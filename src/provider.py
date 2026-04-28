@@ -51,86 +51,77 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         if self._algorithms_loaded:
             return
         
-        try:
-            # Import retardé pour éviter les problèmes de dépendances
-            from .algorithms import (
-                SquaringQGIS,
-                BuildingSimplificationRuasQGIS,
-                BuildingDisplacementRandomQGIS,
-                MorphologicalAmalgamation,
-                BoffetArea,
-                ClosePolygon,
-                VisvalingamWhyattQGIS,
-                RaposoSimplificationQGIS,
-                DouglasPeucker,
-                GaussianSmoothing,
-                DetectRoundaboutsQGIS,
-                DetectDeadEnds,
-                EliminateDeadEnds,
-                CollapseRoundaboutsQGIS,
-                DetectBranchingCrossroads,
-                CollapseBranchingCrossroads,
-                DetectDualCarriageways,
-                CollapseDualCarriageways,
-                BuildStrokes,
-                RuralTraffic,
-                ReduceKmeans,
-                ReduceLabelgrid,
-                ReduceQuadtree,
-                HullDelaunay,
-                HullSwingingArm,
-                VectorHeatmap
-            )
+        from .algorithms import (
+            SquaringQGIS,
+            BuildingSimplificationRuasQGIS,
+            BuildingDisplacementRandomQGIS,
+            MorphologicalAmalgamation,
+            BoffetArea,
+            ClosePolygon,
+            VisvalingamWhyattQGIS,
+            RaposoSimplificationQGIS,
+            DouglasPeucker,
+            GaussianSmoothing,
+            DetectRoundaboutsQGIS,
+            DetectDeadEnds,
+            EliminateDeadEnds,
+            CollapseRoundaboutsQGIS,
+            DetectBranchingCrossroads,
+            CollapseBranchingCrossroads,
+            DetectDualCarriageways,
+            CollapseDualCarriageways,
+            BuildStrokes,
+            RuralTraffic,
+            ReduceKmeans,
+            ReduceLabelgrid,
+            ReduceQuadtree,
+            HullDelaunay,
+            HullSwingingArm,
+            VectorHeatmap,
+            NetworkFacesQGIS
+        )
 
-            # Buildings
-            self.addAlgorithm(SquaringQGIS())
-            self.addAlgorithm(BuildingSimplificationRuasQGIS())
-            self.addAlgorithm(BuildingDisplacementRandomQGIS())
-            self.addAlgorithm(MorphologicalAmalgamation())
-            self.addAlgorithm(BoffetArea())
-            self.addAlgorithm(ClosePolygon())
-            
-            # Lines
-            self.addAlgorithm(VisvalingamWhyattQGIS())
-            self.addAlgorithm(RaposoSimplificationQGIS())
-            self.addAlgorithm(DouglasPeucker())
-            self.addAlgorithm(GaussianSmoothing())
-            
-            # General
-            # self.addAlgorithm(ConstraintMethodQGIS())
+        # Buildings
+        self.addAlgorithm(SquaringQGIS())
+        self.addAlgorithm(BuildingSimplificationRuasQGIS())
+        self.addAlgorithm(BuildingDisplacementRandomQGIS())
+        self.addAlgorithm(MorphologicalAmalgamation())
+        self.addAlgorithm(BoffetArea())
+        self.addAlgorithm(ClosePolygon())
+        
+        # Lines
+        self.addAlgorithm(VisvalingamWhyattQGIS())
+        self.addAlgorithm(RaposoSimplificationQGIS())
+        self.addAlgorithm(DouglasPeucker())
+        self.addAlgorithm(GaussianSmoothing())
+        
+        # General
+        # self.addAlgorithm(ConstraintMethodQGIS())
 
-            # Network
-            self.addAlgorithm(DetectRoundaboutsQGIS())
-            self.addAlgorithm(DetectDeadEnds())
-            self.addAlgorithm(EliminateDeadEnds())
-            self.addAlgorithm(CollapseRoundaboutsQGIS())
-            self.addAlgorithm(DetectBranchingCrossroads())
-            self.addAlgorithm(CollapseBranchingCrossroads())
-            self.addAlgorithm(DetectDualCarriageways())
-            self.addAlgorithm(CollapseDualCarriageways())
-            self.addAlgorithm(BuildStrokes())
-            self.addAlgorithm(RuralTraffic())
+        # Network
+        self.addAlgorithm(DetectRoundaboutsQGIS())
+        self.addAlgorithm(DetectDeadEnds())
+        self.addAlgorithm(EliminateDeadEnds())
+        self.addAlgorithm(CollapseRoundaboutsQGIS())
+        self.addAlgorithm(DetectBranchingCrossroads())
+        self.addAlgorithm(CollapseBranchingCrossroads())
+        self.addAlgorithm(DetectDualCarriageways())
+        self.addAlgorithm(CollapseDualCarriageways())
+        self.addAlgorithm(BuildStrokes())
+        self.addAlgorithm(RuralTraffic())
 
-            # Tools
-            self.addAlgorithm(NetworkFacesQGIS())
-            
-            # Points
-            self.addAlgorithm(ReduceKmeans())
-            self.addAlgorithm(ReduceLabelgrid())
-            self.addAlgorithm(ReduceQuadtree())
-            self.addAlgorithm(HullDelaunay())
-            self.addAlgorithm(HullSwingingArm())
-            self.addAlgorithm(VectorHeatmap())
-            
-            self._algorithms_loaded = True
-            
-        except Exception as e:
-            from qgis.core import QgsMessageLog, Qgis
-            QgsMessageLog.logMessage(
-                f"Error while loading CartAGen algorithms: {str(e)}",
-                'CartAGen4QGIS',
-                Qgis.Critical
-            )
+        # Tools
+        self.addAlgorithm(NetworkFacesQGIS())
+        
+        # Points
+        self.addAlgorithm(ReduceKmeans())
+        self.addAlgorithm(ReduceLabelgrid())
+        self.addAlgorithm(ReduceQuadtree())
+        self.addAlgorithm(HullDelaunay())
+        self.addAlgorithm(HullSwingingArm())
+        self.addAlgorithm(VectorHeatmap())
+        
+        self._algorithms_loaded = True
 
     def id(self):
         """
