@@ -114,7 +114,7 @@ class CartAGen4QGISPlugin(object):
             from qgis.PyQt.QtWidgets import QMessageBox
             
             msg = QMessageBox()
-            msg.setIcon(QMessageBox.Information)
+            msg.setIcon(QMessageBox.Icon.Information)
             msg.setWindowTitle("Missing dependencies for CartAGen")
             msg.setText("This plugin requires the CartAGen Python library to properly work.")
             
@@ -123,12 +123,12 @@ class CartAGen4QGISPlugin(object):
                 f"Proceed?"
             )
             
-            msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-            msg.setDefaultButton(QMessageBox.Yes)
+            msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            msg.setDefaultButton(QMessageBox.StandardButton.Yes)
             
-            reply = msg.exec_()
+            reply = msg.exec()
             
-            if reply == QMessageBox.Yes:
+            if reply == QMessageBox.StandardButton.Yes:
                 self.install_dependencies()
             else:
                 QMessageBox.warning(
@@ -161,7 +161,7 @@ class CartAGen4QGISPlugin(object):
                 0  # Undefined mode
             )
             progress.setWindowTitle("Dependencies installation")
-            progress.setWindowModality(Qt.WindowModal)
+            progress.setWindowModality(Qt.WindowModality.WindowModal)
             progress.setCancelButton(None)  # deactivate cancel
             progress.show()
             QApplication.processEvents()
@@ -278,7 +278,7 @@ flatpak install org.kde.Sdk/x86_64/VERSION
             layout.addWidget(close_button)
             
             dialog.setLayout(layout)
-            dialog.exec_()
+            dialog.exec()
         except Exception as e:
             from qgis.core import QgsMessageLog, Qgis
             QgsMessageLog.logMessage(
