@@ -23,11 +23,35 @@ __revision__ = '$Format:%H$'
 
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import QgsProcessing, QgsFeatureSink, QgsProcessingAlgorithm, QgsFeature, QgsGeometry, QgsProcessingParameterDefinition
-from qgis.core import QgsProcessingParameterFeatureSource, QgsProcessingParameterFeatureSink, QgsProcessingParameterNumber
+from qgis.core import QgsProcessingParameterFeatureSource, QgsProcessingParameterFeatureSink, QgsProcessingParameterNumber, QgsProcessingParameterString, QgsProcessingParameterBoolean
 
-class SquaringQGIS(QgsProcessingAlgorithm):
+class SquaringPolygonLS(QgsProcessingAlgorithm):
+
     """
-    Square buildings using the least square method
+    Squares a polygon using the method of least squares.
+
+    The least squares based polygon squaring algorithm was proposed by Touya and Lokhat [1] and is particularly useful to square buildings.
+
+    In practice, this function iteratively tries to resolve matrices equations until a threshold norm is reached and the provided constraint are satisfied.
+
+    Parameters:
+
+        polygon (Polygon) – The polygon to square.
+
+        max_iteration (float, optional) – This is the maximum number of iteration before breaking the loop. If constraints and weights are correctly set, the norm tolerance threshold should be reached before the maximum number of iteration.
+
+        norm_tolerance (float, optional) – The threshold below which the norm of the resulting point matrix is acceptable enough to break the iteration loop.
+
+        right_tolerance (float, optional) – Tolerance in degrees to consider an angle to be right.
+
+        flat_tolerance (float, optional) – Tolerance in degrees to consider an angle to be flat.
+
+        fixed_weight (int, optional) – The weight of the angle constraint concerning an angle neither right nor flat. A high value means those angles will be more likely to keep their value in the resulting polygon.
+
+        right_weight (int, optional) – The weight of the angle constraint concerning right angles. A high value means those angles will be more likely to keep their value in the resulting polygon.
+
+        flat_weight (int, optional) – The weight of the angle constraint concerning flat angles. A high value means those angles will be more likely to keep their value in the resulting polygon.
+
     """
 
     # Constants used to refer to parameters and outputs. They will be
@@ -40,12 +64,9 @@ class SquaringQGIS(QgsProcessingAlgorithm):
     NORM_TOLERANCE = 'NORM_TOLERANCE'
     RIGHT_TOLERANCE = 'RIGHT_TOLERANCE'
     FLAT_TOLERANCE = 'FLAT_TOLERANCE'
-    HALF_RIGHT_TOLERANCE = 'HALF_RIGHT_TOLERANCE'
-    WEIGHT_FIX = 'WEIGHT_FIX'
-    WEIGHT_RIGHT = 'WEIGHT_RIGHT'
-    WEIGHT_FLAT = 'WEIGHT_FLAT'
-    WEIGHT_HALF_RIGHT = 'WEIGHT_HALF_RIGHT'
-    THRESHOLD = 'THRESHOLD'
+    FIXED_WEIGHT = 'FIXED_WEIGHT'
+    RIGHT_WEIGHT = 'RIGHT_WEIGHT'
+    FLAT_WEIGHT = 'FLAT_WEIGHT'
 
     def initAlgorithm(self, config):
         """
@@ -57,105 +78,76 @@ class SquaringQGIS(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input buildings'),
+                self.tr('Input buildings :'),
                 [QgsProcessing.TypeVectorPolygon]
             )
         )
 
         maxiter = QgsProcessingParameterNumber(
             self.MAX_ITERATION,
-            self.tr('Maximum number of iterations'),
+            self.tr('Max iteration :'),
             type=QgsProcessingParameterNumber.Integer,
             defaultValue=1000,
             optional=False
         )
-        maxiter.setFlags(maxiter.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(maxiter)
 
         normtol = QgsProcessingParameterNumber(
             self.NORM_TOLERANCE,
-            self.tr('Norm tolerance'),
+            self.tr('Norm tolerance :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=0.05,
             optional=False
         )
-        normtol.setMetadata({'widget_wrapper':{ 'decimals': 2 }})
-        normtol.setFlags(normtol.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(normtol)
         
         righttol = QgsProcessingParameterNumber(
             self.RIGHT_TOLERANCE,
-            self.tr('Right angle tolerance'),
+            self.tr('Right tolerance :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=10,
             optional=False
         )
-        righttol.setMetadata({'widget_wrapper':{ 'decimals': 2 }})
-        righttol.setFlags(righttol.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(righttol)
 
         flattol = QgsProcessingParameterNumber(
             self.FLAT_TOLERANCE,
-            self.tr('Flat angle tolerance'),
+            self.tr('Flat tolerance :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=10,
             optional=False
         )
-        flattol.setMetadata({'widget_wrapper':{ 'decimals': 2 }})
-        flattol.setFlags(flattol.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
-
-        hrtol = QgsProcessingParameterNumber(
-            self.HALF_RIGHT_TOLERANCE,
-            self.tr('45° and 135° angle tolerance'),
-            type=QgsProcessingParameterNumber.Double,
-            defaultValue=7,
-            optional=False
-        )
-        hrtol.setMetadata({'widget_wrapper':{ 'decimals': 2 }})
-        hrtol.setFlags(hrtol.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(flattol)
 
         wfix = QgsProcessingParameterNumber(
-            self.WEIGHT_FIX,
-            self.tr('Fixed points weight'),
+            self.FIXED_WEIGHT,
+            self.tr('Fixed weight :'),
             type=QgsProcessingParameterNumber.Integer,
             defaultValue=5,
             optional=False
         )
         wfix.setFlags(wfix.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(wfix)
 
         wright = QgsProcessingParameterNumber(
-            self.WEIGHT_RIGHT,
-            self.tr('Right angles weight'),
+            self.RIGHT_WEIGHT,
+            self.tr('Right weight :'),
             type=QgsProcessingParameterNumber.Integer,
             defaultValue=100,
             optional=False
         )
         wright.setFlags(wright.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(wright)
 
         wflat = QgsProcessingParameterNumber(
-            self.WEIGHT_FLAT,
-            self.tr('Flat angles weight'),
+            self.FLAT_WEIGHT,
+            self.tr('Flat weight :'),
             type=QgsProcessingParameterNumber.Integer,
             defaultValue=50,
             optional=False
         )
         wflat.setFlags(wflat.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
-
-        whright = QgsProcessingParameterNumber(
-            self.WEIGHT_HALF_RIGHT,
-            self.tr('45° and 135° angles weight'),
-            type=QgsProcessingParameterNumber.Integer,
-            defaultValue=10,
-            optional=False
-        )
-        whright.setFlags(whright.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
-
-        self.addParameter(maxiter)
-        self.addParameter(normtol)
-        self.addParameter(righttol)
-        self.addParameter(flattol)
-        self.addParameter(hrtol)
-        self.addParameter(wfix)
-        self.addParameter(wright)
         self.addParameter(wflat)
-        self.addParameter(whright)
 
         # We add a feature sink in which to store our processed features (this
         # usually takes the form of a newly created vector layer when the
@@ -163,7 +155,7 @@ class SquaringQGIS(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
-                self.tr('Squared Buildings')
+                self.tr('Squared LS Buildings')
             )
         )
 
@@ -174,11 +166,14 @@ class SquaringQGIS(QgsProcessingAlgorithm):
         from cartagen import square_polygon_ls
         from shapely import Polygon
         from shapely.wkt import loads
+        import geopandas as gpd
+        from cartagen4qgis.src.tools import list_to_qgis_feature_2
 
         # Retrieve the feature source and sink. The 'dest_id' variable is used
         # to uniquely identify the feature sink, and must be included in the
         # dictionary returned by the processAlgorithm function.
         source = self.parameterAsSource(parameters, self.INPUT, context)
+        gdf = gpd.GeoDataFrame.from_features(source.getFeatures())
 
         # Create an output sink
         (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
@@ -194,41 +189,34 @@ class SquaringQGIS(QgsProcessingAlgorithm):
         normtol = self.parameterAsInt(parameters, self.NORM_TOLERANCE, context)
         rtol = self.parameterAsDouble(parameters, self.RIGHT_TOLERANCE, context)
         ftol = self.parameterAsDouble(parameters, self.FLAT_TOLERANCE, context)
-        hrtol = self.parameterAsDouble(parameters, self.HALF_RIGHT_TOLERANCE, context)
-        wfixed = self.parameterAsInt(parameters, self.WEIGHT_FIX, context)
-        wright = self.parameterAsInt(parameters, self.WEIGHT_RIGHT, context)
-        wflat = self.parameterAsInt(parameters, self.WEIGHT_FLAT, context)
-        whright = self.parameterAsInt(parameters, self.WEIGHT_HALF_RIGHT, context)
+        wfixed = self.parameterAsInt(parameters, self.FIXED_WEIGHT, context)
+        wright = self.parameterAsInt(parameters, self.RIGHT_WEIGHT, context)
+        wflat = self.parameterAsInt(parameters, self.FLAT_WEIGHT, context)
 
-        buildings = []
-        attributes = []
-        for current, feature in enumerate(features):
-            # Stop the algorithm if cancel button has been clicked
-            if feedback.isCanceled():
-                break
+        #Preparing the data and process
+        gs = gdf.copy()
+        for i in range(len(gdf)):
+            geommultiple = gs['geometry'].loc[i]
+            listGeomSimple = list(geommultiple.geoms)
+            listeTraitee = []
 
-            attributes.append(feature.attributes())
-            wkt = feature.geometry().asWkt()
-            shapely_geom = loads(wkt)
+            for ligne in listGeomSimple:
+                ligneTraitee = square_polygon_ls(
+                    ligne, max_iteration=maxiter, norm_tolerance=normtol, right_tolerance=rtol, flat_tolerance=ftol, fixed_weight=wfixed, right_weight=wright, flat_weight=wflat
+                    )
+                listeTraitee.append(ligneTraitee)
 
-            squared = square_polygon_ls(
-                shapely_geom,
-                max_iteration=maxiter, norm_tolerance=normtol,
-                right_tolerance=rtol, flat_tolerance=ftol,
-                fixed_weight=wfixed, right_weight=wright, flat_weight=wflat
-            )
+            gs.loc[i,'geometry'] = listeTraitee
 
-            buildings.append(squared)
-            # Update the progress bar
-            feedback.setProgress(int(current * total))
+        res = gs.to_dict('records')
+        res = list_to_qgis_feature_2(res, source.fields())
 
-        for i, simple in enumerate(buildings):
-            result = QgsFeature()
-            result.setGeometry(QgsGeometry.fromWkt(Polygon(simple).wkt))
-            result.setAttributes(attributes[i])
-
-            # Add a feature in the sink
-            sink.addFeature(result, QgsFeatureSink.FastInsert)
+        #Create the ouput sink
+        (sink, dest_id) = self.parameterAsSink(
+            parameters, self.OUTPUT, context, 
+            res[0].fields(), source.wkbType(), source.sourceCrs())
+        # Add a feature in the sink
+        sink.addFeatures(res, QgsFeatureSink.FastInsert)
 
         # Return the results of the algorithm. In this case our only result is
         # the feature sink which contains the processed features, but some
@@ -248,7 +236,7 @@ class SquaringQGIS(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Squaring'
+        return 'Square Polygon LS'
 
     def displayName(self):
         """
@@ -288,11 +276,261 @@ class SquaringQGIS(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("to be completed")
+        return self.tr(
+            "Squares a polygon using the method of least squares. \n" \
+            "The least squares based polygon squaring algorithm was proposed by Touya and Lokhat and is particularly useful to square buildings. \n"\
+            "In practice, this function iteratively tries to resolve matrices equations until a threshold norm is reached and the provided constraint are satisfied. \n"\
+            "Parameters :\n"
+            "- Max iteration : Maximum number of iteration before breaking the loop. If constraints and weights are correctly set, the norm tolerance threshold should be reached before the maximum number of iteration. \n"\
+            "- Norm tolerance : The threshold below which the norm of the resulting point matrix is acceptable enough to break the iteration loop. \n"\
+            "- Right tolerance : Tolerance in degrees to consider an angle to be right. \n"\
+            "- Flat tolerance : Tolerance in degrees to consider an angle to be flat. \n"\
+            "- Fixed weight : The weight of the angle constraint concerning an angle neither right nor flat. A high value means those angles will be more likely to keep their value in the resulting polygon. \n"\
+            "- Right weight : The weight of the angle constraint concerning right angles. A high value means those angles will be more likely to keep their value in the resulting polygon. \n"\
+            "- Flat weight : The weight of the angle constraint concerning flat angles. A high value means those angles will be more likely to keep their value in the resulting polygon. \n"\
+            "Link to the doc : \n"\
+            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.square_polygon_ls.html#cartagen.square_polygon_ls"
+            )
         
     
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
 
     def createInstance(self):
-        return SquaringQGIS()
+        return SquaringPolygonLS()
+
+
+class SquaringPolygonNaive(QgsProcessingAlgorithm):
+
+    """
+    Squares a polygon according to its orientation.
+
+    This method, described in Touya, [1] first calculates the orientation of the polygon. Sides are then corrected depending on the angles formed at the vertexes and on their alignment regarding the calculated orientation.
+
+    Parameters:
+
+        polygon (Polygon) – The polygon to square.
+
+        orient (str, optional) –
+
+        The method to calculate the orientation. Be aware that the orientation of the polygon defines how the sides are corrected.
+
+            ’primary’ calculates the orientation of the longest side of the provided polygon.
+
+            ’mbr’ calculates the orientation of the long side of the minimum rotated bounding rectangle.
+
+            ’mbtr’ calculates the orientation of the long side of the minimum rotated bounding touching rectangle. It is the same as the mbr but the rectangle and the polygon must have at least one side in common.
+
+            ’swo’ or statistical weighted orientation described in Duchêne, [2] calculates the orientation of a polygon using the statistical weighted orientation. This method relies on the length and orientation of the longest and second longest segment between two vertexes of the polygon.
+
+        angle_tolerance (float, optional) – Tolerance in degrees to square the considered angle.
+
+        correct_tolerance (float, optional) – Tolerance in degrees to consider the angle to be already flat or right.
+
+        remove_flat (bool, optional) – If set to True, vertexes with an angle detected or corrected as flat are removed. Thus, the resulting polygon can have less vertexes than the provided one.
+
+    """
+
+    # Constants used to refer to parameters and outputs. They will be
+    # used when calling the algorithm from another algorithm, or when
+    # calling from the QGIS console.
+
+    OUTPUT = 'OUTPUT'
+    INPUT = 'INPUT'
+    ORIENT='ORIENT'
+    ANGLE_TOLERANCE='ANGLE_TOLERANCE'
+    CORRECT_TOLERANCE='CORRECT_TOLERANCE'
+    REMOVE_FLAT='REMOVE_FLAT'
+
+    def initAlgorithm(self, config):
+        """
+        Here we define the inputs and output of the algorithm, along
+        with some other properties.
+        """
+
+        # We add the input vector features source.
+        self.addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.INPUT,
+                self.tr('Input buildings :'),
+                [QgsProcessing.TypeVectorPolygon]
+            )
+        )
+        orient = QgsProcessingParameterString(
+            self.ORIENT,
+            self.tr('Orientation :'),
+            defaultValue='primary',
+            optional=False
+        )
+        self.addParameter(orient)
+
+        angle_tolerance = QgsProcessingParameterNumber(
+            self.ANGLE_TOLERANCE,
+            self.tr('Angle tolerance :'),
+            type=QgsProcessingParameterNumber.Double,
+            defaultValue=8,
+            optional=False
+        )
+        self.addParameter(angle_tolerance)
+        
+        correct_tolerance = QgsProcessingParameterNumber(
+            self.CORRECT_TOLERANCE,
+            self.tr('Correct tolerance :'),
+            type=QgsProcessingParameterNumber.Double,
+            defaultValue=0.6,
+            optional=False
+        )
+        self.addParameter(correct_tolerance)
+
+        remove_flat = QgsProcessingParameterBoolean(
+            self.REMOVE_FLAT,
+            self.tr('Remove flat ?'),
+            defaultValue=True,
+            optional=False
+        )
+        remove_flat.setFlags(remove_flat.flags() | QgsProcessingParameterDefinition.FlagAdvanced)        
+        self.addParameter(remove_flat)
+
+        # We add a feature sink in which to store our processed features (this
+        # usually takes the form of a newly created vector layer when the
+        # algorithm is run in QGIS).
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.OUTPUT,
+                self.tr('Squared Naive Buildings')
+            )
+        )
+
+    def processAlgorithm(self, parameters, context, feedback):
+        """
+        Here is where the processing itself takes place.
+        """
+        from cartagen import square_polygon_naive
+        from shapely import Polygon
+        from shapely.wkt import loads
+        import geopandas as gpd
+        from cartagen4qgis.src.tools import list_to_qgis_feature_2
+
+
+        # Retrieve the feature source and sink. The 'dest_id' variable is used
+        # to uniquely identify the feature sink, and must be included in the
+        # dictionary returned by the processAlgorithm function.
+        source = self.parameterAsSource(parameters, self.INPUT, context)
+        gdf = gpd.GeoDataFrame.from_features(source.getFeatures())
+
+        # Compute the number of steps to display within the progress bar and
+        # get features from source
+        total = 100.0 / source.featureCount() if source.featureCount() else 0
+        features = source.getFeatures()
+
+        #Retrieve the parameter values
+        orient = self.parameterAsString(parameters, self.ORIENT, context)
+        angle_tolerance = self.parameterAsDouble(parameters, self.ANGLE_TOLERANCE, context)
+        correct_tolerance = self.parameterAsDouble(parameters, self.CORRECT_TOLERANCE, context)
+        remove_flat = self.parameterAsBoolean(parameters, self.REMOVE_FLAT, context)
+
+        #Preparing the data and process
+        gs = gdf.copy()
+        for i in range(len(gdf)):
+            geommultiple = gs['geometry'].loc[i]
+            listGeomSimple = list(geommultiple.geoms)
+            listeTraitee = []
+
+            for ligne in listGeomSimple:
+                ligneTraitee = square_polygon_naive(
+                    ligne, orient=orient, angle_tolerance=angle_tolerance, correct_tolerance=correct_tolerance, remove_flat=remove_flat
+                )
+                listeTraitee.append(ligneTraitee)
+
+            gs.loc[i,'geometry'] = listeTraitee
+
+        res = gs.to_dict('records')
+        res = list_to_qgis_feature_2(res, source.fields())
+
+        #Create the ouput sink
+        (sink, dest_id) = self.parameterAsSink(
+            parameters, self.OUTPUT, context, 
+            res[0].fields(), source.wkbType(), source.sourceCrs())
+        # Add a feature in the sink
+        sink.addFeatures(res, QgsFeatureSink.FastInsert)
+
+        # Return the results of the algorithm. In this case our only result is
+        # the feature sink which contains the processed features, but some
+        # algorithms may return multiple feature sinks, calculated numeric
+        # statistics, etc. These should all be included in the returned
+        # dictionary, with keys matching the feature corresponding parameter
+        # or output names.
+        return {
+            self.OUTPUT: dest_id
+        }
+
+    def name(self):
+        """
+        Returns the algorithm name, used for identifying the algorithm. This
+        string should be fixed for the algorithm, and must not be localised.
+        The name should be unique within each provider. Names should contain
+        lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'Square Polygon Naive'
+
+    def displayName(self):
+        """
+        Returns the translated algorithm name, which should be used for any
+        user-visible display of the algorithm name.
+        """
+        return self.tr(self.name())
+
+    def group(self):
+        """
+        Returns the name of the group this algorithm belongs to. This string
+        should be localised.
+        """
+        return self.tr(self.groupId())
+
+    def groupId(self):
+        """
+        Returns the unique ID of the group this algorithm belongs to. This
+        string should be fixed for the algorithm, and must not be localised.
+        The group id should be unique within each provider. Group id should
+        contain lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'Buildings'
+
+    def icon(self):
+        """
+        Should return a QIcon which is used for your provider inside
+        the Processing toolbox.
+        """
+        from cartagen4qgis import get_plugin_icon
+        return get_plugin_icon()
+
+    def shortHelpString(self):
+        """
+        Returns a localised short helper string for the algorithm. This string
+        should provide a basic description about what the algorithm does and the
+        parameters and outputs associated with it..
+        """
+        return self.tr(
+            "Squares a polygon according to its orientation.\n"\
+            " This method, described in Touya, first calculates the orientation of the polygon. Sides are then corrected depending on the angles formed at the vertexes and on their alignment regarding the calculated orientation.\n"\
+            "Parameters :\n"\
+            "- Orientation : The method to calculate the orientation. Be aware that the orientation of the polygon defines how the sides are corrected.\n"\
+            "   ’primary’ calculates the orientation of the longest side of the provided polygon.\n"\
+            "   ’mbr’ calculates the orientation of the long side of the minimum rotated bounding rectangle.\n"\
+            "   ’mbtr’ calculates the orientation of the long side of the minimum rotated bounding touching rectangle. It is the same as the mbr but the rectangle and the polygon must have at least one side in common.\n"\
+            "   ’swo’ or statistical weighted orientation described in Duchêne, calculates the orientation of a polygon using the statistical weighted orientation. This method relies on the length and orientation of the longest and second longest segment between two vertexes of the polygon.\n"\
+            "- Angle tolerance : Tolerance in degrees to square the considered angle.\n"\
+            "- Correct tolerance : Tolerance in degrees to consider the angle to be already flat or right.\n"\
+            "- Remove flat : If set to True, vertexes with an angle detected or corrected as flat are removed. Thus, the resulting polygon can have less vertexes than the provided one.\n"\
+            "Link to the doc :\n"\
+            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.square_polygon_naive.html#cartagen.square_polygon_naive"
+            )
+        
+    
+    def tr(self, string):
+        return QCoreApplication.translate('Processing', string)
+
+    def createInstance(self):
+        return SquaringPolygonNaive()

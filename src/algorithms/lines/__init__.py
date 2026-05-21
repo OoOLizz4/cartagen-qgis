@@ -1,2 +1,2 @@
-from .line_simplification import DouglasPeucker, VisvalingamWhyattQGIS, RaposoSimplificationQGIS
-from .gaussian_smoothing import GaussianSmoothing
+from .line_simplification import DouglasPeucker, VisvalingamWhyattQGIS, RaposoSimplificationQGIS, Lang, LiOpenshaw, ReumannWitkam, Whirlpool
+from .line_smoothing import GaussianSmoothing, CatmullRomSmoothing, ChaikinSmoothing

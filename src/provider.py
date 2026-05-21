@@ -52,7 +52,11 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             return
         
         from .algorithms import (
-            SquaringQGIS,
+            SquaringPolygonLS,
+            SquaringPolygonNaive,
+            BuildingFER,
+            BuildingRectangle,
+            BuildingRegression,
             BuildingSimplificationRuasQGIS,
             BuildingDisplacementRandomQGIS,
             MorphologicalAmalgamation,
@@ -61,7 +65,13 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             VisvalingamWhyattQGIS,
             RaposoSimplificationQGIS,
             DouglasPeucker,
+            Lang,
+            LiOpenshaw,
+            ReumannWitkam,
+            Whirlpool,
             GaussianSmoothing,
+            CatmullRomSmoothing,
+            ChaikinSmoothing,
             DetectRoundaboutsQGIS,
             DetectDeadEnds,
             EliminateDeadEnds,
@@ -78,22 +88,36 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             HullDelaunay,
             HullSwingingArm,
             VectorHeatmap,
+            BoundariesVisvalingam,
+            BoundariesDouglasPeucker,
+            BoundariesRaposo,
+            BoundariesLiOpenshaw,
             NetworkFacesQGIS
         )
 
         # Buildings
-        self.addAlgorithm(SquaringQGIS())
+        self.addAlgorithm(SquaringPolygonLS())
+        self.addAlgorithm(SquaringPolygonNaive())
         self.addAlgorithm(BuildingSimplificationRuasQGIS())
         self.addAlgorithm(BuildingDisplacementRandomQGIS())
         self.addAlgorithm(MorphologicalAmalgamation())
         self.addAlgorithm(BoffetArea())
         self.addAlgorithm(ClosePolygon())
+        self.addAlgorithm(BuildingFER())
+        self.addAlgorithm(BuildingRectangle())
+        self.addAlgorithm(BuildingRegression())
         
         # Lines
-        self.addAlgorithm(VisvalingamWhyattQGIS())
-        self.addAlgorithm(RaposoSimplificationQGIS())
         self.addAlgorithm(DouglasPeucker())
+        self.addAlgorithm(Lang())
+        self.addAlgorithm(LiOpenshaw())
+        self.addAlgorithm(RaposoSimplificationQGIS())
+        self.addAlgorithm(ReumannWitkam())
+        self.addAlgorithm(VisvalingamWhyattQGIS())
+        self.addAlgorithm(Whirlpool())
         self.addAlgorithm(GaussianSmoothing())
+        self.addAlgorithm(CatmullRomSmoothing())
+        self.addAlgorithm(ChaikinSmoothing())
         
         # General
         # self.addAlgorithm(ConstraintMethodQGIS())
@@ -120,6 +144,12 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(HullDelaunay())
         self.addAlgorithm(HullSwingingArm())
         self.addAlgorithm(VectorHeatmap())
+
+        #Polygon
+        self.addAlgorithm(BoundariesVisvalingam())
+        self.addAlgorithm(BoundariesDouglasPeucker())
+        self.addAlgorithm(BoundariesRaposo())
+        self.addAlgorithm(BoundariesLiOpenshaw())
         
         self._algorithms_loaded = True
 
