@@ -277,6 +277,7 @@ class SquaringPolygonLS(QgsProcessingAlgorithm):
         parameters and outputs associated with it..
         """
         return self.tr(
+            "/!\ Drop Z and M /!\ \n "\
             "Squares a polygon using the method of least squares. \n" \
             "The least squares based polygon squaring algorithm was proposed by Touya and Lokhat and is particularly useful to square buildings. \n"\
             "In practice, this function iteratively tries to resolve matrices equations until a threshold norm is reached and the provided constraint are satisfied. \n"\
@@ -315,7 +316,7 @@ class SquaringPolygonNaive(QgsProcessingAlgorithm):
 
         The method to calculate the orientation. Be aware that the orientation of the polygon defines how the sides are corrected.
 
-            ’primary’ calculates the orientation of the longest side of the provided polygon.
+            'primary': calculates the orientation of the longest side of the provided polygon.
 
             ’mbr’ calculates the orientation of the long side of the minimum rotated bounding rectangle.
 
@@ -513,14 +514,15 @@ class SquaringPolygonNaive(QgsProcessingAlgorithm):
         parameters and outputs associated with it..
         """
         return self.tr(
+            "/!\ Drop Z and M /!\ \n"\
             "Squares a polygon according to its orientation.\n"\
             " This method, described in Touya, first calculates the orientation of the polygon. Sides are then corrected depending on the angles formed at the vertexes and on their alignment regarding the calculated orientation.\n"\
             "Parameters :\n"\
-            "- Orientation : The method to calculate the orientation. Be aware that the orientation of the polygon defines how the sides are corrected.\n"\
-            "   ’primary’ calculates the orientation of the longest side of the provided polygon.\n"\
-            "   ’mbr’ calculates the orientation of the long side of the minimum rotated bounding rectangle.\n"\
-            "   ’mbtr’ calculates the orientation of the long side of the minimum rotated bounding touching rectangle. It is the same as the mbr but the rectangle and the polygon must have at least one side in common.\n"\
-            "   ’swo’ or statistical weighted orientation described in Duchêne, calculates the orientation of a polygon using the statistical weighted orientation. This method relies on the length and orientation of the longest and second longest segment between two vertexes of the polygon.\n"\
+            "- Orientation : The method to calculate the orientation. Be aware that the orientation of the polygon defines how the sides are corrected.\n  "\
+            "   . 'primary' calculates the orientation of the longest side of the provided polygon.\n  "\
+            "   . 'mbr' calculates the orientation of the long side of the minimum rotated bounding rectangle.\n  "\
+            "   . 'mbtr' calculates the orientation of the long side of the minimum rotated bounding touching rectangle. It is the same as the mbr but the rectangle and the polygon must have at least one side in common.\n  "\
+            "   . 'swo' or statistical weighted orientation described in Duchêne, calculates the orientation of a polygon using the statistical weighted orientation. This method relies on the length and orientation of the longest and second longest segment between two vertexes of the polygon.\n  "\
             "- Angle tolerance : Tolerance in degrees to square the considered angle.\n"\
             "- Correct tolerance : Tolerance in degrees to consider the angle to be already flat or right.\n"\
             "- Remove flat : If set to True, vertexes with an angle detected or corrected as flat are removed. Thus, the resulting polygon can have less vertexes than the provided one.\n"\

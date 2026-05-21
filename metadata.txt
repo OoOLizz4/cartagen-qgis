@@ -5,8 +5,9 @@
 [general]
 name=CartAGen
 qgisMinimumVersion=3.0
+qgisMaximumVersion=4.99
 description=Cartographic generalization
-version=1.0.6
+version=1.1.0
 author=Guillaume Touya, Justin Berli & Paul Bourcier
 email=guillaume.touya@ign.fr
 
@@ -43,5 +44,3 @@ category=Vector
 
 # If the plugin can run on QGIS Server.
 server=False
-
-
