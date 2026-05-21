@@ -80,7 +80,7 @@ def list_to_qgis_feature(dicts):
     for field in field_list: #append the fields from the field list into a QgsFields() object
         fields.append(field)
 
-    for d in dicts: #for each dict from the list
+    for i, d in enumerate(dicts): #for each dict from the list
         feature = QgsFeature() #create a QgsFeature()
         feature.setGeometry(QgsGeometry.fromWkt(d['geometry'].wkt)) #append its geometry
         feature.setFields(fields) #apend its fields (name + type)
