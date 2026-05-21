@@ -127,7 +127,12 @@ class CatmullRomSmoothing(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Smooth a line or polygon and preserve vertexes. \n This algorithm was proposed by Catmull and Rom, this is the version proposed by Barry and Goldman \n that makes use of the de Boor’s algorithm for evaluating spline curves in B-spline form. \n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_catmull_rom.html#cartagen.smooth_catmull_rom")
+        return self.tr(
+            "Smooth a line or polygon and preserve vertexes. \n"\
+            "This algorithm was proposed by Catmull and Rom, this is the version proposed by Barry and Goldman that makes use of the de Boor’s algorithm for evaluating spline curves in B-spline form. \n"\
+            "Link to the doc : \n"\
+            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_catmull_rom.html#cartagen.smooth_catmull_rom"
+            )
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)

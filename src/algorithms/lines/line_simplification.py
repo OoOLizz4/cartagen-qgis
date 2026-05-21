@@ -35,6 +35,7 @@ from qgis.core import (
     QgsProcessingParameterDistance,
     QgsProcessingParameterBoolean,
     QgsProcessingException,
+    QgsProcessingParameterEnum,
     QgsProcessingParameterMultipleLayers
 )
 
@@ -1140,7 +1141,8 @@ class VisvalingamWhyattQGIS(QgsProcessingAlgorithm):
 
     OUTPUT = 'OUTPUT'
     INPUT = 'INPUT'
-    TOLERANCE='TOLERANCE'
+    METHOD='METHOD'
+    VALUE ='VALUE'
 
     def initAlgorithm(self, config):
         """
@@ -1152,24 +1154,34 @@ class VisvalingamWhyattQGIS(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input line or polygon'),
+                self.tr('Input line or polygon :'),
                 [QgsProcessing.TypeVectorLine]
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterNumber(
-                self.TOLERANCE,
-                self.tr('Tolerance area'),
-                type=QgsProcessingParameterNumber.Double,
-                defaultValue=None,
-                optional=False
+        methodes = ['Thresold', 'Number', 'Ratio']
+        methode = QgsProcessingParameterEnum(
+                self.METHOD,
+                'Select a method :',
+                methodes,
+                defaultValue='Thresold' 
             )
+        self.addParameter(methode)
+
+        # float number
+        value = QgsProcessingParameterNumber(
+            self.VALUE,
+            self.tr('Value :'),
+            type=QgsProcessingParameterNumber.Double,
+            optional=False,
+            defaultValue=1
         )
+        self.addParameter(value)
 
         # We add a feature sink in which to store our processed features (this
         # usually takes the form of a newly created vector layer when the
         # algorithm is run in QGIS).
+    
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
@@ -1182,16 +1194,23 @@ class VisvalingamWhyattQGIS(QgsProcessingAlgorithm):
         Here is where the processing itself takes place.
         """
         import geopandas as gpd
-        from cartagen import simplify_visvalingam_whyatt, simplify_raposo, simplify_douglas_peucker
+        from cartagen import simplify_visvalingam_whyatt
         from shapely.wkt import loads
         from cartagen4qgis.src.tools import qgis_source_to_geodataframe, list_to_qgis_feature_2
-
         # Retrieve the feature source and sink. The 'dest_id' variable is used
         # to uniquely identify the feature sink, and must be included in the
+
         # dictionary returned by the processAlgorithm function.
         source = self.parameterAsSource(parameters, self.INPUT, context)
+
         (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
                 context, source.fields(), source.wkbType(), source.sourceCrs())
+
+        value = self.parameterAsDouble(parameters, self.VALUE, context)
+        methodes = ['thresold', 'number', 'ratio']
+        methode = self.parameterAsString(parameters, self.METHOD, context)
+        
+        feedback.setProgress(1) #start the loading bar at 1 %
 
         # Compute the number of steps to display within the progress bar and
         # get features from source
@@ -1206,11 +1225,18 @@ class VisvalingamWhyattQGIS(QgsProcessingAlgorithm):
             wkt = feature.geometry().asWkt()
             shapely_geom = loads(wkt)
 
-            # CartAGen's algorithm
-            simplified = simplify_visvalingam_whyatt(shapely_geom, self.parameterAsInt(parameters,self.TOLERANCE,context))
+            # use the version of the CartAGen's algorithm according to selected mode
+            if methode == "0":
+                res = simplify_visvalingam_whyatt(shapely_geom, threshold=value)
+            elif methode == "1":
+                res = simplify_visvalingam_whyatt(shapely_geom, number=value)
+            elif methode == "2":
+                res = simplify_visvalingam_whyatt(shapely_geom, ratio=value)
+            else:
+                raise Exception("You need to choose a method !")
 
             result = QgsFeature()
-            result.setGeometry(QgsGeometry.fromWkt(simplified.wkt))
+            result.setGeometry(QgsGeometry.fromWkt(res.wkt))
             result.setAttributes(feature.attributes())
 
             # Add a feature in the sink
@@ -1283,7 +1309,19 @@ class VisvalingamWhyattQGIS(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Simplify a line or polygon using an area-based selection.\n This algorithm proposed by Visvalingam and Whyatt performs a line simplification that produces less angular results than the filtering algorithm of Ramer-Douglas-Peucker. The principle of the algorithm is to select the vertices to delete (the less characteristic ones) rather than choosing the vertices to keep (in the Douglas and Peucker algorithm). To select the vertices to delete, there is an iterative process, and at each iteration, the triangles formed by three consecutive vertices are computed. If the area of the smallest triangle is smaller than a threshold, the middle vertex is deleted, and another iteration starts.\n The algorithm is relevant for the simplification of natural line or polygon features such as rivers, forests, or coastlines. This implementation was made by Elliot Hallmark. \n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_visvalingam_whyatt.html#cartagen.simplify_visvalingam_whyatt")
+        return self.tr(
+            "Simplify a line or polygon using an area-based selection.\n"\
+            "This algorithm proposed by Visvalingam and Whyatt performs a line simplification that produces less angular results than the filtering algorithm of Ramer-Douglas-Peucker. The principle of the algorithm is to select the vertices to delete (the less characteristic ones) rather than choosing the vertices to keep (in the Douglas and Peucker algorithm). To select the vertices to delete, there is an iterative process, and at each iteration, the triangles formed by three consecutive vertices are computed. If the area of the smallest triangle is smaller than a threshold, the middle vertex is deleted, and another iteration starts.\n"\
+            "The algorithm is relevant for the simplification of natural line or polygon features such as rivers, forests, or coastlines. This implementation was made by Elliot Hallmark. \n"\
+            "Parameters: \n"\
+            "Methode : Choose the methode used for the calcul : \n "\
+            ". Threshold (float) : The minimum triangle area to keep a vertex in the line. Higher values = more points kept (less aggressive simplification).\n  "\
+            ". Number (int) : The target number of points to keep in the simplified line.\n  "\
+            f". Ratio (float) : The ratio of points to keep (between 0 and 1). Example: 0.5 keeps approximately 50% of the original points.\n"\
+            "Value : The value to use fot the calcul \n"\
+            "Link to the doc : \n"\
+            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_visvalingam_whyatt.html#cartagen.simplify_visvalingam_whyatt"
+            )
         
 class Whirlpool(QgsProcessingAlgorithm):
 

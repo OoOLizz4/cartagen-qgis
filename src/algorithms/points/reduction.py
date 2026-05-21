@@ -181,7 +181,6 @@ class ReduceKmeans(QgsProcessingAlgorithm):
         )
         self.addParameter(ratio)
 
-       
         # option selection in a list
         modes = ['selection', 'simplification', 'aggregation']
         mode = QgsProcessingParameterEnum(
