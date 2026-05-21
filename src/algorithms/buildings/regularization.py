@@ -113,8 +113,18 @@ class BuildingFER (QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("/!\ Drop Z and M /!\ \n Regularize a polygon using feature edge reconstruction. \n This algorithm was proposed by Yang et al. FER enforces orthogonality and clean edge alignment on raw segmentation polygons. It first estimates the dominant orientation of a building, then iteratively snaps near-parallel and near-perpendicular edges to that principal axis, using Douglas-Peucker simplification, minimum-rotated-rectangle fitting, and a local reconstruction loop.\n This is slightly modified version of the SamGeo Python package available here. It is basically the same but without the osgeo dependencies. \n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_fer.html#cartagen.regularize_building_fer")
-    
+        return self.tr(
+            "/!\ Drop Z and M /!\ \n"\
+            "Regularize a polygon using feature edge reconstruction.\n"\
+            "This algorithm was proposed by Yang et al. FER enforces orthogonality and clean edge alignment on raw segmentation polygons. It first estimates the dominant orientation of a building, then iteratively snaps near-parallel and near-perpendicular edges to that principal axis, using Douglas-Peucker simplification, minimum-rotated-rectangle fitting, and a local reconstruction loop. \n "\
+            "This is slightly modified version of the SamGeo Python package available here. It is basically the same but without the osgeo dependencies.\n"\
+            "Parameters:\n"\
+            "- Length : Minimum edge length used during the reconstruction pass (default 6 m).\n"\
+            "- Area : Polygons whose area is below this value (m²) are discarded (default 6 m²).\n"\
+            "Link to the doc :\n"\
+            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_fer.html#cartagen.regularize_building_fer"
+            )
+
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
     
@@ -129,14 +139,14 @@ class BuildingFER (QgsProcessingAlgorithm):
 
         input = QgsProcessingParameterFeatureSource(
             name=self.INPUT_BUILDING,
-            description=self.tr("Input building footprint(s) to regularize."),
+            description=self.tr("Input building footprint(s) to regularize :"),
             types=[QgsProcessing.TypeVectorPolygon]
         )
         self.addParameter(input)
 
         length = QgsProcessingParameterNumber(
             name=self.LENGTH,
-            description=self.tr("Minimum edge length used during the reconstruction pass."),
+            description=self.tr("Length :"),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=6.0
         )
@@ -144,7 +154,7 @@ class BuildingFER (QgsProcessingAlgorithm):
 
         area = QgsProcessingParameterNumber(
             name=self.AREA,
-            description=self.tr("Polygons whose area is below this value (m²) are discarded."),
+            description=self.tr("Area :"),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=6.0
         )
@@ -289,7 +299,17 @@ class BuildingRectangle(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Transform a polygon into a rectangle.\nThis function transforms a polygon to a rectangle using the minimum rotated rectangle and scale it up or down.\n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_rectangle.html#cartagen.regularize_building_rectangle")
+        return self.tr(
+            "Transform a polygon into a rectangle.\n"\
+            "This function transforms a polygon to a rectangle using the minimum rotated rectangle and scale it up or down.\n"\
+            "Parameters:\n"\
+            "- Factor : The scaling factor to apply.\n"\
+            "- Method : The method to calculate the rectangle: \n  "\
+            ". 'mbr' calculate the minimum rotated bounding rectangle. \n  "\
+            ". 'mbtr' calculate minimum rotated bounding touching rectangle. It is the same as the mbr but the rectangle and the polygon must have at least one side in common. \n"\
+            "Link to the doc : \n"\
+            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_rectangle.html#cartagen.regularize_building_rectangle"
+            )
     
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -305,14 +325,14 @@ class BuildingRectangle(QgsProcessingAlgorithm):
 
         input = QgsProcessingParameterFeatureSource(
             name=self.INPUT,
-            description=self.tr("Input building footprint(s) to regularize."),
+            description=self.tr("Input building footprint(s) to regularize :"),
             types=[QgsProcessing.TypeVectorPolygon]
         )
         self.addParameter(input)
 
         factor = QgsProcessingParameterNumber(
             name=self.FACTOR,
-            description=self.tr("The scaling factor to apply."),
+            description=self.tr("Factor :"),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=1.0
         )
@@ -320,7 +340,7 @@ class BuildingRectangle(QgsProcessingAlgorithm):
 
         method = QgsProcessingParameterString(
             name=self.METHOD,
-            description=self.tr("The method to calculate the rectangle.\n mbr = calculate the minimum rotated bounding rectangle.\n mbtr = calculate minimum rotated bounding touching rectangle. It is the same as the mbr but the rectangle and the polygon must have at least one side in common."),
+            description=self.tr("Method :"),
             defaultValue='mbr'
         )
         self.addParameter(method)
@@ -455,7 +475,14 @@ class BuildingRegression(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Regularize a polygon using recursive linear regression.\n This algorithm was proposed by Bayer and used for remote sensing building regularization in Yang. It first defines the four sides of the polygon using an enclosing rectangle that has one side touching the side of the polygon. Then, every side is recursively subdivided until the standard deviation of the vertex composing the side is below the provided threshold. The standard deviation is calculated using the horizontal or vertical regression line which will output a squared polygon. \n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_regression.html#cartagen.regularize_building_regression ")
+        return self.tr(
+            "Regularize a polygon using recursive linear regression.\n"\
+            "This algorithm was proposed by Bayer and used for remote sensing building regularization in Yang. It first defines the four sides of the polygon using an enclosing rectangle that has one side touching the side of the polygon. Then, every side is recursively subdivided until the standard deviation of the vertex composing the side is below the provided threshold. The standard deviation is calculated using the horizontal or vertical regression line which will output a squared polygon. \n"\
+            "Parameters: \n"\
+            "- Sigma : The standard deviation threshold above which the recursion continues. \n"\
+            "Link to the doc : \n"\
+            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_regression.html#cartagen.regularize_building_regression "
+            )
     
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -471,15 +498,16 @@ class BuildingRegression(QgsProcessingAlgorithm):
 
         input = QgsProcessingParameterFeatureSource(
             name=self.INPUT_BUILDING,
-            description=self.tr("The polygon to regularize."),
+            description=self.tr("Input building footprint(s) to regularize :"),
             types=[QgsProcessing.TypeVectorPolygon]
         )
         self.addParameter(input)
 
         sigma = QgsProcessingParameterNumber(
             name=self.SIGMA,
-            description=self.tr("The standard deviation threshold above which the recursion continues."),
+            description=self.tr("Sigma  :"),
             type=QgsProcessingParameterNumber.Double,
+            defaultValue=1.0
         )
         self.addParameter(sigma)
 
@@ -493,8 +521,6 @@ class BuildingRegression(QgsProcessingAlgorithm):
         """
         Here is where the processing itself takes place.
         """
-
-        print("fiesta")
 
         import geopandas as gpd
         import pandas
