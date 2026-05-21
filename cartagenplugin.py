@@ -19,6 +19,7 @@ __revision__ = '$Format:%H$'
 
 import os
 import sys
+import subprocess
 import inspect
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
@@ -147,7 +148,6 @@ class CartAGen4QGISPlugin(object):
     
     def install_dependencies(self):
         """Install deendencies with a progress bar"""
-        import subprocess
         
         try:
             from qgis.PyQt.QtWidgets import QProgressDialog, QMessageBox, QApplication
@@ -165,9 +165,33 @@ class CartAGen4QGISPlugin(object):
             progress.setCancelButton(None)  # deactivate cancel
             progress.show()
             QApplication.processEvents()
+
+            # Check if sys.executable points to a python executable
+            python_executable = sys.executable
+
+            # Function to check if a given path is a python executable
+            def is_python_executable(path):
+                if not os.path.isfile(path):
+                    return False
+                try:
+                    result = subprocess.run(
+                        [path, "--version"],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        timeout=5,
+                    )
+                    return result.returncode == 0 and result.stdout.decode().startswith("Python")
+                except (OSError, subprocess.TimeoutExpired, subprocess.SubprocessError):
+                    return False
+            
+            # If not, try to find a python executable depending on the platform
+            if not is_python_executable(python_executable):
+                # if macOS
+                if sys.platform == "darwin":
+                    python_executable = os.path.join(os.path.dirname(sys.executable), "python")
             
             # Prepare the installation command
-            cmd = [ sys.executable, '-m', 'pip', 'install', '--user', 'cartagen' ]
+            cmd = [ python_executable, '-m', 'pip', 'install', '--user', 'cartagen' ]
             
             # Installation using pip
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
