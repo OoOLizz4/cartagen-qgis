@@ -31,6 +31,7 @@ from qgis.core import (
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterBoolean,
     QgsProcessingParameterNumber,
+    QgsProcessingParameterEnum,
     QgsProcessingParameterString,
     QgsProcessingParameterDistance,
     QgsProcessingParameterMultipleLayers
@@ -338,9 +339,11 @@ class BuildingRectangle(QgsProcessingAlgorithm):
         )
         self.addParameter(factor)
 
-        method = QgsProcessingParameterString(
+        listMethods = ['mbr', 'mbtr']
+        method = QgsProcessingParameterEnum(
             name=self.METHOD,
             description=self.tr("Method :"),
+            options=listMethods,
             defaultValue='mbr'
         )
         self.addParameter(method)
@@ -369,26 +372,29 @@ class BuildingRectangle(QgsProcessingAlgorithm):
 
         # Retrieve the other parameter values 
         factor = self.parameterAsDouble(parameters, self.FACTOR, context)
-        method = self.parameterAsString(parameters, self.METHOD, context)
+        method = self.parameterAsEnum(parameters, self.METHOD, context)
+        print(type(method))
+        dicoMethods = {0:'mbr', 1:'mbtr'}
+        print(f"le numero {method} et la methode {dicoMethods[method]}")
 
         #Preparing the data and process
         gs = gdf.copy()
         for i in range(len(gdf)):
-            print(f"Je suis dans la premiere boucle pour la {i}eme fois.")
+            # print(f"Je suis dans la premiere boucle pour la {i}eme fois.")
             geommultiple = gs['geometry'].loc[i]
             listGeomSimple = list(geommultiple.geoms)
-            print(f"liste des géométrie : {listGeomSimple}")
+            # print(f"liste des géométrie : {listGeomSimple}")
             listeTraitee = []
 
             for ligne in listGeomSimple:
-                print("Je suis dans la deuxième boucle.")
-                print(f"Le polyg qui va dans le traitement : {ligne}")
-                ligneTraitee = regularize_building_rectangle(ligne, factor=factor, method=method)
-                print(f"Le polyg après le traitement {ligneTraitee}")
+                # print("Je suis dans la deuxième boucle.")
+                # print(f"Le polyg qui va dans le traitement : {ligne}")
+                ligneTraitee = regularize_building_rectangle(ligne, factor=factor, method=dicoMethods[method])
+                # print(f"Le polyg après le traitement {ligneTraitee}")
                 listeTraitee.append(ligneTraitee)
-                print(f"Le append a eu lieu. La liste est : {listeTraitee}")
+                # print(f"Le append a eu lieu. La liste est : {listeTraitee}")
 
-            print(f"La liste de geom qui va être affichée : {listeTraitee}")
+            # print(f"La liste de geom qui va être affichée : {listeTraitee}")
             gs.loc[i,'geometry'] = listeTraitee
 
         res = gs.to_dict('records')

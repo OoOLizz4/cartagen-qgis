@@ -23,7 +23,14 @@ __revision__ = '$Format:%H$'
 
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import QgsProcessing, QgsFeatureSink, QgsProcessingAlgorithm, QgsFeature, QgsGeometry, QgsProcessingParameterDefinition
-from qgis.core import QgsProcessingParameterFeatureSource, QgsProcessingParameterFeatureSink, QgsProcessingParameterNumber, QgsProcessingParameterString, QgsProcessingParameterBoolean
+from qgis.core import (
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterFeatureSink, 
+    QgsProcessingParameterNumber, 
+    QgsProcessingParameterString, 
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterEnum
+)
 
 class SquaringPolygonLS(QgsProcessingAlgorithm):
 
@@ -357,9 +364,12 @@ class SquaringPolygonNaive(QgsProcessingAlgorithm):
                 [QgsProcessing.TypeVectorPolygon]
             )
         )
-        orient = QgsProcessingParameterString(
+
+        listOrient = ['primary', 'mbr', 'mbtr', 'swo']
+        orient = QgsProcessingParameterEnum(
             self.ORIENT,
             self.tr('Orientation :'),
+            options=listOrient,
             defaultValue='primary',
             optional=False
         )
@@ -425,7 +435,8 @@ class SquaringPolygonNaive(QgsProcessingAlgorithm):
         features = source.getFeatures()
 
         #Retrieve the parameter values
-        orient = self.parameterAsString(parameters, self.ORIENT, context)
+        orient = self.parameterAsEnum(parameters, self.ORIENT, context)
+        dicoOrient = {0:'primary', 1:'mbr', 2:'mbtr', 3:'swo'}
         angle_tolerance = self.parameterAsDouble(parameters, self.ANGLE_TOLERANCE, context)
         correct_tolerance = self.parameterAsDouble(parameters, self.CORRECT_TOLERANCE, context)
         remove_flat = self.parameterAsBoolean(parameters, self.REMOVE_FLAT, context)
@@ -439,7 +450,7 @@ class SquaringPolygonNaive(QgsProcessingAlgorithm):
 
             for ligne in listGeomSimple:
                 ligneTraitee = square_polygon_naive(
-                    ligne, orient=orient, angle_tolerance=angle_tolerance, correct_tolerance=correct_tolerance, remove_flat=remove_flat
+                    ligne, orient=dicoOrient[orient], angle_tolerance=angle_tolerance, correct_tolerance=correct_tolerance, remove_flat=remove_flat
                 )
                 listeTraitee.append(ligneTraitee)
 
