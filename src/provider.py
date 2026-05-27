@@ -52,47 +52,62 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             return
         
         from .algorithms import (
-            SquaringPolygonLS,
-            SquaringPolygonNaive,
+
+            #Buildings
+            BoffetArea,
+            ClosePolygon,
+            MorphologicalAmalgamation,
             BuildingFER,
             BuildingRectangle,
             BuildingRegression,
             BuildingSimplificationRuasQGIS,
             BuildingDisplacementRandomQGIS,
-            MorphologicalAmalgamation,
-            BoffetArea,
-            ClosePolygon,
-            VisvalingamWhyattQGIS,
-            RaposoSimplificationQGIS,
+            SquaringPolygonLS,
+            SquaringPolygonNaive,
+
+            #General
+            BuildStrokes,
+            NetworkFacesQGIS,
+
+            #Lines
+            CatmullRomSmoothing,
+            ChaikinSmoothing,
+            GaussianSmoothing,
             DouglasPeucker,
             Lang,
             LiOpenshaw,
+            RaposoSimplificationQGIS,
             ReumannWitkam,
+            VisvalingamWhyattQGIS,
             Whirlpool,
-            GaussianSmoothing,
-            CatmullRomSmoothing,
-            ChaikinSmoothing,
+
+            #Network
+            CollapseRoundaboutsQGIS,
+            CollapseBranchingCrossroads,
+            CollapseDualCarriageways,
             DetectRoundaboutsQGIS,
             DetectDeadEnds,
-            EliminateDeadEnds,
-            CollapseRoundaboutsQGIS,
             DetectBranchingCrossroads,
-            CollapseBranchingCrossroads,
+            EliminateDeadEnds,
             DetectDualCarriageways,
-            CollapseDualCarriageways,
-            BuildStrokes,
             RuralTraffic,
+
+            #Points
+            VectorHeatmap,
+            HullDelaunay,
+            HullSwingingArm,
             ReduceKmeans,
             ReduceLabelgrid,
             ReduceQuadtree,
-            HullDelaunay,
-            HullSwingingArm,
-            VectorHeatmap,
+
+            #Polygons
             BoundariesVisvalingam,
             BoundariesDouglasPeucker,
             BoundariesRaposo,
             BoundariesLiOpenshaw,
-            NetworkFacesQGIS
+            SkelNatural,
+            SkelArtificial,
+            SkelNetwork
         )
 
         # Buildings
@@ -146,6 +161,9 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(VectorHeatmap())
 
         #Polygon
+        self.addAlgorithm(SkelNatural())
+        self.addAlgorithm(SkelArtificial())
+        self.addAlgorithm(SkelNetwork())
         self.addAlgorithm(BoundariesVisvalingam())
         self.addAlgorithm(BoundariesDouglasPeucker())
         self.addAlgorithm(BoundariesRaposo())

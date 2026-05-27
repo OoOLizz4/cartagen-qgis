@@ -541,7 +541,6 @@ class SquaringPolygonNaive(QgsProcessingAlgorithm):
             "https://cartagen.readthedocs.io/en/latest/reference/cartagen.square_polygon_naive.html#cartagen.square_polygon_naive"
             )
         
-    
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
 
