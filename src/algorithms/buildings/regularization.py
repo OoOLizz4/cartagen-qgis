@@ -186,26 +186,30 @@ class BuildingFER (QgsProcessingAlgorithm):
         length = self.parameterAsDouble(parameters, self.LENGTH, context)
         area = self.parameterAsDouble(parameters, self.AREA, context)
 
+        feedback.setProgress(1)
+
         #Preparing the data and process
         gs = gdf.copy()
         for i in range(len(gdf)):
             listBuil = []
 
-            print(f"Je suis dans la premiere boucle pour la {i}eme fois")
+            # print(f"Je suis dans la premiere boucle pour la {i}eme fois")
             batRegularizeFer = regularize_building_fer(gs['geometry'].loc[i], length=length, area=area)            
             listBuil.append(batRegularizeFer)
 
             gs.loc[i,'geometry'] = listBuil
+        # print(f"Longueur avant traitement : {len(gs)}")
 
-        print(f"Longueur avant traitement : {len(gs)}")
+        feedback.setProgress(80)
+
 
         for row in gs.iterrows():
             # print(f"ligne :{row[1]['geometry']}")
             if row[1]['geometry']== None :
-                print(f"la geom {row[0]} est vide")
+                # print(f"la geom {row[0]} est vide")
                 gs = gs.drop(labels=row[0], axis='index')
 
-        print(f"Longueur après traitement : {len(gs)}")
+        # print(f"Longueur après traitement : {len(gs)}")
 
         res = gs.to_dict(orient='records')
         # print(f"le dico {res} de type {type(res)}")

@@ -29,12 +29,8 @@ from qgis.core import (
 from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterFeatureSink,
-    QgsProcessingParameterBoolean,
     QgsProcessingParameterNumber,
-    QgsProcessingParameterDistance,
-    QgsProcessingParameterField,
     QgsProcessingParameterEnum,
-    QgsProcessingParameterMultipleLayers
 )
 
 class HullDelaunay(QgsProcessingAlgorithm):
@@ -400,10 +396,9 @@ class HullSwingingArm(QgsProcessingAlgorithm):
             QMessageBox.warning(None, "Empty output", f"The length of the arm ({length}) is too small. The polygon of the hull can't be created.")
 
             feature = QgsFeature() #create a QgsFeature()
-            print("feature est créé")
+            # print("feature est créé")
             (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
                     context, feature.fields(), QgsWkbTypes.Unknown, source.sourceCrs())
-            print("sink a été créé")
        
         else :
             res = list_to_qgis_feature(res)

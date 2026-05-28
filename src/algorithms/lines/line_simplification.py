@@ -347,7 +347,6 @@ class DouglasPeucker(QgsProcessingAlgorithm):
         Here is where the processing itself takes place.
         """
         import geopandas as gpd
-        from cartagen import simplify_visvalingam_whyatt, simplify_raposo, simplify_douglas_peucker
         from shapely.wkt import loads
         from cartagen4qgis.src.tools import qgis_source_to_geodataframe, list_to_qgis_feature_2
 
@@ -744,7 +743,27 @@ class LiOpenshaw(QgsProcessingAlgorithm):
 
 class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
     """
-    Simplify lines using the Raposo hexagon-based line simplification
+    Simplify a line or a polygon using an hexagonal tessellation.
+
+    This algorithm proposed by Raposo [1] simplifies lines based on a hexagonal tessellation. The algorithm also works for the simplification of the border of a polygon object. The idea of the algorithm is to put a hexagonal tessellation on top of the line to simplify, the size of the cells depending on the targeted granularity of the line. Similarly to the Li-Openshaw algorithm, only one vertex is kept inside each cell. This point can be the centroid of the removed vertices, or a projection on the initial line of this centroid. The shapes obtained with this algorithm are less sharp than the ones obtained with other algorithms such as Douglas-Peucker.
+
+    The algorithm is dedicated to the smooth simplification of natural features such as rivers, forests, coastlines, lakes.
+
+    Parameters:
+
+        geometry (LineString, MultiLineString, Polygon, MultiPolygon, LinearRing) – The line to simplify.
+
+        initial_scale (float) – Initial scale of the provided line (25000.0 for 1:25000 scale).
+
+        final_scale (float) – Final scale of the simplified line.
+
+        centroid (bool, optional) – If true, uses the center of the hexagonal cells as the new vertex, if false, the center is projected on the nearest point in the initial line.
+
+        tobler (bool, optional) – If True, compute cell resolution based on Tobler’s formula, else uses Raposo’s formula
+
+    Returns:
+
+        LineString, MultiLineString, Polygon, MultiPolygon, LinearRing
     """
 
     # Constants used to refer to parameters and outputs. They will be
@@ -757,123 +776,6 @@ class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
     FINAL_SCALE = 'FINAL_SCALE'
     CENTROID = 'CENTROID'
     TOBLER = 'TOBLER'
-
-    def initAlgorithm(self, config):
-        """
-        Here we define the inputs and output of the algorithm, along
-        with some other properties.
-        """
-
-        # We add the input vector features source.
-        self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT,
-                self.tr('Input lines or polygons :'),
-                [QgsProcessing.TypeVectorLine]
-            )
-        )
-
-        self.addParameter(
-            QgsProcessingParameterNumber(
-                self.INITIAL_SCALE,
-                self.tr('Initial scale :'),
-                type=QgsProcessingParameterNumber.Integer,
-                optional=False
-            )
-        )
-
-        final_scale = QgsProcessingParameterNumber(
-                self.FINAL_SCALE,
-                self.tr('Final scale :'),
-                type=QgsProcessingParameterNumber.Integer,
-                optional=False
-            )
-        self.addParameter(final_scale)    
-
-        centroid = QgsProcessingParameterBoolean(
-                self.CENTROID,
-                self.tr('Centroid ?'),
-                defaultValue=True,
-                optional=False
-            )
-        centroid.setFlags(centroid.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
-        self.addParameter(centroid)    
-
-        tobler = QgsProcessingParameterBoolean(
-                self.TOBLER,
-                self.tr('Tobler ?'),
-                defaultValue=True,
-                optional=False
-            )
-        tobler.setFlags(tobler.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
-        self.addParameter(tobler) 
-
-        # We add a feature sink in which to store our processed features (this
-        # usually takes the form of a newly created vector layer when the
-        # algorithm is run in QGIS).
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT,
-                self.tr('Simplified Raposo')
-            )
-        )
-
-    def processAlgorithm(self, parameters, context, feedback):
-        """
-        Here is where the processing itself takes place.
-        """
-        import geopandas as gpd
-        from cartagen import simplify_visvalingam_whyatt, simplify_raposo, simplify_douglas_peucker
-        from shapely.wkt import loads
-        from cartagen4qgis.src.tools import qgis_source_to_geodataframe, list_to_qgis_feature_2
-
-        # Retrieve the feature source and sink. The 'dest_id' variable is used
-        # to uniquely identify the feature sink, and must be included in the
-        # dictionary returned by the processAlgorithm function.
-        source = self.parameterAsSource(parameters, self.INPUT, context)
-        (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
-                context, source.fields(), source.wkbType(), source.sourceCrs())
-
-        # Compute the number of steps to display within the progress bar and
-        # get features from source
-        total = 100.0 / source.featureCount() if source.featureCount() else 0
-        features = source.getFeatures()
-
-        for current, feature in enumerate(features):
-            # Stop the algorithm if cancel button has been clicked
-            if feedback.isCanceled():
-                break
-
-            wkt = feature.geometry().asWkt()
-            shapely_geom = loads(wkt)
-
-            simplified = simplify_raposo(
-                shapely_geom,
-                self.parameterAsInt(parameters,self.INITIAL_SCALE,context),
-                self.parameterAsInt(parameters,self.FINAL_SCALE,context),
-                centroid=self.parameterAsBoolean(parameters, self.CENTROID, context),
-                tobler=self.parameterAsBoolean(parameters, self.TOBLER, context)
-            )
-
-            result = QgsFeature()
-            result.setGeometry(QgsGeometry.fromWkt(simplified.wkt))
-            result.setAttributes(feature.attributes())
-
-            # Add a feature in the sink
-            sink.addFeature(result, QgsFeatureSink.FastInsert)
-
-            # Update the progress bar
-            feedback.setProgress(int(current * total))
-
-        # Return the results of the algorithm. In this case our only result is
-        # the feature sink which contains the processed features, but some
-        # algorithms may return multiple feature sinks, calculated numeric
-        # statistics, etc. These should all be included in the returned
-        # dictionary, with keys matching the feature corresponding parameter
-        # or output names.
-        return {
-            self.OUTPUT: dest_id
-        }
 
     def name(self):
         """
@@ -941,6 +843,143 @@ class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
 
     def createInstance(self):
         return RaposoSimplificationQGIS()
+    
+    def initAlgorithm(self, config):
+        """
+        Here we define the inputs and output of the algorithm, along
+        with some other properties.
+        """
+
+        # We add the input vector features source.
+        self.addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.INPUT,
+                self.tr('Input lines or polygons :'),
+                [QgsProcessing.TypeVectorLine]
+            )
+        )
+
+        initial_scale = QgsProcessingParameterNumber(
+                self.INITIAL_SCALE,
+                self.tr('Initial scale :'),
+                type=QgsProcessingParameterNumber.Double,
+                defaultValue=5000,
+                optional=False
+            )
+        self.addParameter(initial_scale)
+
+        final_scale = QgsProcessingParameterNumber(
+                self.FINAL_SCALE,
+                self.tr('Final scale :'),
+                type=QgsProcessingParameterNumber.Double,
+                defaultValue=10000,
+                optional=False
+            )
+        self.addParameter(final_scale)    
+
+        centroid = QgsProcessingParameterBoolean(
+                self.CENTROID,
+                self.tr('Centroid ?'),
+                defaultValue=True,
+                optional=False
+            )
+        centroid.setFlags(centroid.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(centroid)    
+
+        tobler = QgsProcessingParameterBoolean(
+                self.TOBLER,
+                self.tr('Tobler ?'),
+                defaultValue=True,
+                optional=False
+            )
+        tobler.setFlags(tobler.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(tobler) 
+
+        # We add a feature sink in which to store our processed features (this
+        # usually takes the form of a newly created vector layer when the
+        # algorithm is run in QGIS).
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.OUTPUT,
+                self.tr('Simplified Raposo')
+            )
+        )
+
+    def processAlgorithm(self, parameters, context, feedback):
+        """
+        Here is where the processing itself takes place.
+        """
+        import geopandas as gpd
+        from cartagen import simplify_raposo
+        from shapely.wkt import loads
+        from cartagen4qgis.src.tools import qgis_source_to_geodataframe, list_to_qgis_feature_2
+
+        # Retrieve the feature source and sink. The 'dest_id' variable is used
+        # to uniquely identify the feature sink, and must be included in the
+        # dictionary returned by the processAlgorithm function.
+        source = self.parameterAsSource(parameters, self.INPUT, context)
+        (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
+                context, source.fields(), source.wkbType(), source.sourceCrs())
+
+        initial_scale = self.parameterAsDouble(parameters,self.INITIAL_SCALE,context)
+        final_scale = self.parameterAsDouble(parameters,self.FINAL_SCALE,context)
+        centroid = self.parameterAsBoolean(parameters, self.CENTROID, context)
+        tobler = self.parameterAsBoolean(parameters, self.TOBLER, context)
+
+        # Compute the number of steps to display within the progress bar and
+        # get features from source
+        total = 100.0 / source.featureCount() if source.featureCount() else 0
+        features = source.getFeatures()
+
+        # print(f"initial scale : {initial_scale} et {type(initial_scale)}")
+        # print(f"final scale : {final_scale}")
+
+
+        if initial_scale == 0.0:
+
+            from qgis.PyQt.QtWidgets import QMessageBox
+            QMessageBox.warning(None, "Initial scale is null !", f"The Initial scale is equal to 0. The algorithm can't function.")
+
+            from qgis.core import QgsWkbTypes
+            feature = QgsFeature() #create a QgsFeature()
+            # print("feature est créé")
+            (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
+                    context, feature.fields(), QgsWkbTypes.Unknown, source.sourceCrs())
+
+        else :
+            
+            print("on est dans la boucle normale")
+
+            for current, feature in enumerate(features):
+                # Stop the algorithm if cancel button has been clicked
+                if feedback.isCanceled():
+                    break
+
+                wkt = feature.geometry().asWkt()
+                shapely_geom = loads(wkt)
+
+                simplified = simplify_raposo(shapely_geom, initial_scale=initial_scale, final_scale=final_scale, centroid=centroid, tobler=tobler)
+
+                result = QgsFeature()
+                result.setGeometry(QgsGeometry.fromWkt(simplified.wkt))
+                result.setAttributes(feature.attributes())
+
+                # Add a feature in the sink
+                sink.addFeature(result, QgsFeatureSink.FastInsert)
+
+                # Update the progress bar
+                feedback.setProgress(int(current * total))
+
+        # Return the results of the algorithm. In this case our only result is
+        # the feature sink which contains the processed features, but some
+        # algorithms may return multiple feature sinks, calculated numeric
+        # statistics, etc. These should all be included in the returned
+        # dictionary, with keys matching the feature corresponding parameter
+        # or output names.
+        return {
+            self.OUTPUT: dest_id
+        }
+
 
 class ReumannWitkam(QgsProcessingAlgorithm):
     """
