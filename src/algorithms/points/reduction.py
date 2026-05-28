@@ -96,7 +96,7 @@ class ReduceKmeans(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'K-means point reduction'
+        return 'Reduction K-means Point'
 
     def displayName(self):
         """
@@ -277,23 +277,23 @@ class ReduceLabelgrid(QgsProcessingAlgorithm):
     
     Parameters:
 
-    points (GeoDataFrame of Point) – The points to reduce.
+        - points (GeoDataFrame of Point) – The points to reduce.
 
-    width (float) – Width of the grid cells.
+        - width (float) – Width of the grid cells.
 
-    height (float) – Height of the grid cells.
+        - height (float) – Height of the grid cells.
 
-    shape (str, optional) – Shape of the grid cells, can be ‘square’, ‘diamond’, ‘hexagonal’.
+        - shape (str, optional) – Shape of the grid cells, can be ‘square’, ‘diamond’, ‘hexagonal’.
 
-    mode (str, optional) –
+        - mode (str, optional) –
 
-    There are three available modes:
+            There are three available modes:
 
-    ’selection’: for one cell, the algorithm retains the point with the largest value in the chosen column. This option requires the column parameter to be provided.
+                - ’selection’: for one cell, the algorithm retains the point with the largest value in the chosen column. This option requires the column parameter to be provided.
 
-    ’simplification’: the point retained in the cell is the closest to the center of the cell.
+                - ’simplification’: the point retained in the cell is the closest to the center of the cell.
 
-    ’aggregation’: the points are all aggregated to the centroid of the cell. The count of point is added as a new attribute. If a column name is provided, also adds the sum of the attribute.
+                - ’aggregation’: the points are all aggregated to the centroid of the cell. The count of point is added as a new attribute. If a column name is provided, also adds the sum of the attribute.
 
     column (str, optional) – Name of the column to use.
 
@@ -323,7 +323,7 @@ class ReduceLabelgrid(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Label grid point reduction'
+        return 'Reduction Labelgrid Point'
 
     def displayName(self):
         """
@@ -607,7 +607,7 @@ class ReduceQuadtree(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Quadtree point reduction'
+        return 'Reduction Quadtree Point'
 
     def displayName(self):
         """

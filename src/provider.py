@@ -65,6 +65,8 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             SquaringPolygonLS,
             SquaringPolygonNaive,
 
+            #Bends
+
             #General
             BuildStrokes,
             NetworkFacesQGIS,

@@ -214,22 +214,20 @@ class HullSwingingArm(QgsProcessingAlgorithm):
     """
     Create the hull of a set of points using the swinging arm algorithm.
 
-    This algorithm is described in Galton & Duckham. [1] 
+    This algorithm is described in Galton & Duckham.
     Starting at the most northen point, iteratively create the border of a polygon by adding the first point intersecting the line (the arm) rotating around the point.
 
     Parameters:
 
-    points (list of Point) – The set of points.
+        - points (list of Point) – The set of points.
 
-    length (int) – The length of the line (or arm) that will rotate around the point.
+        - length (int) – The length of the line (or arm) that will rotate around the point.
 
-    direction (str, optional) – The direction of the arm’s rotation. Can be ‘ccw’ or ‘cw’.
+        - direction (str, optional) – The direction of the arm’s rotation. Can be ‘ccw’ or ‘cw’.
 
     Returns:
 
-    list of Polygon
-
-    Create the hull of a set of points using the Delaunay triangulation.
+        - list of Polygon
 
     Notes : This algorithm can create multiple polygons, unlike hull_delaunay()
     """
@@ -240,9 +238,8 @@ class HullSwingingArm(QgsProcessingAlgorithm):
 
     OUTPUT = 'OUTPUT'
     INPUT = 'INPUT'
-
-    DIRECTION = 'DIRECTION'
     LENGTH = 'LENGTH'
+    DIRECTION = 'DIRECTION'
  
     def name(self):
         """
@@ -252,7 +249,7 @@ class HullSwingingArm(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Hull swinging arm'
+        return 'Hull Swinging Arm'
 
     def displayName(self):
         """
@@ -292,7 +289,18 @@ class HullSwingingArm(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Create the hull of a set of points using the swinging arm algorithm.\nStarting at the most northen point, iteratively create the border of a polygon by adding the first point intersecting the line (the arm) rotating around the point.\nLength : the length of the line (or arm) that will rotate around the point.\nDirection : the direction of the arm’s rotation. Can be ‘ccw’ or ‘cw’.\nNotes : This algorithm can create multiple polygons, unlike Hull Delaunay")
+        helpsting = (
+            "Create the hull of a set of points using the swinging arm algorithm.\n"\
+            "Starting at the most northen point, iteratively create the border of a polygon by adding the first point intersecting the line (the arm) rotating around the point.\n"\
+            "Parameters : \n"\
+            " - Length : the length of the line (or arm) that will rotate around the point.\n"\
+            " - Direction : the direction of the arm’s rotation. Can be ‘ccw’ or ‘cw’.\n"\
+            "Notes : This algorithm can create multiple polygons, unlike Hull Delaunay \n"\
+            "Link to the doc : \n"\
+            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.hull_swinging_arm.html#cartagen.hull_swinging_arm"
+            )
+
+        return self.tr(helpsting)
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -310,14 +318,14 @@ class HullSwingingArm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input point layer'),
+                self.tr('Input point layer :'),
                 [QgsProcessing.TypeVectorPoint]
             )
         )
 
         length = QgsProcessingParameterNumber(
             self.LENGTH,
-            self.tr('Length threshold'),
+            self.tr('Length of the arm :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=2000,
             optional=False
@@ -328,7 +336,7 @@ class HullSwingingArm(QgsProcessingAlgorithm):
         directions = ['cw', 'ccw']
         direction = QgsProcessingParameterEnum(
                 self.DIRECTION,
-                'Rotation direction of the arm',
+                'Rotation direction of the arm :',
                 directions,
                 defaultValue=0  
             )
@@ -341,7 +349,7 @@ class HullSwingingArm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
-                self.tr('Swinging arm hull(s)')
+                self.tr('Swinging Arm Hull(s)')
             )
         )
 
@@ -350,12 +358,8 @@ class HullSwingingArm(QgsProcessingAlgorithm):
         Here is where the processing itself takes place.
         """ 
         import geopandas as gpd
-        import pandas
-        from cartagen4qgis import get_plugin_icon
-        from cartagen import hull_delaunay, hull_swinging_arm
+        from cartagen import hull_swinging_arm
         from cartagen4qgis.src.tools import list_to_qgis_feature
-        from shapely import Polygon
-        from shapely.wkt import loads
         
         # Retrieve the feature source and sink. The 'dest_id' variable is used
         # to uniquely identify the feature sink, and must be included in the
@@ -364,12 +368,9 @@ class HullSwingingArm(QgsProcessingAlgorithm):
         #transform the source to a GeoDataFrame
         points = gpd.GeoDataFrame.from_features(source.getFeatures())
         
-        # Compute the number of steps to display within the progress bar and
-        # get features from source
-        # total = 100.0 / source.featureCount() if source.featureCount() else 0
-        
         # retrieve the values of the parameters
         length = self.parameterAsDouble(parameters, self.LENGTH, context)
+
         directions = ['cw', 'ccw']
         direction = self.parameterAsString(parameters, self.DIRECTION, context)
 
@@ -378,25 +379,46 @@ class HullSwingingArm(QgsProcessingAlgorithm):
         # transform the GDF into a list of geometry to fit the algorithm
         points = list(points.geometry)
 
+        feedback.setProgress(10) #set loading bar to 1 %
+
         # Perform CG algorithm
         res = hull_swinging_arm(points, length=length, direction=directions[int(direction)])
+        # print(f"res direct: {res}")
 
         feedback.setProgress(90) #set loading bar to 90 %
         
         #transform the result into a gdf, the gdf into a dictionnary, and the dictionnary into a list of QgsFeature()
         res = gpd.GeoDataFrame(geometry=gpd.GeoSeries(res))
+        # print(f"res gpd: {res} avec {len(res)} colonne(s) et de type {type(res)}")
+
         res = res.to_dict('records')
-        res = list_to_qgis_feature(res)
-     
-        #Define the output sink
-        (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
-                context, res[0].fields(), QgsWkbTypes.Polygon, source.sourceCrs())
-        
-        # Add a feature in the sink
-        sink.addFeatures(res, QgsFeatureSink.FastInsert)
-        
+        # print(f"res dict: {res}")
+
+        if not res :
+            # print(f"vide")
+            from qgis.PyQt.QtWidgets import QMessageBox
+            QMessageBox.warning(None, "Empty output", f"The length of the arm ({length}) is too small. The polygon of the hull can't be created.")
+
+            feature = QgsFeature() #create a QgsFeature()
+            print("feature est créé")
+            (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
+                    context, feature.fields(), QgsWkbTypes.Unknown, source.sourceCrs())
+            print("sink a été créé")
+       
+        else :
+            res = list_to_qgis_feature(res)
+            # print(f"res qgis feature: {res}")
+            # print(f"fields {res[0].fields()} de type {type(res[0])}")
+            
+            #Define the output sink
+            (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
+                    context, res[0].fields(), QgsWkbTypes.Polygon, source.sourceCrs())
+
+            # Add a feature in the sink
+            sink.addFeatures(res, QgsFeatureSink.FastInsert)
+            
         feedback.setProgress(100) #set loading bar to 100 %
         
         return {
-            self.OUTPUT: dest_id
-        }
+                self.OUTPUT: dest_id
+            }

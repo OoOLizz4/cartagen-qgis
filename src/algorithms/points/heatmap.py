@@ -86,7 +86,7 @@ class VectorHeatmap(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Vector heatmap'
+        return 'Heatmap Vector'
 
     def displayName(self):
         """

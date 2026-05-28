@@ -682,7 +682,7 @@ class SkelNetwork(QgsProcessingAlgorithm):
             # print(f"Index : {index}")
             # print(f"Les types des paramètres : entries={type(entries)}, connection={type(listConnection[connection])}")
             skeletonized = skeletonize_network(gdf.loc[index,'geometry'], network=network, sigma=sigma, blend_smoothing=blend_smoothing, threshold_range=(low_bound, up_bound))
-            # print(f"Geométrie après le traitement : {skeletonized[0]}")
+            print(f"Geométrie après le traitement : {skeletonized}")
             listSkel.append(skeletonized[0])
 
         gs = gs.assign(geometry=listSkel)

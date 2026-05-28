@@ -116,7 +116,13 @@ class MorphologicalAmalgamation(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Amalgamate buildings using dilation and erosion.\nThe amalgamation algorithm proposed by Damen et al. is based on morphological dilations and erosions with a square cap. It is particularly useful to keep the overall shape of building blocks.\nBuffer : size of the buffer used for dilation (in meters). Buildings closer than 2 times the buffer size are amalgamated.\nEdge length : minimum length of edges in the amalgamated geometries (a simplification process is carried out).")
+        return self.tr(
+            "Amalgamate buildings using dilation and erosion.\n"\
+            "The amalgamation algorithm proposed by Damen et al. is based on morphological dilations and erosions with a square cap. It is particularly useful to keep the overall shape of building blocks.\n " \
+            "Parameters : \n "\
+            "- Buffer : size of the buffer used for dilation (in meters). Buildings closer than 2 times the buffer size are amalgamated.\n " \
+            "- Edge length : minimum length of edges in the amalgamated geometries (a simplification process is carried out)."
+            )
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
