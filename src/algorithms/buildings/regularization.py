@@ -114,17 +114,20 @@ class BuildingFER (QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            "/!\ Drop Z and M /!\ \n"\
-            "Regularize a polygon using feature edge reconstruction.\n"\
-            "This algorithm was proposed by Yang et al. FER enforces orthogonality and clean edge alignment on raw segmentation polygons. It first estimates the dominant orientation of a building, then iteratively snaps near-parallel and near-perpendicular edges to that principal axis, using Douglas-Peucker simplification, minimum-rotated-rectangle fitting, and a local reconstruction loop. \n "\
-            "This is slightly modified version of the SamGeo Python package available here. It is basically the same but without the osgeo dependencies.\n"\
-            "Parameters:\n"\
-            "- Length : Minimum edge length used during the reconstruction pass (default 6 m).\n"\
-            "- Area : Polygons whose area is below this value (m²) are discarded (default 6 m²).\n"\
-            "Link to the doc :\n"\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_fer.html#cartagen.regularize_building_fer"
-            )
+        return self.tr( f"""
+            <b> /!\ Drop Z and M /!\ </b>
+                       
+            Regularize a polygon using feature edge reconstruction.
+            This algorithm was proposed by Yang et al. FER enforces orthogonality and clean edge alignment on raw segmentation polygons. It first estimates the dominant orientation of a building, then iteratively snaps near-parallel and near-perpendicular edges to that principal axis, using Douglas-Peucker simplification, minimum-rotated-rectangle fitting, and a local reconstruction loop.
+            This is slightly modified version of the SamGeo Python package available here. It is basically the same but without the osgeo dependencies.
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em> Length </em> : Minimum edge length used during the reconstruction pass (default 6 m).</li>
+                <li> - <em> Area </em> : Polygons whose area is below this value (m²) are discarded (default 6 m²).</li>
+            </ul>
+                       
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_fer.html#cartagen.regularize_building_fer">help online</a>.
+            """)
 
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -304,17 +307,22 @@ class BuildingRectangle(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            "Transform a polygon into a rectangle.\n"\
-            "This function transforms a polygon to a rectangle using the minimum rotated rectangle and scale it up or down.\n"\
-            "Parameters:\n"\
-            "- Factor : The scaling factor to apply.\n"\
-            "- Method : The method to calculate the rectangle: \n  "\
-            ". 'mbr' calculate the minimum rotated bounding rectangle. \n  "\
-            ". 'mbtr' calculate minimum rotated bounding touching rectangle. It is the same as the mbr but the rectangle and the polygon must have at least one side in common. \n"\
-            "Link to the doc : \n"\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_rectangle.html#cartagen.regularize_building_rectangle"
-            )
+        return self.tr(f"""
+            Transform a polygon into a rectangle.
+            This function transforms a polygon to a rectangle using the minimum rotated rectangle and scale it up or down.
+            <h3> Parameters: </h3>
+            <ul>
+                <li>- <em> Factor </em> : The scaling factor to apply.</li>
+                <li>- <em> Method </em> : The method to calculate the rectangle:<li> \n
+                <ul>      
+                    <li> . <em> 'mbr' </em> : calculate the minimum rotated bounding rectangle.<li> \n
+                    <li> . <em> 'mbtr' </em> : calculate minimum rotated bounding touching rectangle. It is the same as the mbr but the rectangle and the polygon must have at least one side in common. </li>
+                </ul>
+            </ul>
+                       
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_rectangle.html">help online</a>.
+
+            """)
     
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -485,14 +493,17 @@ class BuildingRegression(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            "Regularize a polygon using recursive linear regression.\n"\
-            "This algorithm was proposed by Bayer and used for remote sensing building regularization in Yang. It first defines the four sides of the polygon using an enclosing rectangle that has one side touching the side of the polygon. Then, every side is recursively subdivided until the standard deviation of the vertex composing the side is below the provided threshold. The standard deviation is calculated using the horizontal or vertical regression line which will output a squared polygon. \n"\
-            "Parameters: \n"\
-            "- Sigma : The standard deviation threshold above which the recursion continues. \n"\
-            "Link to the doc : \n"\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_regression.html#cartagen.regularize_building_regression "
-            )
+        return self.tr(f"""
+            Regularize a polygon using recursive linear regression.
+            This algorithm was proposed by Bayer and used for remote sensing building regularization in Yang. It first defines the four sides of the polygon using an enclosing rectangle that has one side touching the side of the polygon. Then, every side is recursively subdivided until the standard deviation of the vertex composing the side is below the provided threshold. The standard deviation is calculated using the horizontal or vertical regression line which will output a squared polygon.
+            
+            <h3>Parameters: </h3>
+            <ul>
+                <li> - <em> Sigma </em> : The standard deviation threshold above which the recursion continues. </li> 
+            </ul>
+                       
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_regression.html">help online</a>.
+            """)
     
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)

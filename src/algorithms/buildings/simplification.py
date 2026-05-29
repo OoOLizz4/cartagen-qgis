@@ -157,7 +157,7 @@ class BuildingSimplificationRuasQGIS(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Ruas simplification'
+        return 'Simplification Ruas'
 
     def shortHelpString(self):
         """
@@ -165,7 +165,17 @@ class BuildingSimplificationRuasQGIS(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Simplify buildings by removing edges.\nThis algorithm proposed by Ruas analyses the edges of the polygon to find the ones that should be removed and how they can be replaced.\nEdge_threshold : minimum length of an edge to be considered by the simplification algorithm.\nParallel_limit (optional) : limit angle to consider an edge into the parallel case of the simplification algorithm. The default value is set to 20*π/180\nOrthogonal_limit (optional) : limit angle to consider an edge into the orthogonal case of the simplification algorithm. The default value is set to 20*π/180")
+        return self.tr(f"""
+            Simplify buildings by removing edges.
+            This algorithm proposed by Ruas analyses the edges of the polygon to find the ones that should be removed and how they can be replaced.
+            <h3> Parameters :</h3>
+            <ul>
+                <li> - <em> Edge Threshold </em> : minimum length of an edge to be considered by the simplification algorithm. </li>
+                <li> - <em> Parallel Limit </em> : limit angle to consider an edge into the parallel case of the simplification algorithm. The default value is set to 20*π/180 </li>
+                <li> - <em> Orthogonal Limit </em> : limit angle to consider an edge into the orthogonal case of the simplification algorithm. The default value is set to 20*π/180" </li>
+            </ul>
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_regression.html">help online</a>.
+            """)
         
 
     def displayName(self):

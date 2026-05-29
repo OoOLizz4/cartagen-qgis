@@ -909,10 +909,8 @@ class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
         """
         Here is where the processing itself takes place.
         """
-        import geopandas as gpd
         from cartagen import simplify_raposo
         from shapely.wkt import loads
-        from cartagen4qgis.src.tools import qgis_source_to_geodataframe, list_to_qgis_feature_2
 
         # Retrieve the feature source and sink. The 'dest_id' variable is used
         # to uniquely identify the feature sink, and must be included in the
@@ -948,8 +946,6 @@ class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
 
         else :
             
-            print("on est dans la boucle normale")
-
             for current, feature in enumerate(features):
                 # Stop the algorithm if cancel button has been clicked
                 if feedback.isCanceled():

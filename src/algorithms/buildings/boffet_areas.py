@@ -80,7 +80,7 @@ class BoffetArea(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Boffet area'
+        return 'Boffet Area'
 
     def displayName(self):
         """
@@ -120,7 +120,19 @@ class BoffetArea(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Calculate urban areas from buildings.\nThis algorithm proposed by Boffet uses buffer around the buildings, then simplify and erode the unioned result to characterize urban areas.\nBuffer : the buffer size used to merge buildings that are close from each other.\nErosion : the erosion size to avoid the urban area to expand too far from the buildings located on the edge.\nSimplification distance : the distance threshold used by the Douglas-Peucker simplification on the edge.")
+        return self.tr(f"""
+            Calculate urban areas from buildings.
+            This algorithm proposed by Boffet uses buffer around the buildings, then simplify and erode the unioned result to characterize urban areas.
+            
+            <h3> Parameters : <\h3>
+            <ul>
+                <li> - <em>Buffer</em> : the buffer size used to merge buildings that are close from each other.<\li>
+                <li> - <em>Erosion</em> : the erosion size to avoid the urban area to expand too far from the buildings located on the edge.<\li>
+                <li> - <em>Simplification distance</em> : the distance threshold used by the Douglas-Peucker simplification on the edge.<\li>
+            </ul>
+                       
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.boffet_areas.html#cartagen.boffet_areas">help online</a>.
+            """)
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -138,14 +150,14 @@ class BoffetArea(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_BUILDINGS,
-                self.tr('Input buildings'),
+                self.tr('Buildings to generate the urban area from :'),
                 [QgsProcessing.TypeVectorPolygon]
             )
         )
 
         buffer = QgsProcessingParameterNumber(
             self.BUFFER,
-            self.tr('Buffer size used to merge buildings'),
+            self.tr('Buffer size :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=10.0,
             optional=False
@@ -154,7 +166,7 @@ class BoffetArea(QgsProcessingAlgorithm):
        
         erosion = QgsProcessingParameterNumber(
             self.EROSION,
-            self.tr('Erosion size'),
+            self.tr('Erosion size :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=10,
             optional=False
@@ -163,7 +175,7 @@ class BoffetArea(QgsProcessingAlgorithm):
 
         simpl_dist = QgsProcessingParameterNumber(
             self.SIMPLIFICATION_DISTANCE,
-            self.tr('Distance threshold used for the simplification'),
+            self.tr('Distance threshold used for the simplification :'),
             type=QgsProcessingParameterNumber.Integer,
             defaultValue=1,
             optional=False
@@ -171,23 +183,23 @@ class BoffetArea(QgsProcessingAlgorithm):
         simpl_dist.setFlags(simpl_dist.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
         self.addParameter(simpl_dist)
 
-        self.addParameter(
-            QgsProcessingParameterBoolean(
+        network_partinioning = QgsProcessingParameterBoolean(
                 self.NETWORK_PARTITIONING_TF,
-                self.tr('Activate network partitioning'),
+                self.tr('Activate network partitioning ?'),
                 defaultValue=False,
                 optional=True
             )
-        )
-        
-        self.addParameter(
-            QgsProcessingParameterMultipleLayers(
+        network_partinioning.setFlags(network_partinioning.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(network_partinioning)
+
+        network_part = QgsProcessingParameterMultipleLayers(
                 self.INPUT_NETWORK_PART,
-                self.tr('Input lines for the network partition'),
+                self.tr('Input lines for the network partition :'),
                 layerType=QgsProcessing.TypeVectorLine,
                 optional=True
             )
-        )
+        network_part.setFlags(network_part.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(network_part)
 
         # We add a feature sink in which to store our processed features (this
         # usually takes the form of a newly created vector layer when the
@@ -195,7 +207,7 @@ class BoffetArea(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
-                self.tr('Boffet area')
+                self.tr('Boffet Area')
             )
         )
 

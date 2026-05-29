@@ -44,29 +44,30 @@ class BuildingDisplacementRandomQGIS(QgsProcessingAlgorithm):
 
     Parameters
     ----------
-    polygons : GeoDataFrame of Polygon
-        The buildings to displace.
-    networks : list of GeoDataFrame of LineString, optional
-        A list of networks the polygons need to be moved away from.
-        If left to None, polygons will only be moved away from each other.
-    polygon_distance : float, optional
-        The minimum acceptable distance between polygons.
-    network_distance : float, optional
-        The minimum acceptable distance between the polygons
-        and the provided networks.
-    max_trials : int, optional
-        The maximum number of trials before stopping the iteration.
-        A trial represent the movement of one polygon that did not
-        lower the mean overlapping area between polygons and networks.
-    max_displacement : float, optional
-        The maximum allowed distance of displacement per iteration.
-    network_partioning : GeoDataFrame of LineString, optional
-        The network to partition the data with. If provided, each network
-        face is treated individually, thus improving performance on larger dataset.
+        polygons : GeoDataFrame of Polygon
+            The buildings to displace.
+        networks : list of GeoDataFrame of LineString, optional
+            A list of networks the polygons need to be moved away from.
+            If left to None, polygons will only be moved away from each other.
+        polygon_distance : float, optional
+            The minimum acceptable distance between polygons.
+        network_distance : float, optional
+            The minimum acceptable distance between the polygons
+            and the provided networks.
+        max_trials : int, optional
+            The maximum number of trials before stopping the iteration.
+            A trial represent the movement of one polygon that did not
+            lower the mean overlapping area between polygons and networks.
+        max_displacement : float, optional
+            The maximum allowed distance of displacement per iteration.
+        network_partioning : GeoDataFrame of LineString, optional
+            The network to partition the data with. If provided, each network
+            face is treated individually, thus improving performance on larger dataset.
 
     Returns
     -------
-    GeoDataFrame
+        GeoDataFrame 
+
     """
 
     # Constants used to refer to parameters and outputs. They will be
@@ -74,9 +75,8 @@ class BuildingDisplacementRandomQGIS(QgsProcessingAlgorithm):
     # calling from the QGIS console.
 
     OUTPUT = 'OUTPUT'
-    
-    INPUT_BUILDINGS = 'INPUT_BUILDINGS'
 
+    INPUT_BUILDINGS = 'INPUT_BUILDINGS'
     INPUT_NETWORK = 'INPUT_NETWORK'
 
     NETWORK_PARTITIONING_TF = 'NETWORK_PARTITIONING_TF'
@@ -88,6 +88,75 @@ class BuildingDisplacementRandomQGIS(QgsProcessingAlgorithm):
     MAX_TRIALS = 'MAX_TRIALS'
     MAX_DISPLACEMENT = 'MAX_DISPLACEMENT' 
 
+    def name(self):
+        """
+        Returns the algorithm name, used for identifying the algorithm. This
+        string should be fixed for the algorithm, and must not be localised.
+        The name should be unique within each provider. Names should contain
+        lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'Random Displacement'
+
+    def displayName(self):
+        """
+        Returns the translated algorithm name, which should be used for any
+        user-visible display of the algorithm name.
+        """
+        return self.tr(self.name())
+
+    def group(self):
+        """
+        Returns the name of the group this algorithm belongs to. This string
+        should be localised.
+        """
+        return self.tr(self.groupId())
+
+    def groupId(self):
+        """
+        Returns the unique ID of the group this algorithm belongs to. This
+        string should be fixed for the algorithm, and must not be localised.
+        The group id should be unique within each provider. Group id should
+        contain lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'Buildings'
+
+    def icon(self):
+        """
+        Should return a QIcon which is used for your provider inside
+        the Processing toolbox.
+        """
+        from cartagen4qgis import get_plugin_icon
+        return get_plugin_icon()
+
+    def shortHelpString(self):
+        """
+        Returns a localised short helper string for the algorithm. This string
+        should provide a basic description about what the algorithm does and the
+        parameters and outputs associated with it..
+        """
+        return self.tr(f"""
+            Iteratively displace polygons overlapping each other and the provided network.
+            Displace the provided buildings if they overlap each other or are closer than the width value to the provided networks.
+            <h3> Parameters : </h3>
+            <ul>
+                <li> - <em> Networks </em> : a list of networks the polygons need to be moved away from. If left to None, polygons will only be moved away from each other. </li>
+                <li> - <em> Polygon distance </em> : the minimum acceptable distance between polygons. </li>
+                <li> - <em> Network distance </em> : the minimum acceptable distance between the polygons and the provided networks.</li>
+                <li> - <em> Max trials </em> : the maximum number of trials before stopping the iteration. A trial represent the movement of one polygon that did not lower the mean overlapping area between polygons and networks.
+                <li> - <em> Max displacement </em> : the maximum allowed distance of displacement per iteration. </li>
+                <li> - <em> Network partioning </em> : the network to partition the data with. If provided, each network face is treated individually, thus improving performance on larger dataset </li>
+            </ul>
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.random_displacement.html">help online</a>.
+            """)
+        
+    def tr(self, string):
+        return QCoreApplication.translate('Processing', string)
+
+    def createInstance(self):
+        return BuildingDisplacementRandomQGIS()
+
     def initAlgorithm(self, config):
         """
         Here we define the inputs and output of the algorithm, along
@@ -98,7 +167,7 @@ class BuildingDisplacementRandomQGIS(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_BUILDINGS,
-                self.tr('Input buildings'),
+                self.tr('Input buildings :'),
                 [QgsProcessing.TypeVectorPolygon]
             )
         )
@@ -106,7 +175,7 @@ class BuildingDisplacementRandomQGIS(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterMultipleLayers(
                 self.INPUT_NETWORK,
-                self.tr('Input rivers and/or roads networks'),
+                self.tr('Input rivers and/or roads networks :'),
                 layerType=QgsProcessing.TypeVectorLine,
                 optional=True
             )
@@ -115,7 +184,7 @@ class BuildingDisplacementRandomQGIS(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterDistance(
                 self.POLYGON_DISTANCE,
-                self.tr('Minimum acceptable distance between polygons'),
+                self.tr('Minimum acceptable distance between polygons :'),
                 defaultValue=10.0,
                 optional=False,
                 parentParameterName='INPUT_BUILDINGS'
@@ -125,44 +194,44 @@ class BuildingDisplacementRandomQGIS(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterDistance(
                 self.NETWORK_DISTANCE,
-                self.tr('Minimum acceptable distance between the polygons and the provided networks'),
+                self.tr('Minimum acceptable distance between the polygons and the provided networks :'),
                 defaultValue=10.0,
-                optional=True,
+                optional=False,
                 parentParameterName='INPUT_BUILDINGS'
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterBoolean(
+        network_parti_bool = QgsProcessingParameterBoolean(
                 self.NETWORK_PARTITIONING_TF,
-                self.tr('Network partitioning'),
-                defaultValue=True,
+                self.tr('Network partitioning ?'),
+                defaultValue=False,
                 optional=False
             )
-        )
+        network_parti_bool.setFlags(network_parti_bool.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(network_parti_bool)
         
-        self.addParameter(
-            QgsProcessingParameterMultipleLayers(
+        network_parti_data = QgsProcessingParameterMultipleLayers(
                 self.INPUT_NETWORK_PART,
-                self.tr('Input lines for the network partition'),
+                self.tr('Input lines for the network partition :'),
                 layerType=QgsProcessing.TypeVectorLine,
                 optional=True
             )
-        )
+        network_parti_data.setFlags(network_parti_data.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(network_parti_data)
 
         maxtrials = QgsProcessingParameterNumber(
             self.MAX_TRIALS,
-            self.tr('Maximum number of trials'),
+            self.tr('Maximum number of trials :'),
             type=QgsProcessingParameterNumber.Integer,
             defaultValue=25,
-            optional=False
+            optional=True
         )
         maxtrials.setFlags(maxtrials.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
         self.addParameter(maxtrials)
 
         maxdisp = QgsProcessingParameterNumber(
             self.MAX_DISPLACEMENT,
-            self.tr('Maximum allowed distance of displacement per iteration'),
+            self.tr('Maximum allowed distance of displacement per iteration :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=10.0,
             optional=True
@@ -214,6 +283,8 @@ class BuildingDisplacementRandomQGIS(QgsProcessingAlgorithm):
         activate_network_part = self.parameterAsBoolean(parameters, self.NETWORK_PARTITIONING_TF, context)
         network_part = self.parameterAsLayerList(parameters, self.INPUT_NETWORK_PART, context)
 
+        feedback.setProgress(10)
+
         # Use the CartAGen algorithm with or without network partitionning
         if len(network_part) == 0 or activate_network_part == False:
             d = random_displacement(
@@ -231,6 +302,8 @@ class BuildingDisplacementRandomQGIS(QgsProcessingAlgorithm):
         
         # Convert the result to a list of dictionnaries
         d = d.to_dict('records')
+
+        feedback.setProgress(20)
 
         #Convert the list to a list of QgsFeature() (TO-DO : use the converter.py instead)
         features = []
@@ -257,60 +330,3 @@ class BuildingDisplacementRandomQGIS(QgsProcessingAlgorithm):
         return {
             self.OUTPUT: dest_id
         }
-
-    def name(self):
-        """
-        Returns the algorithm name, used for identifying the algorithm. This
-        string should be fixed for the algorithm, and must not be localised.
-        The name should be unique within each provider. Names should contain
-        lowercase alphanumeric characters only and no spaces or other
-        formatting characters.
-        """
-        return 'Random displacement'
-
-    def displayName(self):
-        """
-        Returns the translated algorithm name, which should be used for any
-        user-visible display of the algorithm name.
-        """
-        return self.tr(self.name())
-
-    def group(self):
-        """
-        Returns the name of the group this algorithm belongs to. This string
-        should be localised.
-        """
-        return self.tr(self.groupId())
-
-    def groupId(self):
-        """
-        Returns the unique ID of the group this algorithm belongs to. This
-        string should be fixed for the algorithm, and must not be localised.
-        The group id should be unique within each provider. Group id should
-        contain lowercase alphanumeric characters only and no spaces or other
-        formatting characters.
-        """
-        return 'Buildings'
-
-    def icon(self):
-        """
-        Should return a QIcon which is used for your provider inside
-        the Processing toolbox.
-        """
-        from cartagen4qgis import get_plugin_icon
-        return get_plugin_icon()
-
-    def shortHelpString(self):
-        """
-        Returns a localised short helper string for the algorithm. This string
-        should provide a basic description about what the algorithm does and the
-        parameters and outputs associated with it..
-        """
-        return self.tr("Iteratively displace polygons overlapping each other and the provided network.\nDisplace the provided buildings if they overlap each other or are closer than the width value to the provided networks.\nNetworks : a list of networks the polygons need to be moved away from. If left to None, polygons will only be moved away from each other.\nPolygon distance : the minimum acceptable distance between polygons.\nNetwork distance : the minimum acceptable distance between the polygons and the provided networks.\nMax trials : the maximum number of trials before stopping the iteration. A trial represent the movement of one polygon that did not lower the mean overlapping area between polygons and networks.\nMax displacement : the maximum allowed distance of displacement per iteration.\nNetwork partioning : the network to partition the data with. If provided, each network face is treated individually, thus improving performance on larger dataset")
-        
-
-    def tr(self, string):
-        return QCoreApplication.translate('Processing', string)
-
-    def createInstance(self):
-        return BuildingDisplacementRandomQGIS()
