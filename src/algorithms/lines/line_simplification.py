@@ -111,15 +111,15 @@ class Angular(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            "Simplify a line or polygon by removing vertexes with small angles. \n"\
-            "This algorithm, proposed by McMaster, eliminates vertices that represent very small turning angles (< 10 degrees). This prevents rounding filters from destroying sharp curvatures, granting the resulting geometry a ‘manually generalised’ characteristic where significant bends remain prominent. \n"\
-            "Accept Multi geometries. If a polygon is provided, it also applies the thinning to its holes using the same parameters. \n"\
-            "Parameter : \n"\
-            "- Angle : Turning-angle threshold in degrees. Vertices creating an exterior angle below this limit will be iteratively removed. Default is 10.0. \n"\
-            "Link to the doc : \n"\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_angular.html#cartagen.simplify_angular"
-            )
+        return self.tr( f"""
+            Simplify a line or polygon by removing vertexes with small angles.
+            This algorithm, proposed by McMaster, eliminates vertices that represent very small turning angles (< 10 degrees). This prevents rounding filters from destroying sharp curvatures, granting the resulting geometry a ‘manually generalised’ characteristic where significant bends remain prominent.
+            Accept Multi geometries. If a polygon is provided, it also applies the thinning to its holes using the same parameters.
+            Parameter :
+            - Angle : Turning-angle threshold in degrees. Vertices creating an exterior angle below this limit will be iteratively removed. Default is 10.0.
+            Link to the doc :
+            https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_angular.html#cartagen.simplify_angular"
+            """)
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -282,16 +282,19 @@ class DouglasPeucker(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            "Simplify a line or polygon using a distance-based selection.\n"\
-            "This algorithm was proposed by Ramer and by Douglas and Peucker. It is a line filtering algorithm, which means that it filters the vertices of the line (or polygon) to only retain the most important ones to preserve the shape of the line. The algorithm iteratively searches the most characteristics vertices of portions of the line and decides to retain or remove them given a distance threshold.\n"\
-            "The algorithm tends to unsmooth geographic lines, and is rarely used to simplify geographic features. But it can be very useful to quickly filter the vertices of a line inside another algorithm.\n"\
-            "Parameters :\n"\
-            "- Threshold : The distance threshold to remove the vertex from the line. \n"\
-            "- Preserve topology : If set to True, the algorithm will prevent invalid geometries from being created (checking for collapses, ring-intersections, etc). The trade-off is computational expensivity. \n"\
-            "Link to the doc : \n"\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_douglas_peucker.html#cartagen.simplify_douglas_peucker"
-            )
+        return self.tr(f"""
+            Simplify a line or polygon using a distance-based selection.
+            This algorithm was proposed by Ramer and by Douglas and Peucker. It is a line filtering algorithm, which means that it filters the vertices of the line (or polygon) to only retain the most important ones to preserve the shape of the line. The algorithm iteratively searches the most characteristics vertices of portions of the line and decides to retain or remove them given a distance threshold.
+            The algorithm tends to unsmooth geographic lines, and is rarely used to simplify geographic features. But it can be very useful to quickly filter the vertices of a line inside another algorithm.
+            
+            <h3>Parameters :</h3>
+            <ul>
+                <li> - <em> Threshold </em> : The distance threshold to remove the vertex from the line. </li> 
+                <li> - <em> Preserve Topology </em> : If set to True, the algorithm will prevent invalid geometries from being created (checking for collapses, ring-intersections, etc). The trade-off is computational expensivity. </li> 
+            </ul>
+            
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_douglas_peucker.html#cartagen.simplify_douglas_peucker">help online</a>.
+            """)
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -397,12 +400,12 @@ class Lang(QgsProcessingAlgorithm):
 
     Parameters:
 
-    geometry (LineString) – The geometry to simplify.
+        geometry (LineString) – The geometry to simplify.
 
-    tolerance (float) – The maximum allowed perpendicular distance between the original vertices and the simplified segment.
+        tolerance (float) – The maximum allowed perpendicular distance between the original vertices and the simplified segment.
 
-    look_ahead (int, optional) – The maximum number of vertices to consider in a single search window. 
-    Higher values allow for more aggressive simplification but increase computational cost.
+        look_ahead (int, optional) – The maximum number of vertices to consider in a single search window. 
+        Higher values allow for more aggressive simplification but increase computational cost.
     """
 
     # Constants used to refer to parameters and outputs. They will be
@@ -464,16 +467,18 @@ class Lang(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            "Simplify a line or polygon using a look-ahead distance-based selection. \n"\
-            "This algorithm, proposed by Lang, performs a simplification by defining a search region of a fixed number of vertices (look-ahead). It serves as a middle ground between local sequential filters and global algorithms like Douglas-Peucker. \n"\
-            "The principle of the algorithm is to create a segment between the current vertex and a vertex further down the line. The perpendicular distances from all intermediate vertices to this segment are calculated. If any distance exceeds the tolerance, the search region is shrunk by moving the end vertex one step closer to the start, and the process repeats until all intermediate points fall within the tolerance. Once a valid segment is found, all intermediate points are removed, and the process restarts from the end of that segment. \n"\
-            "Parameters: \n"\
-            "- Tolerance : The maximum allowed perpendicular distance between the original vertices and the simplified segment. \n"\
-            "- Look ahead : The maximum number of vertices to consider in a single search window. Higher values allow for more aggressive simplification but increase computational cost. \n"\
-            "Link to the doc : \n"\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_lang.html#cartagen.simplify_lang"
-            )
+        return self.tr(f"""
+        Simplify a line or polygon using a distance-based selection.
+        This algorithm was proposed by Ramer and by Douglas and Peucker. It is a line filtering algorithm, which means that it filters the vertices of the line (or polygon) to only retain the most important ones to preserve the shape of the line. The algorithm iteratively searches the most characteristics vertices of portions of the line and decides to retain or remove them given a distance threshold.
+        The algorithm tends to unsmooth geographic lines, and is rarely used to simplify geographic features. But it can be very useful to quickly filter the vertices of a line inside another algorithm.
+        This is a simple wrapper around shapely.simplify().
+        <h3> Parameters:<h3>
+        <ul>
+            <li> - <em>Threshold</em> : The distance threshold to remove the vertex from the line.</li>
+            <li> - <em>Preserve Topology</em> : If set to True, the algorithm will prevent invalid geometries from being created (checking for collapses, ring-intersections, etc). The trade-off is computational expensivity.</li>
+        </ul>
+        For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_lang.html">help online</a>.
+        """)
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
