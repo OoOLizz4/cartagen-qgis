@@ -193,25 +193,14 @@ class SkelNatural(QgsProcessingAlgorithm):
         up_bound = self.parameterAsDouble(parameters, self.UP_BOUND, context)
 
         gs = gdf.copy()
-        print(f"type gs : {type(gs)}")
-        print(f"gs sans drop {gs['geometry']}")
         gs = gs.drop(columns=['geometry'])
-        print(f"gs avec drop {gs}")
 
         listSkel = []
         for index in range(len(gs)):
-            print(f"Index : {index}")
             skeletonized = skeletonize_natural(gdf.loc[index,'geometry'], threshold_range=(low_bound, up_bound))
-            print(f"Geométrie après le traitement : {skeletonized[0]}")
-            # print(f"Longueur {len(skeletonized)}")
             listSkel.append(skeletonized[0])
 
-        print(f"La liste est {listSkel} de taille {len(listSkel)}")
-        print(f"taille gs : {len(gs)}")
-
         gs = gs.assign(geometry=listSkel)
-        print(f"nouveau tableau : {gs}")
-
         res = gs.to_dict('records')
         res = list_to_qgis_feature_2(res, source.fields())
 
@@ -435,14 +424,10 @@ class SkelArtificial(QgsProcessingAlgorithm):
 
         listSkel = []
         for index in range(len(gs)):
-            # print(f"Index : {index}")
-            # print(f"Les types des paramètres : entries={type(entries)}, connection={type(listConnection[connection])}")
             skeletonized = skeletonize_artificial(gdf.loc[index,'geometry'], entries=entries, connection=listConnection[connection], threshold_range=(low_bound, up_bound))
-            # print(f"Geométrie après le traitement : {skeletonized[0]}")
             listSkel.append(skeletonized[0])
 
         gs = gs.assign(geometry=listSkel)
-        # print(f"nouveau tableau : {gs}")
 
         res = gs.to_dict('records')
         res = list_to_qgis_feature_2(res, source.fields())
@@ -667,7 +652,6 @@ class SkelNetwork(QgsProcessingAlgorithm):
 
         network = self.parameterAsVectorLayer(parameters, self.NETWORK, context)
         network = gpd.GeoDataFrame.from_features(network.getFeatures())
-        print(f"J'ai des problemes avec le network : {network} de {type(network)} et {type(network['geometry'].loc[0])}")
 
         sigma = self.parameterAsDouble(parameters, self.SIGMA, context)
         blend_smoothing = self.parameterAsBoolean(parameters, self.BLEND_SMOOTHING, context)
@@ -679,15 +663,10 @@ class SkelNetwork(QgsProcessingAlgorithm):
 
         listSkel = []
         for index in range(len(gs)):
-            # print(f"Index : {index}")
-            # print(f"Les types des paramètres : entries={type(entries)}, connection={type(listConnection[connection])}")
             skeletonized = skeletonize_network(gdf.loc[index,'geometry'], network=network, sigma=sigma, blend_smoothing=blend_smoothing, threshold_range=(low_bound, up_bound))
-            print(f"Geométrie après le traitement : {skeletonized}")
             listSkel.append(skeletonized[0])
 
         gs = gs.assign(geometry=listSkel)
-        # print(f"nouveau tableau : {gs}")
-
         res = gs.to_dict('records')
         res = list_to_qgis_feature_2(res, source.fields())
 

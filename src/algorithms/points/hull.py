@@ -379,31 +379,23 @@ class HullSwingingArm(QgsProcessingAlgorithm):
 
         # Perform CG algorithm
         res = hull_swinging_arm(points, length=length, direction=directions[int(direction)])
-        # print(f"res direct: {res}")
 
         feedback.setProgress(90) #set loading bar to 90 %
         
         #transform the result into a gdf, the gdf into a dictionnary, and the dictionnary into a list of QgsFeature()
         res = gpd.GeoDataFrame(geometry=gpd.GeoSeries(res))
-        # print(f"res gpd: {res} avec {len(res)} colonne(s) et de type {type(res)}")
-
         res = res.to_dict('records')
-        # print(f"res dict: {res}")
 
         if not res :
-            # print(f"vide")
             from qgis.PyQt.QtWidgets import QMessageBox
             QMessageBox.warning(None, "Empty output", f"The length of the arm ({length}) is too small. The polygon of the hull can't be created.")
 
             feature = QgsFeature() #create a QgsFeature()
-            # print("feature est créé")
             (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
                     context, feature.fields(), QgsWkbTypes.Unknown, source.sourceCrs())
        
         else :
             res = list_to_qgis_feature(res)
-            # print(f"res qgis feature: {res}")
-            # print(f"fields {res[0].fields()} de type {type(res[0])}")
             
             #Define the output sink
             (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,

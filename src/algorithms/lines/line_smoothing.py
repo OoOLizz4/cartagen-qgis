@@ -217,45 +217,30 @@ class CatmullRomSmoothing(QgsProcessingAlgorithm):
         alpha = self.parameterAsEnum(parameters, self.ALPHA, context)
         dico = {0:0.5, 1:0.0, 1:1}
 
-        print(f"indice : {alpha} et alpha {dico[alpha]}")
-
         #Using CartAGen algorithm and transforming the result to a list of QgsFeature()
         #Depending on the type of geometry of the input data
         if source.wkbType().name == 'Polygon':
-            print("Je suis un polygon")
             gs = gdf.copy()
             for i in range(len(gdf)):
                 try:
                     gs.loc[i,'geometry'] = smooth_catmull_rom(list(gs.geometry)[i], alpha=dico[alpha], subdivisions=subdivisions)
-                    print("Je suis dans try")
                 except:
                     gs.loc[i,'geometry'] = gs.loc[i,'geometry']
-                    print("Je suis dans except")
                 
-                #gs.loc[i,'geometry'] = Polygon(gs.loc[i,'geometry'])
-
             res = gs.to_dict('records')
             res = list_to_qgis_feature_2(res,source.fields())
 
         else:
-            print("Je suis une ligne")
             gs = gdf.copy()
-            print(gs)
             for i in range(len(gdf)):
-                # print("Je suis dans la premiere boucle")
                 geommultiple = gs.loc[i,'geometry']
-                # print(geommultiple)
                 listGeomSimple = list(geommultiple.geoms)
                 listeTraitee = []
-                # print(listGeomSimple)
 
                 for ligne in listGeomSimple:
-                    # print("Je suis dans la deuxième boucle.")
-                    # print(ligne)
                     ligneTraitee = smooth_catmull_rom(ligne, alpha=dico[alpha], subdivisions=subdivisions)
                     listeTraitee.append(ligneTraitee)
 
-                # print(listeTraitee)
                 gs.loc[i,'geometry'] = listeTraitee
             
             res = gs.to_dict('records')
@@ -434,44 +419,26 @@ class ChaikinSmoothing(QgsProcessingAlgorithm):
         #Using CartAGen algorithm and transforming the result to a list of QgsFeature()
         #Depending on the type of geometry of the input data
         if source.wkbType().name == 'Polygon':
-            print("Je suis un polygon")
+
             gs = gdf.copy()
             for i in range(len(gdf)):
-                #try:
                 gs.loc[i,'geometry'] = smooth_chaikin(list(gs.geometry)[i], iterations=iterations, keep_ends=keep_ends)
-                # except:
-                #     gs.loc[i,'geometry'] = gs.loc[i,'geometry'] 
-                
-                #gs.loc[i,'geometry'] = Polygon(gs.loc[i,'geometry'])
-
+            
             res = gs.to_dict('records')
             res = list_to_qgis_feature_2(res,source.fields())
 
         else:
-            print("Je suis une ligne")
             gs = gdf.copy()
-            print(gs)
             for i in range(len(gdf)):
-                print("Je suis dans la premiere boucle")
                 geommultiple = gs.loc[i,'geometry']
-                print(geommultiple)
                 listGeomSimple = list(geommultiple.geoms)
                 listeTraitee = []
-                print(listGeomSimple)
 
                 for ligne in listGeomSimple:
-                    print("Je suis dans la deuxième boucle.")
-                    print(ligne)
                     ligneTraitee = smooth_chaikin(ligne, iterations=iterations, keep_ends=keep_ends)
                     listeTraitee.append(ligneTraitee)
-
-                print(listeTraitee)
                 gs.loc[i,'geometry'] = listeTraitee
-                #     print("Je suis dans try")
-                # except:
-                #     gs.loc[i,'geometry'] = gs.loc[i,'geometry']
-                #     print("Je suis dans except")
-            
+
             res = gs.to_dict('records')
             res = list_to_qgis_feature_2(res,source.fields())
 
@@ -560,8 +527,14 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Smooth a line and attenuate its inflexion points.\nThe gaussian smoothing has been studied by Babaud et al. for image processing, and by Plazanet for the generalisation of cartographic features. \n Accept Multi geometries. If a polygon is provided, it also apply the smoothing to its holes using the same parameters. \n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_gaussian.html#cartagen.smooth_gaussian")
-        
+        return self.tr(
+            """
+            Smooth a line and attenuate its inflexion points.
+            The gaussian smoothing has been studied by Babaud et al. for image processing, and by Plazanet for the generalisation of cartographic features.
+            Accept Multi geometries. If a polygon is provided, it also apply the smoothing to its holes using the same parameters. 
+            Link to the doc : https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_gaussian.html#cartagen.smooth_gaussian"
+            """)
+    
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
 
@@ -652,12 +625,7 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
         if source.wkbType().name == 'Polygon':
             gs = gdf.copy()
             for i in range(len(gdf)):
-                #try:
                 gs.loc[i,'geometry'] = smooth_gaussian(list(gs.geometry)[i], sigma= sigma, sample= sample, densify = densify)
-                # except:
-                #     gs.loc[i,'geometry'] = gs.loc[i,'geometry'] 
-                
-                #gs.loc[i,'geometry'] = Polygon(gs.loc[i,'geometry'])
 
             res = gs.to_dict('records')
             res = list_to_qgis_feature_2(res,source.fields())

@@ -646,15 +646,18 @@ class LiOpenshaw(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            "Simplify a line or a polygon using a regular grid. \n"\
-            "This algorithm proposed by Li & Openshaw simplifies lines based on a regular square grid. It first divide the line vertexes into groups partionned by a regular grid, then each group of vertexes is replaced by their centroid.\n"\
-            "Parameters : \n"\
-            "- Cell size : The size of the regular grid used to divide the line. \n"\
-            "- Preserve extremities : Whether the algorithm should preserve the first and last vertex of the input geometry. \n"\
-            "Link to the doc : \n"\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_li_openshaw.html#cartagen.simplify_li_openshaw"
-            )
+        return self.tr(f"""
+            Simplify a line or a polygon using a regular grid.
+            This algorithm proposed by Li & Openshaw simplifies lines based on a regular square grid. It first divide the line vertexes into groups partionned by a regular grid, then each group of vertexes is replaced by their centroid
+            
+            <h3> Parameters : </h3>
+            <ul>
+                <li> - <em> Cell size </em> : The size of the regular grid used to divide the line.<li>
+                <li> - <em> Preserve extremities </em> : Whether the algorithm should preserve the first and last vertex of the input geometry.<li>
+            </ul>
+                       
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_li_openshaw.html">help online</a>.
+            """)
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -830,18 +833,19 @@ class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            "Simplify a line or a polygon using an hexagonal tessellation. \n"\
-            "This algorithm proposed by Raposo simplifies lines based on a hexagonal tessellation. The algorithm also works for the simplification of the border of a polygon object. The idea of the algorithm is to put a hexagonal tessellation on top of the line to simplify, the size of the cells depending on the targeted granularity of the line. Similarly to the Li-Openshaw algorithm, only one vertex is kept inside each cell. This point can be the centroid of the removed vertices, or a projection on the initial line of this centroid. The shapes obtained with this algorithm are less sharp than the ones obtained with other algorithms such as Douglas-Peucker. \n"\
-            "The algorithm is dedicated to the smooth simplification of natural features such as rivers, forests, coastlines, lakes. \n"\
-            "Parameters: \n"\
-            "- Initial scale : Initial scale of the provided line (25000.0 for 1:25000 scale). \n"\
-            "- Final scale : Final scale of the simplified line. \n"\
-            "- Centroid : If True, uses the center of the hexagonal cells as the new vertex. If False, the center is projected on the nearest point in the initial line. \n"\
-            "- Tobler : If True, compute cell resolution based on Tobler’s formula, else uses Raposo’s formula. \n"\
-            "Link to the doc : \n"\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_raposo.html#cartagen.simplify_raposo"
-            )   
+        return self.tr(f"""
+            Simplify a line or a polygon using an hexagonal tessellation.
+            This algorithm proposed by Raposo simplifies lines based on a hexagonal tessellation. The algorithm also works for the simplification of the border of a polygon object. The idea of the algorithm is to put a hexagonal tessellation on top of the line to simplify, the size of the cells depending on the targeted granularity of the line. Similarly to the Li-Openshaw algorithm, only one vertex is kept inside each cell. This point can be the centroid of the removed vertices, or a projection on the initial line of this centroid. The shapes obtained with this algorithm are less sharp than the ones obtained with other algorithms such as Douglas-Peucker.
+            The algorithm is dedicated to the smooth simplification of natural features such as rivers, forests, coastlines, lakes.
+            
+                       <h3>Parameters:</h3>
+            <ul>
+                <li>- Initial scale : Initial scale of the provided line (25000.0 for 1:25000 scale).</li>
+                <li>- Final scale : Final scale of the simplified line.</li>
+                <li>- Centroid : If True, uses the center of the hexagonal cells as the new vertex. If False, the center is projected on the nearest point in the initial line.</li>
+                <li>- Tobler : If True, compute cell resolution based on Tobler’s formula, else uses Raposo’s formula.</li>
+            </ul>
+            """)   
 
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -934,10 +938,6 @@ class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
         total = 100.0 / source.featureCount() if source.featureCount() else 0
         features = source.getFeatures()
 
-        # print(f"initial scale : {initial_scale} et {type(initial_scale)}")
-        # print(f"final scale : {final_scale}")
-
-
         if initial_scale == 0.0:
 
             from qgis.PyQt.QtWidgets import QMessageBox
@@ -945,7 +945,6 @@ class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
 
             from qgis.core import QgsWkbTypes
             feature = QgsFeature() #create a QgsFeature()
-            # print("feature est créé")
             (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
                     context, feature.fields(), QgsWkbTypes.Unknown, source.sourceCrs())
 

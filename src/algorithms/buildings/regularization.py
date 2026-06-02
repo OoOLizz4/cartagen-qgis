@@ -196,27 +196,18 @@ class BuildingFER (QgsProcessingAlgorithm):
         for i in range(len(gdf)):
             listBuil = []
 
-            # print(f"Je suis dans la premiere boucle pour la {i}eme fois")
             batRegularizeFer = regularize_building_fer(gs['geometry'].loc[i], length=length, area=area)            
             listBuil.append(batRegularizeFer)
 
             gs.loc[i,'geometry'] = listBuil
-        # print(f"Longueur avant traitement : {len(gs)}")
 
         feedback.setProgress(80)
 
-
         for row in gs.iterrows():
-            # print(f"ligne :{row[1]['geometry']}")
             if row[1]['geometry']== None :
-                # print(f"la geom {row[0]} est vide")
                 gs = gs.drop(labels=row[0], axis='index')
 
-        # print(f"Longueur après traitement : {len(gs)}")
-
         res = gs.to_dict(orient='records')
-        # print(f"le dico {res} de type {type(res)}")
-        # print(f"pb de keys : {len(res[0].keys())}")
         res = list_to_qgis_feature_2(res, source.fields())
 
         #Create the ouput sink
@@ -224,9 +215,6 @@ class BuildingFER (QgsProcessingAlgorithm):
             parameters, self.OUTPUT_BUILDING, context, 
             res[0].fields(), source.wkbType(), source.sourceCrs())
         # Add a feature in the sink
-        print(sink)
-        print(res[0].fields())
-        print(parameters)
         sink.addFeatures(res, QgsFeatureSink.FastInsert)
 
         return {
@@ -385,33 +373,23 @@ class BuildingRectangle(QgsProcessingAlgorithm):
         # Retrieve the other parameter values 
         factor = self.parameterAsDouble(parameters, self.FACTOR, context)
         method = self.parameterAsEnum(parameters, self.METHOD, context)
-        print(type(method))
         dicoMethods = {0:'mbr', 1:'mbtr'}
-        print(f"le numero {method} et la methode {dicoMethods[method]}")
 
         #Preparing the data and process
         gs = gdf.copy()
         for i in range(len(gdf)):
-            # print(f"Je suis dans la premiere boucle pour la {i}eme fois.")
             geommultiple = gs['geometry'].loc[i]
             listGeomSimple = list(geommultiple.geoms)
-            # print(f"liste des géométrie : {listGeomSimple}")
             listeTraitee = []
 
             for ligne in listGeomSimple:
-                # print("Je suis dans la deuxième boucle.")
-                # print(f"Le polyg qui va dans le traitement : {ligne}")
                 ligneTraitee = regularize_building_rectangle(ligne, factor=factor, method=dicoMethods[method])
-                # print(f"Le polyg après le traitement {ligneTraitee}")
                 listeTraitee.append(ligneTraitee)
-                # print(f"Le append a eu lieu. La liste est : {listeTraitee}")
 
-            # print(f"La liste de geom qui va être affichée : {listeTraitee}")
             gs.loc[i,'geometry'] = listeTraitee
 
         res = gs.to_dict('records')
         res = list_to_qgis_feature_2(res, source.fields())
-        print(f"Le dictionnaire : {res}")
 
         #Create the ouput sink
         (sink, dest_id) = self.parameterAsSink(
@@ -560,35 +538,24 @@ class BuildingRegression(QgsProcessingAlgorithm):
         #Preparing the data and process
         gs = gdf.copy()
         for i in range(len(gdf)):
-            print(f"Je suis dans la premiere boucle pour la {i}eme fois.")
             geommultiple = gs['geometry'].loc[i]
             listGeomSimple = list(geommultiple.geoms)
-            print(f"liste des géométrie : {listGeomSimple}")
             listeTraitee = []
 
             for ligne in listGeomSimple:
-                print("Je suis dans la deuxième boucle.")
-                print(f"Le polyg qui va dans le traitement : {ligne}")
                 ligneTraitee = regularize_building_regression(ligne, sigma=sigma)
-                print(f"Le polyg après le traitement {ligneTraitee}")
                 listeTraitee.append(ligneTraitee)
-                print(f"Le append a eu lieu. La liste est : {listeTraitee}")
 
-            print(f"La liste de geom qui va être affichée : {listeTraitee}")
             gs.loc[i,'geometry'] = listeTraitee
 
         res = gs.to_dict('records')
         res = list_to_qgis_feature_2(res, source.fields())
-        print(f"Le dictionnaire : {res}")
 
         #Create the ouput sink
         (sink, dest_id) = self.parameterAsSink(
             parameters, self.OUTPUT_BUILDING, context, 
             res[0].fields(), source.wkbType(), source.sourceCrs())
         # Add a feature in the sink
-        print(sink)
-        print(res[0].fields())
-        print(parameters)
         sink.addFeatures(res, QgsFeatureSink.FastInsert)
 
         return {

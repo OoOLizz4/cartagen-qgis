@@ -752,28 +752,28 @@ class BoundariesVisvalingam(QgsProcessingAlgorithm):
         """
         import datetime
         # Get the QGIS source from the parameters
-        print("chargement source" + str(datetime.datetime.now()))
+        # print("chargement source" + str(datetime.datetime.now()))
         source = self.parameterAsSource(parameters, self.INPUT, context)
         
         # Convert the source to GeoDataFrame, get the list of records and the number of entities
-        print("conversion gdf" + str(datetime.datetime.now()))
+        # print("conversion gdf" + str(datetime.datetime.now()))
         gdf = gpd.GeoDataFrame.from_features(source.getFeatures())
         
         # Retrieve parameters
-        print("récupération paramètre " + str(datetime.datetime.now()))
+        # print("récupération paramètre " + str(datetime.datetime.now()))
         area_tolerance = self.parameterAsDouble(parameters, self.AREA_TOLERANCE, context)
         
         # Actual algorithm
-        print("algo CG " + str(datetime.datetime.now()))
+        # print("algo CG " + str(datetime.datetime.now()))
         gdf_final = boundaries_visvalingam_whyatt(gdf, area_tolerance)
         
-        print("conversion liste de dict " + str(datetime.datetime.now()))
+        # print("conversion liste de dict " + str(datetime.datetime.now()))
         res = gdf_final.to_dict('records')
-        print("conversion liste de qgs feature" + str(datetime.datetime.now()))
+        # print("conversion liste de qgs feature" + str(datetime.datetime.now()))
         res = list_to_qgis_feature_2(res, source.fields())
      
         #Create the feature sink
-        print("création sink " + str(datetime.datetime.now()))
+        # print("création sink " + str(datetime.datetime.now()))
         (sink, dest_id) = self.parameterAsSink(
             parameters, self.OUTPUT, context,
             fields=res[0].fields(),
@@ -782,7 +782,7 @@ class BoundariesVisvalingam(QgsProcessingAlgorithm):
         )
         
         #Add features to the sink
-        print("peuplement sink " + str(datetime.datetime.now()))
+        # print("peuplement sink " + str(datetime.datetime.now()))
         sink.addFeatures(res, QgsFeatureSink.FastInsert)
         
         return {

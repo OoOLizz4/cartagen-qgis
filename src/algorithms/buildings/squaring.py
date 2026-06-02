@@ -75,6 +75,73 @@ class SquaringPolygonLS(QgsProcessingAlgorithm):
     RIGHT_WEIGHT = 'RIGHT_WEIGHT'
     FLAT_WEIGHT = 'FLAT_WEIGHT'
 
+    def name(self):
+        """
+        Returns the algorithm name, used for identifying the algorithm. This
+        string should be fixed for the algorithm, and must not be localised.
+        The name should be unique within each provider. Names should contain
+        lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'Square Polygon LS'
+
+    def displayName(self):
+        """
+        Returns the translated algorithm name, which should be used for any
+        user-visible display of the algorithm name.
+        """
+        return self.tr(self.name())
+
+    def group(self):
+        """
+        Returns the name of the group this algorithm belongs to. This string
+        should be localised.
+        """
+        return self.tr(self.groupId())
+
+    def groupId(self):
+        """
+        Returns the unique ID of the group this algorithm belongs to. This
+        string should be fixed for the algorithm, and must not be localised.
+        The group id should be unique within each provider. Group id should
+        contain lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'Buildings'
+
+    def icon(self):
+        """
+        Should return a QIcon which is used for your provider inside
+        the Processing toolbox.
+        """
+        from cartagen4qgis import get_plugin_icon
+        return get_plugin_icon()
+
+    def shortHelpString(self):
+        """
+        Returns a localised short helper string for the algorithm. This string
+        should provide a basic description about what the algorithm does and the
+        parameters and outputs associated with it..
+        """
+        return self.tr(f"""
+            <b>/!\ Drop Z and M /!\ </b>
+            Squares a polygon using the method of least squares. 
+            The least squares based polygon squaring algorithm was proposed by Touya and Lokhat and is particularly useful to square buildings.
+            In practice, this function iteratively tries to resolve matrices equations until a threshold norm is reached and the provided constraint are satisfied.
+            <h3> Parameters : </h3>
+            <ul>
+                <li> - <em> Max iteration </em> : Maximum number of iteration before breaking the loop. If constraints and weights are correctly set, the norm tolerance threshold should be reached before the maximum number of iteration. </li>
+                <li> - <em> Norm tolerance </em> : The threshold below which the norm of the resulting point matrix is acceptable enough to break the iteration loop.</li>
+                <li> - <em> Right tolerance </em> : Tolerance in degrees to consider an angle to be right.</li>
+                <li> - <em> Flat tolerance </em> : Tolerance in degrees to consider an angle to be flat.</li>
+                <li> - <em> Fixed weight </em> : The weight of the angle constraint concerning an angle neither right nor flat. A high value means those angles will be more likely to keep their value in the resulting polygon. </li>
+                <li> - <em> Right weight </em> : The weight of the angle constraint concerning right angles. A high value means those angles will be more likely to keep their value in the resulting polygon. </li>
+                <li> - <em> Flat weight </em> : The weight of the angle constraint concerning flat angles. A high value means those angles will be more likely to keep their value in the resulting polygon. </li>
+            </ul>
+                       
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.square_polygon_ls.html#cartagen.square_polygon_ls">help online</a>.
+            """)
+        
     def initAlgorithm(self, config):
         """
         Here we define the inputs and output of the algorithm, along
@@ -235,74 +302,6 @@ class SquaringPolygonLS(QgsProcessingAlgorithm):
             self.OUTPUT: dest_id
         }
 
-    def name(self):
-        """
-        Returns the algorithm name, used for identifying the algorithm. This
-        string should be fixed for the algorithm, and must not be localised.
-        The name should be unique within each provider. Names should contain
-        lowercase alphanumeric characters only and no spaces or other
-        formatting characters.
-        """
-        return 'Square Polygon LS'
-
-    def displayName(self):
-        """
-        Returns the translated algorithm name, which should be used for any
-        user-visible display of the algorithm name.
-        """
-        return self.tr(self.name())
-
-    def group(self):
-        """
-        Returns the name of the group this algorithm belongs to. This string
-        should be localised.
-        """
-        return self.tr(self.groupId())
-
-    def groupId(self):
-        """
-        Returns the unique ID of the group this algorithm belongs to. This
-        string should be fixed for the algorithm, and must not be localised.
-        The group id should be unique within each provider. Group id should
-        contain lowercase alphanumeric characters only and no spaces or other
-        formatting characters.
-        """
-        return 'Buildings'
-
-    def icon(self):
-        """
-        Should return a QIcon which is used for your provider inside
-        the Processing toolbox.
-        """
-        from cartagen4qgis import get_plugin_icon
-        return get_plugin_icon()
-
-    def shortHelpString(self):
-        """
-        Returns a localised short helper string for the algorithm. This string
-        should provide a basic description about what the algorithm does and the
-        parameters and outputs associated with it..
-        """
-        return self.tr(f"""
-            <b>/!\ Drop Z and M /!\ </b>
-            Squares a polygon using the method of least squares. 
-            The least squares based polygon squaring algorithm was proposed by Touya and Lokhat and is particularly useful to square buildings.
-            In practice, this function iteratively tries to resolve matrices equations until a threshold norm is reached and the provided constraint are satisfied.
-            <h3> Parameters : </h3>
-            <ul>
-                <li> - <em> Max iteration </em> : Maximum number of iteration before breaking the loop. If constraints and weights are correctly set, the norm tolerance threshold should be reached before the maximum number of iteration. </li>
-                <li> - <em> Norm tolerance </em> : The threshold below which the norm of the resulting point matrix is acceptable enough to break the iteration loop.</li>
-                <li> - <em> Right tolerance </em> : Tolerance in degrees to consider an angle to be right.</li>
-                <li> - <em> Flat tolerance </em> : Tolerance in degrees to consider an angle to be flat.</li>
-                <li> - <em> Fixed weight </em> : The weight of the angle constraint concerning an angle neither right nor flat. A high value means those angles will be more likely to keep their value in the resulting polygon. </li>
-                <li> - <em> Right weight </em> : The weight of the angle constraint concerning right angles. A high value means those angles will be more likely to keep their value in the resulting polygon. </li>
-                <li> - <em> Flat weight </em> : The weight of the angle constraint concerning flat angles. A high value means those angles will be more likely to keep their value in the resulting polygon. </li>
-            </ul>
-                       
-            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.square_polygon_ls.html#cartagen.square_polygon_ls">help online</a>.
-            """)
-        
-    
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
 
@@ -352,6 +351,84 @@ class SquaringPolygonNaive(QgsProcessingAlgorithm):
     CORRECT_TOLERANCE='CORRECT_TOLERANCE'
     REMOVE_FLAT='REMOVE_FLAT'
 
+    def name(self):
+        """
+        Returns the algorithm name, used for identifying the algorithm. This
+        string should be fixed for the algorithm, and must not be localised.
+        The name should be unique within each provider. Names should contain
+        lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'Square Polygon Naive'
+
+    def displayName(self):
+        """
+        Returns the translated algorithm name, which should be used for any
+        user-visible display of the algorithm name.
+        """
+        return self.tr(self.name())
+
+    def group(self):
+        """
+        Returns the name of the group this algorithm belongs to. This string
+        should be localised.
+        """
+        return self.tr(self.groupId())
+
+    def groupId(self):
+        """
+        Returns the unique ID of the group this algorithm belongs to. This
+        string should be fixed for the algorithm, and must not be localised.
+        The group id should be unique within each provider. Group id should
+        contain lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'Buildings'
+
+    def icon(self):
+        """
+        Should return a QIcon which is used for your provider inside
+        the Processing toolbox.
+        """
+        from cartagen4qgis import get_plugin_icon
+        return get_plugin_icon()
+
+    def shortHelpString(self):
+        """
+        Returns a localised short helper string for the algorithm. This string
+        should provide a basic description about what the algorithm does and the
+        parameters and outputs associated with it..
+        """
+        return self.tr(f"""
+            <b> /!\ Drop Z and M /!\ </b>
+            
+            Squares a polygon according to its orientation.
+            This method, described in Touya, first calculates the orientation of the polygon. Sides are then corrected depending on the angles formed at the vertexes and on their alignment regarding the calculated orientation.
+            
+            <h3> Parameters : </h3> 
+            <ul>
+                <li> - <em> Orientation</em>  : The method to calculate the orientation. Be aware that the orientation of the polygon defines how the sides are corrected :</li>
+                <ul>
+                    <li>    . <em> 'primary'</em>  calculates the orientation of the longest side of the provided polygon.</li>
+                    <li>    . <em> 'mbr'</em> calculates the orientation of the long side of the minimum rotated bounding rectangle.</li>
+                    <li>    . <em> 'mbtr'</em> calculates the orientation of the long side of the minimum rotated bounding touching rectangle. It is the same as the mbr but the rectangle and the polygon must have at least one side in common.</li>
+                    <li>    . <em> 'swo'</em> or statistical weighted orientation described in Duchêne, calculates the orientation of a polygon using the statistical weighted orientation. This method relies on the length and orientation of the longest and second longest segment between two vertexes of the polygon.</li>
+                </ul>
+                <li> - <em> Angle tolerance </em> : Tolerance in degrees to square the considered angle.</li>
+                <li> - <em> Correct tolerance </em> : Tolerance in degrees to consider the angle to be already flat or right.</li>
+                <li> - <em> Remove flat </em> : If set to True, vertexes with an angle detected or corrected as flat are removed. Thus, the resulting polygon can have less vertexes than the provided one.</li>
+            </ul>
+                       
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.square_polygon_naive.html#cartagen.square_polygon_naive">help online</a>.
+            
+            """)
+        
+    def tr(self, string):
+        return QCoreApplication.translate('Processing', string)
+
+    def createInstance(self):
+        return SquaringPolygonNaive()
+    
     def initAlgorithm(self, config):
         """
         Here we define the inputs and output of the algorithm, along
@@ -477,81 +554,3 @@ class SquaringPolygonNaive(QgsProcessingAlgorithm):
         return {
             self.OUTPUT: dest_id
         }
-
-    def name(self):
-        """
-        Returns the algorithm name, used for identifying the algorithm. This
-        string should be fixed for the algorithm, and must not be localised.
-        The name should be unique within each provider. Names should contain
-        lowercase alphanumeric characters only and no spaces or other
-        formatting characters.
-        """
-        return 'Square Polygon Naive'
-
-    def displayName(self):
-        """
-        Returns the translated algorithm name, which should be used for any
-        user-visible display of the algorithm name.
-        """
-        return self.tr(self.name())
-
-    def group(self):
-        """
-        Returns the name of the group this algorithm belongs to. This string
-        should be localised.
-        """
-        return self.tr(self.groupId())
-
-    def groupId(self):
-        """
-        Returns the unique ID of the group this algorithm belongs to. This
-        string should be fixed for the algorithm, and must not be localised.
-        The group id should be unique within each provider. Group id should
-        contain lowercase alphanumeric characters only and no spaces or other
-        formatting characters.
-        """
-        return 'Buildings'
-
-    def icon(self):
-        """
-        Should return a QIcon which is used for your provider inside
-        the Processing toolbox.
-        """
-        from cartagen4qgis import get_plugin_icon
-        return get_plugin_icon()
-
-    def shortHelpString(self):
-        """
-        Returns a localised short helper string for the algorithm. This string
-        should provide a basic description about what the algorithm does and the
-        parameters and outputs associated with it..
-        """
-        return self.tr(f"""
-            <b> /!\ Drop Z and M /!\ </b>
-            
-            Squares a polygon according to its orientation.
-            This method, described in Touya, first calculates the orientation of the polygon. Sides are then corrected depending on the angles formed at the vertexes and on their alignment regarding the calculated orientation.
-            
-            <h3> Parameters : </h3> 
-            <ul>
-                <li> - <em> Orientation</em>  : The method to calculate the orientation. Be aware that the orientation of the polygon defines how the sides are corrected :</li>
-                <ul>
-                    <li>    . <em> 'primary'</em>  calculates the orientation of the longest side of the provided polygon.</li>
-                    <li>    . <em> 'mbr'</em> calculates the orientation of the long side of the minimum rotated bounding rectangle.</li>
-                    <li>    . <em> 'mbtr'</em> calculates the orientation of the long side of the minimum rotated bounding touching rectangle. It is the same as the mbr but the rectangle and the polygon must have at least one side in common.</li>
-                    <li>    . <em> 'swo'</em> or statistical weighted orientation described in Duchêne, calculates the orientation of a polygon using the statistical weighted orientation. This method relies on the length and orientation of the longest and second longest segment between two vertexes of the polygon.</li>
-                </ul>
-                <li> - <em> Angle tolerance </em> : Tolerance in degrees to square the considered angle.</li>
-                <li> - <em> Correct tolerance </em> : Tolerance in degrees to consider the angle to be already flat or right.</li>
-                <li> - <em> Remove flat </em> : If set to True, vertexes with an angle detected or corrected as flat are removed. Thus, the resulting polygon can have less vertexes than the provided one.</li>
-            </ul>
-                       
-            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.square_polygon_naive.html#cartagen.square_polygon_naive">help online</a>.
-            
-            """)
-        
-    def tr(self, string):
-        return QCoreApplication.translate('Processing', string)
-
-    def createInstance(self):
-        return SquaringPolygonNaive()
