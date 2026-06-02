@@ -37,18 +37,23 @@ from qgis.core import (
 
 class ClosePolygon(QgsProcessingAlgorithm):
     """
-Close a polygon using dilation and erosion.
+    Close a polygon using dilation and erosion.
 
-This algorithm relies on the successive dilation and erosion of polygon to merge close polygons together and 
-simplify their complexity.
+    This algorithm relies on the successive dilation and erosion of polygon to merge close polygons together and 
+    simplify their complexity.
 
-Parameters:
+    Parameters:
+   
         polygon (Polygon or MultiPolygon) – The polygon to close.
 
         size (float) – The size of the dilation and erosion.
 
         quad_segs (int) – The number of linear segments in a quarter circle when performing the buffer.
-         If above 1, the result may have round corners unsuitable for buildings.
+            If above 1, the result may have round corners unsuitable for buildings.
+
+    Returns :
+
+        Polygon or MultiPolygon
     """
 
      # Constants used to refer to parameters and outputs. They will be
@@ -56,9 +61,7 @@ Parameters:
     # calling from the QGIS console.
 
     OUTPUT = 'OUTPUT'
-    
     INPUT_POLYGONS = 'INPUT_POLYGONS'
-
     SIZE = 'SIZE'
     QUAD_SEGS = 'QUAD_SEGS'
  
@@ -70,7 +73,7 @@ Parameters:
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Close polygon'
+        return 'Close Polygon'
 
     def displayName(self):
         """
@@ -110,7 +113,18 @@ Parameters:
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Close a polygon using dilation and erosion.\nThis algorithm relies on the successive dilation and erosion of polygon to merge close polygons together and simplify their complexity.\nSize : The size of the dilation and erosion.\nQuad segs : the number of linear segments in a quarter circle when performing the buffer. If above 1, the result may have round corners unsuitable for buildings.")
+        return self.tr(f"""
+            Close a polygon using dilation and erosion.
+            This algorithm relies on the successive dilation and erosion of polygon to merge close polygons together and simplify their complexity.
+            
+            <h3> Parameters : </h3>
+            <ul>
+            <li>- <em> Size </em> : The size of the dilation and erosion.</li>
+            <li>- <em> Quad Segs </em> : the number of linear segments in a quarter circle when performing the buffer. If above 1, the result may have round corners unsuitable for buildings.</li>
+            </ul>
+                       
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.close_polygon.html#cartagen.close_polygon">help online</a>.
+            """)
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -128,7 +142,7 @@ Parameters:
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_POLYGONS,
-                self.tr('Input polygons'),
+                self.tr('Polygons to close :'),
                 [QgsProcessing.TypeVectorPolygon]
             )
         )
@@ -136,7 +150,7 @@ Parameters:
 
         size = QgsProcessingParameterNumber(
             self.SIZE,
-            self.tr('Size of the dilation and erosion'),
+            self.tr('Size :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=10.0,
             optional=False
@@ -145,7 +159,7 @@ Parameters:
        
         quad_segs = QgsProcessingParameterNumber(
             self.QUAD_SEGS,
-            self.tr('Number of linear segments in a quarter circle when performing the buffer'),
+            self.tr('Quad Segs :'),
             type=QgsProcessingParameterNumber.Integer,
             defaultValue=1,
             optional=False
@@ -159,7 +173,7 @@ Parameters:
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
-                self.tr('Closed polygons')
+                self.tr('Closed Polygons')
             )
         )
 

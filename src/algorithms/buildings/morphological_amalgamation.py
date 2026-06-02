@@ -42,16 +42,17 @@ class MorphologicalAmalgamation(QgsProcessingAlgorithm):
     The amalgamation algorithm proposed by Damen et al. is based on morphological dilations and erosions with a square cap.
     It is particularly useful to keep the overall shape of building blocks.
 
-    Parameters
+    Parameters :
     ----------
-    buildings : list of Polygon
-        Buildings to amalgamate.
-    buffer : float
-        Size of the buffer used for dilation (in meters).
-        Buildings closer than 2 times the buffer size are amalgamated.
-    edge_length : float
-        Minimum length of edges in the amalgamated geometries
-        (a simplification process is carried out).
+        buildings : list of Polygon
+            Buildings to amalgamate.
+        buffer : float
+            Size of the buffer used for dilation (in meters).
+            Buildings closer than 2 times the buffer size are amalgamated.
+        edge_length : float
+            Minimum length of edges in the amalgamated geometries
+            (a simplification process is carried out).
+
     """
 
     # Constants used to refer to parameters and outputs. They will be
@@ -66,7 +67,8 @@ class MorphologicalAmalgamation(QgsProcessingAlgorithm):
     INPUT_NETWORK_PART = 'INPUT_NETWORK_PART'
 
     BUFFER = 'BUFFER'
-    EDGE_LENGTH = 'EDGE_LENGTH' 
+    EDGE_LENGTH = 'EDGE_LENGTH'
+    THRESOLD='THRESOLD'
 
     def name(self):
         """
@@ -76,7 +78,7 @@ class MorphologicalAmalgamation(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Morphological amalgamation'
+        return 'Morphological Amalgamation'
 
     def displayName(self):
         """
@@ -116,7 +118,19 @@ class MorphologicalAmalgamation(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Amalgamate buildings using dilation and erosion.\nThe amalgamation algorithm proposed by Damen et al. is based on morphological dilations and erosions with a square cap. It is particularly useful to keep the overall shape of building blocks.\nBuffer : size of the buffer used for dilation (in meters). Buildings closer than 2 times the buffer size are amalgamated.\nEdge length : minimum length of edges in the amalgamated geometries (a simplification process is carried out).")
+        return self.tr(f"""
+            Amalgamate buildings using dilation and erosion.
+            The amalgamation algorithm proposed by Damen et al. is based on morphological dilations and erosions with a square cap. It is particularly useful to keep the overall shape of building blocks.
+            <h3> Parameters : </h3>
+                       
+            <ul>
+                <li> - <em> Buffer </em> : size of the buffer used for dilation (in meters). Buildings closer than 2 times the buffer size are amalgamated. </li>
+                <li> - <em> Edge length </em> : minimum length of edges in the amalgamated geometries (a simplification process is carried out). </li>
+                <li> - <em> Threshold </em> : The threshold used for the Douglas-Peucker simplification of the resulting polygon before the edge removal. Do not change.
+            </ul>
+            
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.amalgamate_buildings_morphological.html#cartagen.amalgamate_buildings_morphological">help online</a>.
+        """)
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -134,14 +148,14 @@ class MorphologicalAmalgamation(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_BUILDINGS,
-                self.tr('Input buildings'),
+                self.tr('Buildings to amalgamate :'),
                 [QgsProcessing.TypeVectorPolygon]
             )
         )
 
         buffer = QgsProcessingParameterNumber(
             self.BUFFER,
-            self.tr('Size of the buffer used for dilation'),
+            self.tr('Buffer : '),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=10.0,
             optional=False
@@ -150,30 +164,40 @@ class MorphologicalAmalgamation(QgsProcessingAlgorithm):
        
         edge_length = QgsProcessingParameterNumber(
             self.EDGE_LENGTH,
-            self.tr('Minimum length of edges in the amalgamated geometries'),
+            self.tr('Edge Length :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=0,
             optional=False
         )
         self.addParameter(edge_length)
 
-        self.addParameter(
-            QgsProcessingParameterBoolean(
+        thresold = QgsProcessingParameterNumber(
+            self.THRESOLD,
+            self.tr('Thresold :'),
+            type=QgsProcessingParameterNumber.Double,
+            defaultValue=0.2,
+            optional=False
+        )
+        thresold.setFlags(thresold.flags()|QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(thresold)
+
+        network_bool = QgsProcessingParameterBoolean(
                 self.NETWORK_PARTITIONING_TF,
-                self.tr('Activate network partitioning'),
+                self.tr('Activate network partitioning ?'),
                 defaultValue=False,
                 optional=True
             )
-        )
+        network_bool.setFlags(network_bool.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(network_bool)
         
-        self.addParameter(
-            QgsProcessingParameterMultipleLayers(
+        network_data = QgsProcessingParameterMultipleLayers(
                 self.INPUT_NETWORK_PART,
-                self.tr('Input lines for the network partition'),
+                self.tr('Input lines for the network partition :'),
                 layerType=QgsProcessing.TypeVectorLine,
                 optional=True
             )
-        )
+        network_data.setFlags(network_data.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(network_data)
 
         # We add a feature sink in which to store our processed features (this
         # usually takes the form of a newly created vector layer when the
@@ -217,11 +241,12 @@ class MorphologicalAmalgamation(QgsProcessingAlgorithm):
         network_part = self.parameterAsLayerList(parameters, self.INPUT_NETWORK_PART, context)
         buffer = self.parameterAsDouble(parameters, self.BUFFER, context)
         edge_length = self.parameterAsDouble(parameters, self.EDGE_LENGTH, context)
+        thresold = self.parameterAsDouble(parameters, self.THRESOLD, context)
 
         # Use the CartAGen algorithm with or without network partitionning
         # Convert the result to a list of QgsFeature()
         if len(network_part) == 0 or activate_network_part == False:
-            amal = amalgamate_buildings_morphological(list(gdf.geometry),buffer = buffer, edge_length = edge_length)
+            amal = amalgamate_buildings_morphological(list(gdf.geometry),buffer = buffer, edge_length = edge_length, threshold=thresold)
             amal_gdf = gpd.GeoDataFrame(geometry=gpd.GeoSeries(amal))
             res = amal_gdf.to_dict('records')     
         else:
@@ -231,7 +256,7 @@ class MorphologicalAmalgamation(QgsProcessingAlgorithm):
                 amal = gdf.copy()
                 gdf = gdf.iloc[part[0][i]]
                 try:
-                    generalized = amalgamate_buildings_morphological(list(gdf.geometry), buffer = buffer, edge_length = edge_length)
+                    generalized = amalgamate_buildings_morphological(list(gdf.geometry), buffer = buffer, edge_length = edge_length, threshold=thresold)
                     
                 except: 
                     generalized = gdf.geometry

@@ -35,6 +35,7 @@ from qgis.core import (
     QgsProcessingParameterDistance,
     QgsProcessingParameterBoolean,
     QgsProcessingException,
+    QgsProcessingParameterEnum,
     QgsProcessingParameterMultipleLayers
 )
 
@@ -59,9 +60,7 @@ class Angular(QgsProcessingAlgorithm):
     # calling from the QGIS console.
 
     OUTPUT = 'OUTPUT'
-    
     INPUT = 'INPUT'
-
     ANGLE = 'ANGLE'
  
     def name(self):
@@ -112,7 +111,15 @@ class Angular(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Simplify a line or polygon by removing vertexes with small angles. This algorithm, proposed by McMaster, eliminates vertices that represent very small turning angles (< 10 degrees). This prevents rounding filters from destroying sharp curvatures, granting the resulting geometry a ‘manually generalised’ characteristic where significant bends remain prominent. Accept Multi geometries. If a polygon is provided, it also applies the thinning to its holes using the same parameters. \n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_angular.html#cartagen.simplify_angular")
+        return self.tr( f"""
+            Simplify a line or polygon by removing vertexes with small angles.
+            This algorithm, proposed by McMaster, eliminates vertices that represent very small turning angles (< 10 degrees). This prevents rounding filters from destroying sharp curvatures, granting the resulting geometry a ‘manually generalised’ characteristic where significant bends remain prominent.
+            Accept Multi geometries. If a polygon is provided, it also applies the thinning to its holes using the same parameters.
+            Parameter :
+            - Angle : Turning-angle threshold in degrees. Vertices creating an exterior angle below this limit will be iteratively removed. Default is 10.0.
+            Link to the doc :
+            https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_angular.html#cartagen.simplify_angular"
+            """)
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -130,14 +137,14 @@ class Angular(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input lines or polygons'),
+                self.tr('Input lines or polygons :'),
                 [QgsProcessing.TypeVectorPolygon, QgsProcessing.TypeVectorLine]
             )
         )
 
         angle = QgsProcessingParameterNumber(
             self.ANGLE,
-            self.tr('Turning-angle threshold in degrees. Vertices creating an exterior angle below this limit will be iteratively removed. Default is 10.0.'),
+            self.tr('Angle :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=10.0,
             optional=False
@@ -180,7 +187,6 @@ class Angular(QgsProcessingAlgorithm):
             res = dp.to_dict('records')
             res = list_to_qgis_feature_2(res, source.fields())
 
-
         # Create the output sink    
         (sink, dest_id) = self.parameterAsSink(
             parameters, self.OUTPUT, context,
@@ -193,8 +199,6 @@ class Angular(QgsProcessingAlgorithm):
         return {
             self.OUTPUT: dest_id
         }
-
-
 
 class DouglasPeucker(QgsProcessingAlgorithm):
     """
@@ -226,9 +230,7 @@ class DouglasPeucker(QgsProcessingAlgorithm):
     # calling from the QGIS console.
 
     OUTPUT = 'OUTPUT'
-    
     INPUT = 'INPUT'
-
     THRESHOLD = 'THRESHOLD'
     PRESERVE_TOPOLOGY = 'PRESERVE_TOPOLOGY'
  
@@ -280,7 +282,19 @@ class DouglasPeucker(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Distance-based line simplification.\nThis algorithm was proposed by Ramer and by Douglas and Peucker. It is a line filtering algorithm, which means that it filters the vertices of the line (or polygon) to only retain the most important ones to preserve the shape of the line. The algorithm iteratively searches the most characteristics vertices of portions of the line and decides to retain or remove them given a distance threshold.\nThe algorithm tends to unsmooth geographic lines, and is rarely used to simplify geographic features. But it can be very useful to quickly filter the vertices of a line inside another algorithm.\nThis is a simple wrapper around shapely.simplify().\n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_douglas_peucker.html#cartagen.simplify_douglas_peucker")
+        return self.tr(f"""
+            Simplify a line or polygon using a distance-based selection.
+            This algorithm was proposed by Ramer and by Douglas and Peucker. It is a line filtering algorithm, which means that it filters the vertices of the line (or polygon) to only retain the most important ones to preserve the shape of the line. The algorithm iteratively searches the most characteristics vertices of portions of the line and decides to retain or remove them given a distance threshold.
+            The algorithm tends to unsmooth geographic lines, and is rarely used to simplify geographic features. But it can be very useful to quickly filter the vertices of a line inside another algorithm.
+            
+            <h3>Parameters :</h3>
+            <ul>
+                <li> - <em> Threshold </em> : The distance threshold to remove the vertex from the line. </li> 
+                <li> - <em> Preserve Topology </em> : If set to True, the algorithm will prevent invalid geometries from being created (checking for collapses, ring-intersections, etc). The trade-off is computational expensivity. </li> 
+            </ul>
+            
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_douglas_peucker.html#cartagen.simplify_douglas_peucker">help online</a>.
+            """)
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -298,14 +312,14 @@ class DouglasPeucker(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input lines or polygons'),
+                self.tr('Input lines or polygons :'),
                 [QgsProcessing.TypeVectorPolygon, QgsProcessing.TypeVectorLine]
             )
         )
 
         threshold = QgsProcessingParameterNumber(
             self.THRESHOLD,
-            self.tr('Distance threshold to remove the vertex from the line'),
+            self.tr('Thresold :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=10.0,
             optional=False
@@ -314,10 +328,11 @@ class DouglasPeucker(QgsProcessingAlgorithm):
        
         preserve_topology = QgsProcessingParameterBoolean(
             self.PRESERVE_TOPOLOGY,
-                self.tr(' Preserve Topology. \n If set to True, the algorithm will prevent invalid geometries from being created (checking for collapses, ring-intersections, etc). The trade-off is computational expensivity.'),
+                self.tr(' Preserve Topology ?'),
                 optional=False,
                 defaultValue=True
             )
+        preserve_topology.setFlags(preserve_topology.flags() | QgsProcessingParameterDefinition.FlagAdvanced)        
         self.addParameter(preserve_topology)
 
         # We add a feature sink in which to store our processed features (this
@@ -335,7 +350,6 @@ class DouglasPeucker(QgsProcessingAlgorithm):
         Here is where the processing itself takes place.
         """
         import geopandas as gpd
-        from cartagen import simplify_visvalingam_whyatt, simplify_raposo, simplify_douglas_peucker
         from shapely.wkt import loads
         from cartagen4qgis.src.tools import qgis_source_to_geodataframe, list_to_qgis_feature_2
 
@@ -386,12 +400,12 @@ class Lang(QgsProcessingAlgorithm):
 
     Parameters:
 
-    geometry (LineString) – The geometry to simplify.
+        geometry (LineString) – The geometry to simplify.
 
-    tolerance (float) – The maximum allowed perpendicular distance between the original vertices and the simplified segment.
+        tolerance (float) – The maximum allowed perpendicular distance between the original vertices and the simplified segment.
 
-    look_ahead (int, optional) – The maximum number of vertices to consider in a single search window. 
-    Higher values allow for more aggressive simplification but increase computational cost.
+        look_ahead (int, optional) – The maximum number of vertices to consider in a single search window. 
+        Higher values allow for more aggressive simplification but increase computational cost.
     """
 
     # Constants used to refer to parameters and outputs. They will be
@@ -453,7 +467,18 @@ class Lang(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Simplify a line or polygon using a look-ahead distance-based selection. \n This algorithm, proposed by Lang, performs a simplification by defining a search region of a fixed number of vertices (look-ahead). It serves as a middle ground between local sequential filters and global algorithms like Douglas-Peucker. \n The principle of the algorithm is to create a segment between the current vertex and a vertex further down the line. The perpendicular distances from all intermediate vertices to this segment are calculated. If any distance exceeds the tolerance, the search region is shrunk by moving the end vertex one step closer to the start, and the process repeats until all intermediate points fall within the tolerance. Once a valid segment is found, all intermediate points are removed, and the process restarts from the end of that segment. \n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_lang.html#cartagen.simplify_lang")
+        return self.tr(f"""
+        Simplify a line or polygon using a distance-based selection.
+        This algorithm was proposed by Ramer and by Douglas and Peucker. It is a line filtering algorithm, which means that it filters the vertices of the line (or polygon) to only retain the most important ones to preserve the shape of the line. The algorithm iteratively searches the most characteristics vertices of portions of the line and decides to retain or remove them given a distance threshold.
+        The algorithm tends to unsmooth geographic lines, and is rarely used to simplify geographic features. But it can be very useful to quickly filter the vertices of a line inside another algorithm.
+        This is a simple wrapper around shapely.simplify().
+        <h3> Parameters:<h3>
+        <ul>
+            <li> - <em>Threshold</em> : The distance threshold to remove the vertex from the line.</li>
+            <li> - <em>Preserve Topology</em> : If set to True, the algorithm will prevent invalid geometries from being created (checking for collapses, ring-intersections, etc). The trade-off is computational expensivity.</li>
+        </ul>
+        For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_lang.html">help online</a>.
+        """)
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -471,14 +496,14 @@ class Lang(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input lines or polygons'),
+                self.tr('Input lines or polygons :'),
                 [QgsProcessing.TypeVectorPolygon, QgsProcessing.TypeVectorLine]
             )
         )
 
         tolerance = QgsProcessingParameterNumber(
             self.TOLERANCE,
-            self.tr('The maximum allowed perpendicular distance between the original vertices and the simplified segment.'),
+            self.tr('Tolerance :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=10.0,
             optional=False
@@ -487,7 +512,7 @@ class Lang(QgsProcessingAlgorithm):
        
         look_ahead = QgsProcessingParameterNumber(
             self.LOOK_AHEAD,
-                self.tr('The maximum number of vertices to consider in a single search window. \n Higher values allow for more aggressive simplification but increase computational cost.'),
+                self.tr('Look ahead :'),
                 type=QgsProcessingParameterNumber.Integer,
                 defaultValue=5,
                 optional=False,
@@ -621,7 +646,18 @@ class LiOpenshaw(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Simplify a line or a polygon using a regular grid. \n This algorithm proposed by Li & Openshaw simplifies lines based on a regular square grid. It first divide the line vertexes into groups partionned by a regular grid, then each group of vertexes is replaced by their centroid.\n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_li_openshaw.html#cartagen.simplify_li_openshaw")
+        return self.tr(f"""
+            Simplify a line or a polygon using a regular grid.
+            This algorithm proposed by Li & Openshaw simplifies lines based on a regular square grid. It first divide the line vertexes into groups partionned by a regular grid, then each group of vertexes is replaced by their centroid
+            
+            <h3> Parameters : </h3>
+            <ul>
+                <li> - <em> Cell size </em> : The size of the regular grid used to divide the line.<li>
+                <li> - <em> Preserve extremities </em> : Whether the algorithm should preserve the first and last vertex of the input geometry.<li>
+            </ul>
+                       
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_li_openshaw.html">help online</a>.
+            """)
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -639,25 +675,27 @@ class LiOpenshaw(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input lines or polygons'),
+                self.tr('Input lines or polygons :'),
                 [QgsProcessing.TypeVectorPolygon, QgsProcessing.TypeVectorLine]
             )
         )
 
         cell_size = QgsProcessingParameterNumber(
             self.CELL_SIZE,
-            self.tr('The size of the regular grid used to divide the line.'),
+            self.tr('Cell size :'),
             type=QgsProcessingParameterNumber.Double,
+            defaultValue = 200,
             optional=False
         )
         self.addParameter(cell_size)
        
         preserve_extremities = QgsProcessingParameterBoolean(
-            self.PRESERVE_EXTREMETIES,
-                self.tr('Whether the algorithm should preserve the first and last vertex of the input geometry.'),
+                self.PRESERVE_EXTREMETIES,
+                self.tr('Preserve extremities ?'),
                 defaultValue=True,
-                optional=False,
+                optional=False
             )
+        preserve_extremities.setFlags(preserve_extremities.flags() | QgsProcessingParameterDefinition.FlagAdvanced)        
         self.addParameter(preserve_extremities)
 
         # We add a feature sink in which to store our processed features (this
@@ -713,7 +751,27 @@ class LiOpenshaw(QgsProcessingAlgorithm):
 
 class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
     """
-    Simplify lines using the Raposo hexagon-based line simplification
+    Simplify a line or a polygon using an hexagonal tessellation.
+
+    This algorithm proposed by Raposo [1] simplifies lines based on a hexagonal tessellation. The algorithm also works for the simplification of the border of a polygon object. The idea of the algorithm is to put a hexagonal tessellation on top of the line to simplify, the size of the cells depending on the targeted granularity of the line. Similarly to the Li-Openshaw algorithm, only one vertex is kept inside each cell. This point can be the centroid of the removed vertices, or a projection on the initial line of this centroid. The shapes obtained with this algorithm are less sharp than the ones obtained with other algorithms such as Douglas-Peucker.
+
+    The algorithm is dedicated to the smooth simplification of natural features such as rivers, forests, coastlines, lakes.
+
+    Parameters:
+
+        geometry (LineString, MultiLineString, Polygon, MultiPolygon, LinearRing) – The line to simplify.
+
+        initial_scale (float) – Initial scale of the provided line (25000.0 for 1:25000 scale).
+
+        final_scale (float) – Final scale of the simplified line.
+
+        centroid (bool, optional) – If true, uses the center of the hexagonal cells as the new vertex, if false, the center is projected on the nearest point in the initial line.
+
+        tobler (bool, optional) – If True, compute cell resolution based on Tobler’s formula, else uses Raposo’s formula
+
+    Returns:
+
+        LineString, MultiLineString, Polygon, MultiPolygon, LinearRing
     """
 
     # Constants used to refer to parameters and outputs. They will be
@@ -726,124 +784,6 @@ class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
     FINAL_SCALE = 'FINAL_SCALE'
     CENTROID = 'CENTROID'
     TOBLER = 'TOBLER'
-
-    def initAlgorithm(self, config):
-        """
-        Here we define the inputs and output of the algorithm, along
-        with some other properties.
-        """
-
-        # We add the input vector features source.
-        self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT,
-                self.tr('Input line'),
-                [QgsProcessing.TypeVectorLine]
-            )
-        )
-
-        self.addParameter(
-            QgsProcessingParameterNumber(
-                self.INITIAL_SCALE,
-                self.tr('Initial scale'),
-                type=QgsProcessingParameterNumber.Integer,
-                optional=False
-            )
-        )
-
-        self.addParameter(
-            QgsProcessingParameterNumber(
-                self.FINAL_SCALE,
-                self.tr('Final scale'),
-                type=QgsProcessingParameterNumber.Integer,
-                optional=False
-            )
-        )
-
-        self.addParameter(
-            QgsProcessingParameterBoolean(
-                self.CENTROID,
-                self.tr('Replace line vertices with the hexagons centroid'),
-                defaultValue=True,
-                optional=False
-            )
-        )
-
-        self.addParameter(
-            QgsProcessingParameterBoolean(
-                self.TOBLER,
-                self.tr("Compute cell resolution based on Tobler's formula"),
-                defaultValue=False,
-                optional=False
-            )
-        )
-
-        # We add a feature sink in which to store our processed features (this
-        # usually takes the form of a newly created vector layer when the
-        # algorithm is run in QGIS).
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT,
-                self.tr('Simplified Raposo')
-            )
-        )
-
-    def processAlgorithm(self, parameters, context, feedback):
-        """
-        Here is where the processing itself takes place.
-        """
-        import geopandas as gpd
-        from cartagen import simplify_visvalingam_whyatt, simplify_raposo, simplify_douglas_peucker
-        from shapely.wkt import loads
-        from cartagen4qgis.src.tools import qgis_source_to_geodataframe, list_to_qgis_feature_2
-
-        # Retrieve the feature source and sink. The 'dest_id' variable is used
-        # to uniquely identify the feature sink, and must be included in the
-        # dictionary returned by the processAlgorithm function.
-        source = self.parameterAsSource(parameters, self.INPUT, context)
-        (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
-                context, source.fields(), source.wkbType(), source.sourceCrs())
-
-        # Compute the number of steps to display within the progress bar and
-        # get features from source
-        total = 100.0 / source.featureCount() if source.featureCount() else 0
-        features = source.getFeatures()
-
-        for current, feature in enumerate(features):
-            # Stop the algorithm if cancel button has been clicked
-            if feedback.isCanceled():
-                break
-
-            wkt = feature.geometry().asWkt()
-            shapely_geom = loads(wkt)
-
-            simplified = simplify_raposo(
-                shapely_geom,
-                self.parameterAsInt(parameters,self.INITIAL_SCALE,context),
-                self.parameterAsInt(parameters,self.FINAL_SCALE,context),
-                centroid=self.parameterAsBoolean(parameters, self.CENTROID, context),
-                tobler=self.parameterAsBoolean(parameters, self.TOBLER, context)
-            )
-
-            result = QgsFeature()
-            result.setGeometry(QgsGeometry.fromWkt(simplified.wkt))
-            result.setAttributes(feature.attributes())
-
-            # Add a feature in the sink
-            sink.addFeature(result, QgsFeatureSink.FastInsert)
-
-            # Update the progress bar
-            feedback.setProgress(int(current * total))
-
-        # Return the results of the algorithm. In this case our only result is
-        # the feature sink which contains the processed features, but some
-        # algorithms may return multiple feature sinks, calculated numeric
-        # statistics, etc. These should all be included in the returned
-        # dictionary, with keys matching the feature corresponding parameter
-        # or output names.
-        return {
-            self.OUTPUT: dest_id
-        }
 
     def name(self):
         """
@@ -893,13 +833,153 @@ class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Hexagon-based line simplification.\nThis algorithm proposed by Raposo simplifies lines based on a hexagonal tessellation. Only one vertex is kept inside each cell. This point can be the centroid of the removed vertices, or a projection on the initial line of this centroid. The algorithm also works for the simplification of the border of a polygon object. \n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_raposo.html#cartagen.simplify_raposo")   
+        return self.tr(f"""
+            Simplify a line or a polygon using an hexagonal tessellation.
+            This algorithm proposed by Raposo simplifies lines based on a hexagonal tessellation. The algorithm also works for the simplification of the border of a polygon object. The idea of the algorithm is to put a hexagonal tessellation on top of the line to simplify, the size of the cells depending on the targeted granularity of the line. Similarly to the Li-Openshaw algorithm, only one vertex is kept inside each cell. This point can be the centroid of the removed vertices, or a projection on the initial line of this centroid. The shapes obtained with this algorithm are less sharp than the ones obtained with other algorithms such as Douglas-Peucker.
+            The algorithm is dedicated to the smooth simplification of natural features such as rivers, forests, coastlines, lakes.
+            
+            <h3>Parameters:</h3>
+            <ul>
+                <li>- Initial scale : Initial scale of the provided line (25000.0 for 1:25000 scale).</li>
+                <li>- Final scale : Final scale of the simplified line.</li>
+                <li>- Centroid : If True, uses the center of the hexagonal cells as the new vertex. If False, the center is projected on the nearest point in the initial line.</li>
+                <li>- Tobler : If True, compute cell resolution based on Tobler’s formula, else uses Raposo’s formula.</li>
+            </ul>
+            """)   
 
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
 
     def createInstance(self):
         return RaposoSimplificationQGIS()
+    
+    def initAlgorithm(self, config):
+        """
+        Here we define the inputs and output of the algorithm, along
+        with some other properties.
+        """
+
+        # We add the input vector features source.
+        self.addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.INPUT,
+                self.tr('Input lines or polygons :'),
+                [QgsProcessing.TypeVectorLine]
+            )
+        )
+
+        initial_scale = QgsProcessingParameterNumber(
+                self.INITIAL_SCALE,
+                self.tr('Initial scale :'),
+                type=QgsProcessingParameterNumber.Double,
+                defaultValue=5000,
+                optional=False
+            )
+        self.addParameter(initial_scale)
+
+        final_scale = QgsProcessingParameterNumber(
+                self.FINAL_SCALE,
+                self.tr('Final scale :'),
+                type=QgsProcessingParameterNumber.Double,
+                defaultValue=10000,
+                optional=False
+            )
+        self.addParameter(final_scale)    
+
+        centroid = QgsProcessingParameterBoolean(
+                self.CENTROID,
+                self.tr('Centroid ?'),
+                defaultValue=True,
+                optional=False
+            )
+        centroid.setFlags(centroid.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(centroid)    
+
+        tobler = QgsProcessingParameterBoolean(
+                self.TOBLER,
+                self.tr('Tobler ?'),
+                defaultValue=True,
+                optional=False
+            )
+        tobler.setFlags(tobler.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        self.addParameter(tobler) 
+
+        # We add a feature sink in which to store our processed features (this
+        # usually takes the form of a newly created vector layer when the
+        # algorithm is run in QGIS).
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.OUTPUT,
+                self.tr('Simplified Raposo')
+            )
+        )
+
+    def processAlgorithm(self, parameters, context, feedback):
+        """
+        Here is where the processing itself takes place.
+        """
+        from cartagen import simplify_raposo
+        from shapely.wkt import loads
+
+        # Retrieve the feature source and sink. The 'dest_id' variable is used
+        # to uniquely identify the feature sink, and must be included in the
+        # dictionary returned by the processAlgorithm function.
+        source = self.parameterAsSource(parameters, self.INPUT, context)
+        (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
+                context, source.fields(), source.wkbType(), source.sourceCrs())
+
+        initial_scale = self.parameterAsDouble(parameters,self.INITIAL_SCALE,context)
+        final_scale = self.parameterAsDouble(parameters,self.FINAL_SCALE,context)
+        centroid = self.parameterAsBoolean(parameters, self.CENTROID, context)
+        tobler = self.parameterAsBoolean(parameters, self.TOBLER, context)
+
+        # Compute the number of steps to display within the progress bar and
+        # get features from source
+        total = 100.0 / source.featureCount() if source.featureCount() else 0
+        features = source.getFeatures()
+
+        if initial_scale == 0.0:
+
+            from qgis.PyQt.QtWidgets import QMessageBox
+            QMessageBox.warning(None, "Initial scale is null !", f"The Initial scale is equal to 0. The algorithm can't function.")
+
+            from qgis.core import QgsWkbTypes
+            feature = QgsFeature() #create a QgsFeature()
+            (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
+                    context, feature.fields(), QgsWkbTypes.Unknown, source.sourceCrs())
+
+        else :
+            
+            for current, feature in enumerate(features):
+                # Stop the algorithm if cancel button has been clicked
+                if feedback.isCanceled():
+                    break
+
+                wkt = feature.geometry().asWkt()
+                shapely_geom = loads(wkt)
+
+                simplified = simplify_raposo(shapely_geom, initial_scale=initial_scale, final_scale=final_scale, centroid=centroid, tobler=tobler)
+
+                result = QgsFeature()
+                result.setGeometry(QgsGeometry.fromWkt(simplified.wkt))
+                result.setAttributes(feature.attributes())
+
+                # Add a feature in the sink
+                sink.addFeature(result, QgsFeatureSink.FastInsert)
+
+                # Update the progress bar
+                feedback.setProgress(int(current * total))
+
+        # Return the results of the algorithm. In this case our only result is
+        # the feature sink which contains the processed features, but some
+        # algorithms may return multiple feature sinks, calculated numeric
+        # statistics, etc. These should all be included in the returned
+        # dictionary, with keys matching the feature corresponding parameter
+        # or output names.
+        return {
+            self.OUTPUT: dest_id
+        }
+
 
 class ReumannWitkam(QgsProcessingAlgorithm):
     """
@@ -982,7 +1062,18 @@ class ReumannWitkam(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Simplify a line or polygon using a directional distance-based selection. \n This algorithm, proposed by Reumann and Witkam , performs a sequential line simplification by using a “corridor” or “tube” defined by the direction of the first segment. Unlike the Douglas-Peucker algorithm, which considers the line globally, Reumann-Witkam is a local, streaming-friendly filter that processes vertices in order.\n The principle of the algorithm is to define a search pipe using the first two points of a segment. For all subsequent points, the perpendicular distance to the infinite line passing through this initial segment is calculated. As long as the points stay within the tolerance distance, they are marked for deletion. When a point falls outside the pipe, the current point becomes the new starting vertex, and a new pipe direction is established.\nThe algorithm is particularly efficient for reducing the density of points in datasets where the direction of the line is relatively constant, making it ideal for real-time thinning of trajectory data or GPS traces. \n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_reumann_witkam.html#cartagen.simplify_reumann_witkam")
+        return self.tr("""
+            Simplify a line or polygon using a directional distance-based selection.
+            This algorithm, proposed by Reumann and Witkam , performs a sequential line simplification by using a “corridor” or “tube” defined by the direction of the first segment. Unlike the Douglas-Peucker algorithm, which considers the line globally, Reumann-Witkam is a local, streaming-friendly filter that processes vertices in order.
+            The principle of the algorithm is to define a search pipe using the first two points of a segment. For all subsequent points, the perpendicular distance to the infinite line passing through this initial segment is calculated. As long as the points stay within the tolerance distance, they are marked for deletion. When a point falls outside the pipe, the current point becomes the new starting vertex, and a new pipe direction is established.
+            The algorithm is particularly efficient for reducing the density of points in datasets where the direction of the line is relatively constant, making it ideal for real-time thinning of trajectory data or GPS traces.
+            <h3> Parameters: </h3>
+                       
+            <ul>
+                <li> - <em>Tolerance</em> : The width (radius) of the search corridor. Points within this distance from the segment’s trajectory are removed. Higher values = fewer points kept (more aggressive simplification).</li>
+            </ul>
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_reumann_witkam.html#cartagen.simplify_reumann_witkam">help online</a>
+            """)
                        
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -1000,14 +1091,14 @@ class ReumannWitkam(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input lines or polygons'),
+                self.tr('Input lines or polygons :'),
                 [QgsProcessing.TypeVectorPolygon, QgsProcessing.TypeVectorLine]
             )
         )
 
         tolerance = QgsProcessingParameterNumber(
             self.TOLERANCE,
-            self.tr('The width (radius) of the search corridor. Points within this distance from the segment’s trajectory are removed. Higher values = fewer points kept (more aggressive simplification).'),
+            self.tr('Tolerance :'),
             type=QgsProcessingParameterNumber.Double,
             optional=False
         )
@@ -1091,7 +1182,8 @@ class VisvalingamWhyattQGIS(QgsProcessingAlgorithm):
 
     OUTPUT = 'OUTPUT'
     INPUT = 'INPUT'
-    TOLERANCE='TOLERANCE'
+    METHOD='METHOD'
+    VALUE ='VALUE'
 
     def initAlgorithm(self, config):
         """
@@ -1103,24 +1195,34 @@ class VisvalingamWhyattQGIS(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input line or polygon'),
+                self.tr('Input line or polygon :'),
                 [QgsProcessing.TypeVectorLine]
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterNumber(
-                self.TOLERANCE,
-                self.tr('Tolerance area'),
-                type=QgsProcessingParameterNumber.Double,
-                defaultValue=None,
-                optional=False
+        methodes = ['Thresold', 'Number', 'Ratio']
+        methode = QgsProcessingParameterEnum(
+                self.METHOD,
+                'Select a method :',
+                methodes,
+                defaultValue='Thresold' 
             )
+        self.addParameter(methode)
+
+        # float number
+        value = QgsProcessingParameterNumber(
+            self.VALUE,
+            self.tr('Value :'),
+            type=QgsProcessingParameterNumber.Double,
+            optional=False,
+            defaultValue=1
         )
+        self.addParameter(value)
 
         # We add a feature sink in which to store our processed features (this
         # usually takes the form of a newly created vector layer when the
         # algorithm is run in QGIS).
+    
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
@@ -1133,16 +1235,23 @@ class VisvalingamWhyattQGIS(QgsProcessingAlgorithm):
         Here is where the processing itself takes place.
         """
         import geopandas as gpd
-        from cartagen import simplify_visvalingam_whyatt, simplify_raposo, simplify_douglas_peucker
+        from cartagen import simplify_visvalingam_whyatt
         from shapely.wkt import loads
         from cartagen4qgis.src.tools import qgis_source_to_geodataframe, list_to_qgis_feature_2
-
         # Retrieve the feature source and sink. The 'dest_id' variable is used
         # to uniquely identify the feature sink, and must be included in the
+
         # dictionary returned by the processAlgorithm function.
         source = self.parameterAsSource(parameters, self.INPUT, context)
+
         (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
                 context, source.fields(), source.wkbType(), source.sourceCrs())
+
+        value = self.parameterAsDouble(parameters, self.VALUE, context)
+        methodes = ['thresold', 'number', 'ratio']
+        methode = self.parameterAsString(parameters, self.METHOD, context)
+        
+        feedback.setProgress(1) #start the loading bar at 1 %
 
         # Compute the number of steps to display within the progress bar and
         # get features from source
@@ -1157,11 +1266,18 @@ class VisvalingamWhyattQGIS(QgsProcessingAlgorithm):
             wkt = feature.geometry().asWkt()
             shapely_geom = loads(wkt)
 
-            # CartAGen's algorithm
-            simplified = simplify_visvalingam_whyatt(shapely_geom, self.parameterAsInt(parameters,self.TOLERANCE,context))
+            # use the version of the CartAGen's algorithm according to selected mode
+            if methode == "0":
+                res = simplify_visvalingam_whyatt(shapely_geom, threshold=value)
+            elif methode == "1":
+                res = simplify_visvalingam_whyatt(shapely_geom, number=value)
+            elif methode == "2":
+                res = simplify_visvalingam_whyatt(shapely_geom, ratio=value)
+            else:
+                raise Exception("You need to choose a method !")
 
             result = QgsFeature()
-            result.setGeometry(QgsGeometry.fromWkt(simplified.wkt))
+            result.setGeometry(QgsGeometry.fromWkt(res.wkt))
             result.setAttributes(feature.attributes())
 
             # Add a feature in the sink
@@ -1234,7 +1350,21 @@ class VisvalingamWhyattQGIS(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Simplify a line or polygon using an area-based selection.\n This algorithm proposed by Visvalingam and Whyatt performs a line simplification that produces less angular results than the filtering algorithm of Ramer-Douglas-Peucker. The principle of the algorithm is to select the vertices to delete (the less characteristic ones) rather than choosing the vertices to keep (in the Douglas and Peucker algorithm). To select the vertices to delete, there is an iterative process, and at each iteration, the triangles formed by three consecutive vertices are computed. If the area of the smallest triangle is smaller than a threshold, the middle vertex is deleted, and another iteration starts.\n The algorithm is relevant for the simplification of natural line or polygon features such as rivers, forests, or coastlines. This implementation was made by Elliot Hallmark. \n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_visvalingam_whyatt.html#cartagen.simplify_visvalingam_whyatt")
+        helpstring = """ 
+            Simplify a line or polygon using an area-based selection.
+            This algorithm proposed by Visvalingam and Whyatt performs a line simplification that produces less angular results than the filtering algorithm of Ramer-Douglas-Peucker. The principle of the algorithm is to select the vertices to delete (the less characteristic ones) rather than choosing the vertices to keep (in the Douglas and Peucker algorithm). To select the vertices to delete, there is an iterative process, and at each iteration, the triangles formed by three consecutive vertices are computed. If the area of the smallest triangle is smaller than a threshold, the middle vertex is deleted, and another iteration starts.
+            The algorithm is relevant for the simplification of natural line or polygon features such as rivers, forests, or coastlines. This implementation was made by Elliot Hallmark.
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Methode</em> : Choose the methode used for the calcul :</li>
+                    . Threshold (float) : The minimum triangle area to keep a vertex in the line. Higher values = more points kept (less aggressive simplification).
+                    . Number (int) : The target number of points to keep in the simplified line.
+                    . Ratio (float) : The ratio of points to keep (between 0 and 1). Example: 0.5 keeps approximately 50% of the original points.
+                <li> - <em>Value</em> : The value to use fot the calcul</li>
+            </ul>
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_visvalingam_whyatt.html#cartagen.simplify_visvalingam_whyatt">help online</a>.
+            """
+        return self.tr(helpstring)
         
 class Whirlpool(QgsProcessingAlgorithm):
 
@@ -1312,7 +1442,18 @@ class Whirlpool(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Simplify a line or polygon using an epsilon-circle based selection. \n This algorithm proposed by Dougenik and Chrisman performs a line simplification that removes spiky vertices while preserving the overall shape of the line. It works by iterating through the vertices of the line and removing those that are within a specified distance (epsilon) from the last kept vertex. \n This method is particularly effective at simplifying lines with many small, sharp angles, such as rivers or coastlines, while maintaining the general form of the line. \n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_whirlpool.html#cartagen.simplify_whirlpool")
+        helpstring = """
+            Simplify a line or polygon using an epsilon-circle based selection.
+            This algorithm proposed by Dougenik and Chrisman performs a line simplification that removes spiky vertices while preserving the overall shape of the line. It works by iterating through the vertices of the line and removing those that are within a specified distance (epsilon) from the last kept vertex.
+            This method is particularly effective at simplifying lines with many small, sharp angles, such as rivers or coastlines, while maintaining the general form of the line.
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Thresold</em> : The minimum epsilon-distance to consider a vertex to be removed. Higher values = fewer points kept (more aggressive simplification).</li>
+            </ul>
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_whirlpool.html#cartagen.simplify_whirlpool">help online</a>.
+            """
+        
+        return self.tr(helpstring)
                        
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -1330,14 +1471,14 @@ class Whirlpool(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input lines or polygons'),
+                self.tr('Input lines or polygons :'),
                 [QgsProcessing.TypeVectorPolygon, QgsProcessing.TypeVectorLine]
             )
         )
 
         threshold = QgsProcessingParameterNumber(
             self.THRESHOLD,
-            self.tr('The minimum epsilon-distance to consider a vertex to be removed. \n Higher values = fewer points kept (more aggressive simplification).'),
+            self.tr('Thresold :'),
             type=QgsProcessingParameterNumber.Double,
             optional=False
         )

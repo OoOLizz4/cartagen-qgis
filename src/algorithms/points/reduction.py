@@ -96,7 +96,7 @@ class ReduceKmeans(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'K-means point reduction'
+        return 'Reduction K-means Point'
 
     def displayName(self):
         """
@@ -136,8 +136,18 @@ class ReduceKmeans(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Reduce a set of points using K-Means clustering.\nRatio : a value between 0 (all points are removed) and 1 (all points are kept).\nMode : there are three available modes:\n'selection': inside the cluster, only point with the largest value in the chosen field is retained. This option requires the field parameter to be provided.\n'simplification': the point retained in the cluster is the closest to the centroid of the cluster.\n'aggregation': the points are all aggregated to the centroid of the cluster. The count of point is added as a new attribute. If a column name is provided, also adds the sum of the attribute.")
-        
+        helpstring = """
+            Reduce a set of points using K-Means clustering. 'selection': inside the cluster, only point with the largest value in the chosen field is retained. This option requires the field parameter to be provided. 'simplification': the point retained in the cluster is the closest to the centroid of the cluster. 'aggregation': the points are all aggregated to the centroid of the cluster. The count of point is added as a new attribute. If a column name is provided, also adds the sum of the attribute.
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Ratio</em> : a value between 0 (all points are removed) and 1 (all points are kept).</li>
+                <li> - <em>Mode</em> : there are three available modes:</li>
+            </ul>
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.kmeans_aggregation.html#cartagen.kmeans_aggregation">help online</a>.
+        """
+
+        return self.tr(helpstring)
+
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
 
@@ -154,7 +164,7 @@ class ReduceKmeans(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input point layer'),
+                self.tr('Input point layer :'),
                 [QgsProcessing.TypeVectorPoint]
             )
         )
@@ -162,7 +172,7 @@ class ReduceKmeans(QgsProcessingAlgorithm):
          # field selector
         field = QgsProcessingParameterField(
                 self.FIELD,
-                'Value field',
+                'Value field :',
                 '',
                 self.INPUT,  
                 QgsProcessingParameterField.Numeric,
@@ -174,19 +184,18 @@ class ReduceKmeans(QgsProcessingAlgorithm):
         # float number
         ratio = QgsProcessingParameterNumber(
             self.RATIO,
-            self.tr('Ratio of retained points'),
+            self.tr('Ratio of retained points :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=0.7,
             optional=False
         )
         self.addParameter(ratio)
 
-       
         # option selection in a list
         modes = ['selection', 'simplification', 'aggregation']
         mode = QgsProcessingParameterEnum(
                 self.MODE,
-                'Select a mode',
+                'Select a mode :',
                 modes,
                 defaultValue=1  
             )
@@ -278,23 +287,23 @@ class ReduceLabelgrid(QgsProcessingAlgorithm):
     
     Parameters:
 
-    points (GeoDataFrame of Point) – The points to reduce.
+        - points (GeoDataFrame of Point) – The points to reduce.
 
-    width (float) – Width of the grid cells.
+        - width (float) – Width of the grid cells.
 
-    height (float) – Height of the grid cells.
+        - height (float) – Height of the grid cells.
 
-    shape (str, optional) – Shape of the grid cells, can be ‘square’, ‘diamond’, ‘hexagonal’.
+        - shape (str, optional) – Shape of the grid cells, can be ‘square’, ‘diamond’, ‘hexagonal’.
 
-    mode (str, optional) –
+        - mode (str, optional) –
 
-    There are three available modes:
+            There are three available modes:
 
-    ’selection’: for one cell, the algorithm retains the point with the largest value in the chosen column. This option requires the column parameter to be provided.
+                - ’selection’: for one cell, the algorithm retains the point with the largest value in the chosen column. This option requires the column parameter to be provided.
 
-    ’simplification’: the point retained in the cell is the closest to the center of the cell.
+                - ’simplification’: the point retained in the cell is the closest to the center of the cell.
 
-    ’aggregation’: the points are all aggregated to the centroid of the cell. The count of point is added as a new attribute. If a column name is provided, also adds the sum of the attribute.
+                - ’aggregation’: the points are all aggregated to the centroid of the cell. The count of point is added as a new attribute. If a column name is provided, also adds the sum of the attribute.
 
     column (str, optional) – Name of the column to use.
 
@@ -324,7 +333,7 @@ class ReduceLabelgrid(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Label grid point reduction'
+        return 'Reduction Labelgrid Point'
 
     def displayName(self):
         """
@@ -364,8 +373,24 @@ class ReduceLabelgrid(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Reduce a set of points using the Label Grid method.\nThis algorithm assigns each point to a grid cell of a given height, width and shape before reducing the points per cells either by selection or aggregation.\nWidth : width of the grid cells.\nHeight : height of the grid cells.\nShape : shape of the grid cells, can be 'square', 'diamond', 'hexagonal'.\nMode : there are three available modes:\n’selection’: for one cell, the algorithm retains the point with the largest value in the chosen column. This option requires the field parameter to be provided.\n’simplification’: the point retained in the cell is the closest to the center of the cell.\n’aggregation’: the points are all aggregated to the centroid of the cell. The count of point is added as a new attribute. If a field name is provided, also adds the sum of the attribute.\n Field name : name of the field to use.\n Grid : if set to True, returns the points and the grid. In aggregation mode, the returned grid cells contain the count/sum of points")
-        
+        helpstring = """
+            Reduce a set of points using the Label Grid method. 
+            This algorithm assigns each point to a grid cell of a given height, width and shape before reducing the points per cells either by selection or aggregation. ’selection’: for one cell, the algorithm retains the point with the largest value in the chosen column. This option requires the field parameter to be provided. ’simplification’: the point retained in the cell is the closest to the center of the cell. ’aggregation’: the points are all aggregated to the centroid of the cell. The count of point is added as a new attribute. If a field name is provided, also adds the sum of the attribute.
+            
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Width</em> : width of the grid cells.</li>
+                <li> - <em>Height</em> : height of the grid cells.</li>
+                <li> - <em>Shape</em> : shape of the grid cells, can be 'square', 'diamond', 'hexagonal'.</li>
+                <li> - <em>Mode</em> : there are three available modes:</li>
+                <li> - <em>Field name</em> : name of the field to use.</li>
+                <li> - <em>Grid</em> : if set to True, returns the points and the grid. In aggregation mode, the returned grid cells contain the count/sum of points</li>
+            </ul>
+
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.labelgrid_selection.html#cartagen.labelgrid_selection">help online</a>.
+        """
+
+        return self.tr(helpstring)     
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
 
@@ -382,15 +407,14 @@ class ReduceLabelgrid(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input point layer'),
+                self.tr('Input point layer :'),
                 [QgsProcessing.TypeVectorPoint]
             )
         )
 
-        
         field = QgsProcessingParameterField(
                 self.FIELD,
-                'Value field',
+                'Value field :',
                 '',
                 self.INPUT,  
                 QgsProcessingParameterField.Numeric,
@@ -401,7 +425,7 @@ class ReduceLabelgrid(QgsProcessingAlgorithm):
 
         width = QgsProcessingParameterNumber(
             self.WIDTH,
-            self.tr('Cell width'),
+            self.tr('Cell width :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=500,
             optional=False
@@ -410,7 +434,7 @@ class ReduceLabelgrid(QgsProcessingAlgorithm):
 
         height = QgsProcessingParameterNumber(
             self.HEIGHT,
-            self.tr('Cell height'),
+            self.tr('Cell height :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=500,
             optional=False
@@ -420,7 +444,7 @@ class ReduceLabelgrid(QgsProcessingAlgorithm):
         modes = ['selection', 'simplification', 'aggregation'] 
         mode = QgsProcessingParameterEnum(
                 self.MODE,
-                'Select a mode',
+                'Select a mode :',
                 modes,
                 defaultValue=1  
             )
@@ -429,7 +453,7 @@ class ReduceLabelgrid(QgsProcessingAlgorithm):
         shapes = ['square','diamond','hexagonal']
         shape = QgsProcessingParameterEnum(
                 self.SHAPE,
-                'Select a shape',
+                'Select a shape :',
                 shapes,
                 defaultValue=0  
             )
@@ -437,7 +461,7 @@ class ReduceLabelgrid(QgsProcessingAlgorithm):
 
         get_grid = QgsProcessingParameterBoolean(
             self.GRID,
-            self.tr('Retrieve the reduced points and the grid'),
+            self.tr('Retrieve the reduced points and the grid ?'),
             defaultValue=False,
             optional=True
         )    
@@ -564,7 +588,7 @@ class ReduceQuadtree(QgsProcessingAlgorithm):
     """
     Reduce a set of points using a quadtree.
 
-    This algorithm was proposed by Bereuter & Weibel. [1] The quadtree algorithm iteratively divide the point set into four chunks, creating clusters, until the depth parameter is reach or only one point remain per cluster.
+    This algorithm was proposed by Bereuter & Weibel. The quadtree algorithm iteratively divide the point set into four chunks, creating clusters, until the depth parameter is reach or only one point remain per cluster.
 
     Parameters:
 
@@ -608,7 +632,7 @@ class ReduceQuadtree(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Quadtree point reduction'
+        return 'Reduction Quadtree Point'
 
     def displayName(self):
         """
@@ -648,8 +672,23 @@ class ReduceQuadtree(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Reduce a set of points using a quadtree.\nThe quadtree algorithm iteratively divide the point set into four chunks, creating clusters, until the depth parameter is reach or only one point remain per cluster.\nDepth : the maximum depth of the quadtree. This acts as a selector for the wanted degree of generalisation. The lower the value, the more generalised the point set will be.\nMode : there are three available modes:\n’selection’: for one cell, the algorithm retains the point with the largest value in the chosen column, weighted by the depth of the point. This option requires the column parameter to be provided.\n’simplification’: the point retained in the cell is the closest to the center of the cell.\n’aggregation’: the points are all aggregated to the centroid of the cell. The count of point is added as a new attribute. If a column name is provided, also adds the sum of the attribute.\nField name : name of the field to use.\nQuadtree : if set to True, returns the reduced points and the quadtree.")
-        
+        helpstring = """
+            Reduce a set of points using a quadtree. 
+            The quadtree algorithm iteratively divide the point set into four chunks, creating clusters, until the depth parameter is reach or only one point remain per cluster. ’selection’: for one cell, the algorithm retains the point with the largest value in the chosen column, weighted by the depth of the point. This option requires the column parameter to be provided. ’simplification’: the point retained in the cell is the closest to the center of the cell. ’aggregation’: the points are all aggregated to the centroid of the cell. The count of point is added as a new attribute. If a column name is provided, also adds the sum of the attribute.
+            
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Depth</em> : the maximum depth of the quadtree. This acts as a selector for the wanted degree of generalisation. The lower the value, the more generalised the point set will be.</li>
+                <li> - <em>Mode</em> : there are three available modes:</li>
+                <li> - <em>Field name</em> : name of the field to use.</li>
+                <li> - <em>Quadtree</em> : if set to True, returns the reduced points and the quadtree.</li>
+            </ul>
+            
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.quadtree_selection.html#cartagen.quadtree_selection">help online</a>.
+        """
+
+        return self.tr(helpstring)
+
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
 
@@ -666,14 +705,14 @@ class ReduceQuadtree(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input point layer'),
+                self.tr('Input point layer :'),
                 [QgsProcessing.TypeVectorPoint]
             )
         )
         
         field = QgsProcessingParameterField(
                 self.FIELD,
-                'Value field',
+                'Value field :',
                 '',
                 self.INPUT,  
                 QgsProcessingParameterField.Numeric,
@@ -684,7 +723,7 @@ class ReduceQuadtree(QgsProcessingAlgorithm):
 
         depth = QgsProcessingParameterNumber(
             self.DEPTH,
-            self.tr('Depth value'),
+            self.tr('Depth value :'),
             type=QgsProcessingParameterNumber.Integer,
             defaultValue=5,
             optional=False
@@ -694,7 +733,7 @@ class ReduceQuadtree(QgsProcessingAlgorithm):
         modes = ['selection', 'simplification', 'aggregation']
         mode = QgsProcessingParameterEnum(
                 self.MODE,
-                'Select a mode',
+                'Select a mode :',
                 modes,
                 defaultValue=1  
             )
@@ -702,7 +741,7 @@ class ReduceQuadtree(QgsProcessingAlgorithm):
 
         qtree = QgsProcessingParameterBoolean(
             self.QTREE,
-            self.tr('Retrieve the reduced points and the Quadtree'),
+            self.tr('Retrieve the reduced points and the Quadtree ?'),
             defaultValue=False,
             optional=True
         )    

@@ -39,6 +39,71 @@ class BuildingSimplificationRuasQGIS(QgsProcessingAlgorithm):
     PARALLEL_LIMIT = 'PARALLEL_LIMIT' 
     ORTHOGONAL_LIMIT = 'ORTHOGONAL_LIMIT' 
 
+    def name(self):
+        """
+        Returns the algorithm name, used for identifying the algorithm. This
+        string should be fixed for the algorithm, and must not be localised.
+        The name should be unique within each provider. Names should contain
+        lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'Simplification Ruas'
+
+    def shortHelpString(self):
+        """
+        Returns a localised short helper string for the algorithm. This string
+        should provide a basic description about what the algorithm does and the
+        parameters and outputs associated with it..
+        """
+        return self.tr(f"""
+            Simplify buildings by removing edges.
+            This algorithm proposed by Ruas analyses the edges of the polygon to find the ones that should be removed and how they can be replaced.
+            <h3> Parameters :</h3>
+            <ul>
+                <li> - <em> Edge Threshold </em> : minimum length of an edge to be considered by the simplification algorithm. </li>
+                <li> - <em> Parallel Limit </em> : limit angle to consider an edge into the parallel case of the simplification algorithm. The default value is set to 20*π/180 </li>
+                <li> - <em> Orthogonal Limit </em> : limit angle to consider an edge into the orthogonal case of the simplification algorithm. The default value is set to 20*π/180" </li>
+            </ul>
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_regression.html">help online</a>.
+            """)
+        
+
+    def displayName(self):
+        """
+        Returns the translated algorithm name, which should be used for any
+        user-visible display of the algorithm name.
+        """
+        return self.tr(self.name())
+
+    def group(self):
+        """
+        Returns the name of the group this algorithm belongs to. This string
+        should be localised.
+        """
+        return self.tr(self.groupId())
+
+    def groupId(self):
+        """
+        Returns the unique ID of the group this algorithm belongs to. This
+        string should be fixed for the algorithm, and must not be localised.
+        The group id should be unique within each provider. Group id should
+        contain lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'Buildings'
+    
+    def icon(self):
+        """
+        Should return a QIcon which is used for your provider inside
+        the Processing toolbox.
+        """
+        from cartagen4qgis import get_plugin_icon
+        return get_plugin_icon()
+
+    def tr(self, string):
+        return QCoreApplication.translate('Processing', string)
+    
+    
     def initAlgorithm(self, config):
         """
         Here we define the inputs and output of the algorithm, along
@@ -148,60 +213,6 @@ class BuildingSimplificationRuasQGIS(QgsProcessingAlgorithm):
         return {
             self.OUTPUT: dest_id
         }
-
-    def name(self):
-        """
-        Returns the algorithm name, used for identifying the algorithm. This
-        string should be fixed for the algorithm, and must not be localised.
-        The name should be unique within each provider. Names should contain
-        lowercase alphanumeric characters only and no spaces or other
-        formatting characters.
-        """
-        return 'Ruas simplification'
-
-    def shortHelpString(self):
-        """
-        Returns a localised short helper string for the algorithm. This string
-        should provide a basic description about what the algorithm does and the
-        parameters and outputs associated with it..
-        """
-        return self.tr("Simplify buildings by removing edges.\nThis algorithm proposed by Ruas analyses the edges of the polygon to find the ones that should be removed and how they can be replaced.\nEdge_threshold : minimum length of an edge to be considered by the simplification algorithm.\nParallel_limit (optional) : limit angle to consider an edge into the parallel case of the simplification algorithm. The default value is set to 20*π/180\nOrthogonal_limit (optional) : limit angle to consider an edge into the orthogonal case of the simplification algorithm. The default value is set to 20*π/180")
-        
-
-    def displayName(self):
-        """
-        Returns the translated algorithm name, which should be used for any
-        user-visible display of the algorithm name.
-        """
-        return self.tr(self.name())
-
-    def group(self):
-        """
-        Returns the name of the group this algorithm belongs to. This string
-        should be localised.
-        """
-        return self.tr(self.groupId())
-
-    def groupId(self):
-        """
-        Returns the unique ID of the group this algorithm belongs to. This
-        string should be fixed for the algorithm, and must not be localised.
-        The group id should be unique within each provider. Group id should
-        contain lowercase alphanumeric characters only and no spaces or other
-        formatting characters.
-        """
-        return 'Buildings'
-    
-    def icon(self):
-        """
-        Should return a QIcon which is used for your provider inside
-        the Processing toolbox.
-        """
-        from cartagen4qgis import get_plugin_icon
-        return get_plugin_icon()
-
-    def tr(self, string):
-        return QCoreApplication.translate('Processing', string)
 
     def createInstance(self):
         return BuildingSimplificationRuasQGIS()

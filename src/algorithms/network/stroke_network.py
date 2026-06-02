@@ -74,14 +74,14 @@ class BuildStrokes(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input road network'),
+                self.tr('Input road network :'),
                 [QgsProcessing.TypeVectorLine]
             )
         )
         
         deviat_angle = QgsProcessingParameterNumber(
             self.DEVIAT_ANGLE,
-            self.tr('Maximum angle between two segments at a junction'),
+            self.tr('Maximum angle between two segments at a junction :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=45,
             optional=False
@@ -91,7 +91,7 @@ class BuildStrokes(QgsProcessingAlgorithm):
 
         deviat_sum = QgsProcessingParameterNumber(
             self.DEVIAT_SUM,
-            self.tr('Maximum angle between two sections belonging to the same stroke'),
+            self.tr('Maximum angle between two sections belonging to the same stroke :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=30,
             optional=False
@@ -201,8 +201,22 @@ class BuildStrokes(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("This method computes the strokes in a Stroke network using a loop on network features, and updates its strokes attribute.\nAttributeNames : list of attribute names to be used as a criteria for continuity.\nDeviatAngle : threshold for the maximum angle between two segments at the junction of two sections belonging to the same stroke.\nDeviatSum : thresholds for the maximum angle between two sections belonging to the same stroke.")
-        
+        helpstring = """
+            Calculate strokes inside a road network.
+            This method computes the strokes in a Stroke network using a loop on network features, and updates its strokes attribute.
+            
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>AttributeNames</em> : list of attribute names to be used as a criteria for continuity.</li>
+                <li> - <em>DeviatAngle</em> : threshold for the maximum angle between two segments at the junction of two sections belonging to the same stroke.</li>
+                <li> - <em>DeviatSum</em> : thresholds for the maximum angle between two sections belonging to the same stroke.</li>
+            </ul>
+            
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.strokes_roads.html">help online</a>.
+        """
+
+        return self.tr(helpstring) 
+          
     def icon(self):
         """
         Should return a QIcon which is used for your provider inside

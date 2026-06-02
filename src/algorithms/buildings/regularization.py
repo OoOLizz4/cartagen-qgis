@@ -31,6 +31,7 @@ from qgis.core import (
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterBoolean,
     QgsProcessingParameterNumber,
+    QgsProcessingParameterEnum,
     QgsProcessingParameterString,
     QgsProcessingParameterDistance,
     QgsProcessingParameterMultipleLayers
@@ -113,8 +114,21 @@ class BuildingFER (QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("/!\ Drop Z and M /!\ \n Regularize a polygon using feature edge reconstruction. \n This algorithm was proposed by Yang et al. FER enforces orthogonality and clean edge alignment on raw segmentation polygons. It first estimates the dominant orientation of a building, then iteratively snaps near-parallel and near-perpendicular edges to that principal axis, using Douglas-Peucker simplification, minimum-rotated-rectangle fitting, and a local reconstruction loop.\n This is slightly modified version of the SamGeo Python package available here. It is basically the same but without the osgeo dependencies. \n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_fer.html#cartagen.regularize_building_fer")
-    
+        return self.tr( f"""
+            <b> /!\ If you don't drop Z and M, it won't work ! /!\ </b>
+                       
+            Regularize a polygon using feature edge reconstruction.
+            This algorithm was proposed by Yang et al. FER enforces orthogonality and clean edge alignment on raw segmentation polygons. It first estimates the dominant orientation of a building, then iteratively snaps near-parallel and near-perpendicular edges to that principal axis, using Douglas-Peucker simplification, minimum-rotated-rectangle fitting, and a local reconstruction loop.
+            This is slightly modified version of the SamGeo Python package available here. It is basically the same but without the osgeo dependencies.
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em> Length </em> : Minimum edge length used during the reconstruction pass (default 6 m).</li>
+                <li> - <em> Area </em> : Polygons whose area is below this value (m²) are discarded (default 6 m²).</li>
+            </ul>
+                       
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_fer.html#cartagen.regularize_building_fer">help online</a>.
+            """)
+
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
     
@@ -129,14 +143,14 @@ class BuildingFER (QgsProcessingAlgorithm):
 
         input = QgsProcessingParameterFeatureSource(
             name=self.INPUT_BUILDING,
-            description=self.tr("Input building footprint(s) to regularize."),
+            description=self.tr("Input building footprint(s) to regularize :"),
             types=[QgsProcessing.TypeVectorPolygon]
         )
         self.addParameter(input)
 
         length = QgsProcessingParameterNumber(
             name=self.LENGTH,
-            description=self.tr("Minimum edge length used during the reconstruction pass."),
+            description=self.tr("Length :"),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=6.0
         )
@@ -144,7 +158,7 @@ class BuildingFER (QgsProcessingAlgorithm):
 
         area = QgsProcessingParameterNumber(
             name=self.AREA,
-            description=self.tr("Polygons whose area is below this value (m²) are discarded."),
+            description=self.tr("Area :"),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=6.0
         )
@@ -175,30 +189,25 @@ class BuildingFER (QgsProcessingAlgorithm):
         length = self.parameterAsDouble(parameters, self.LENGTH, context)
         area = self.parameterAsDouble(parameters, self.AREA, context)
 
+        feedback.setProgress(1)
+
         #Preparing the data and process
         gs = gdf.copy()
         for i in range(len(gdf)):
             listBuil = []
 
-            print(f"Je suis dans la premiere boucle pour la {i}eme fois")
             batRegularizeFer = regularize_building_fer(gs['geometry'].loc[i], length=length, area=area)            
             listBuil.append(batRegularizeFer)
 
             gs.loc[i,'geometry'] = listBuil
 
-        print(f"Longueur avant traitement : {len(gs)}")
+        feedback.setProgress(80)
 
         for row in gs.iterrows():
-            # print(f"ligne :{row[1]['geometry']}")
             if row[1]['geometry']== None :
-                print(f"la geom {row[0]} est vide")
                 gs = gs.drop(labels=row[0], axis='index')
 
-        print(f"Longueur après traitement : {len(gs)}")
-
         res = gs.to_dict(orient='records')
-        # print(f"le dico {res} de type {type(res)}")
-        # print(f"pb de keys : {len(res[0].keys())}")
         res = list_to_qgis_feature_2(res, source.fields())
 
         #Create the ouput sink
@@ -206,9 +215,6 @@ class BuildingFER (QgsProcessingAlgorithm):
             parameters, self.OUTPUT_BUILDING, context, 
             res[0].fields(), source.wkbType(), source.sourceCrs())
         # Add a feature in the sink
-        print(sink)
-        print(res[0].fields())
-        print(parameters)
         sink.addFeatures(res, QgsFeatureSink.FastInsert)
 
         return {
@@ -289,7 +295,22 @@ class BuildingRectangle(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Transform a polygon into a rectangle.\nThis function transforms a polygon to a rectangle using the minimum rotated rectangle and scale it up or down.\n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_rectangle.html#cartagen.regularize_building_rectangle")
+        return self.tr(f"""
+            Transform a polygon into a rectangle.
+            This function transforms a polygon to a rectangle using the minimum rotated rectangle and scale it up or down.
+            <h3> Parameters: </h3>
+            <ul>
+                <li>- <em> Factor </em> : The scaling factor to apply.</li>
+                <li>- <em> Method </em> : The method to calculate the rectangle:<li> \n
+                <ul>      
+                    <li> . <em> 'mbr' </em> : calculate the minimum rotated bounding rectangle.<li> \n
+                    <li> . <em> 'mbtr' </em> : calculate minimum rotated bounding touching rectangle. It is the same as the mbr but the rectangle and the polygon must have at least one side in common. </li>
+                </ul>
+            </ul>
+                       
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_rectangle.html">help online</a>.
+
+            """)
     
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -305,22 +326,24 @@ class BuildingRectangle(QgsProcessingAlgorithm):
 
         input = QgsProcessingParameterFeatureSource(
             name=self.INPUT,
-            description=self.tr("Input building footprint(s) to regularize."),
+            description=self.tr("Input building footprint(s) to regularize :"),
             types=[QgsProcessing.TypeVectorPolygon]
         )
         self.addParameter(input)
 
         factor = QgsProcessingParameterNumber(
             name=self.FACTOR,
-            description=self.tr("The scaling factor to apply."),
+            description=self.tr("Factor :"),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=1.0
         )
         self.addParameter(factor)
 
-        method = QgsProcessingParameterString(
+        listMethods = ['mbr', 'mbtr']
+        method = QgsProcessingParameterEnum(
             name=self.METHOD,
-            description=self.tr("The method to calculate the rectangle.\n mbr = calculate the minimum rotated bounding rectangle.\n mbtr = calculate minimum rotated bounding touching rectangle. It is the same as the mbr but the rectangle and the polygon must have at least one side in common."),
+            description=self.tr("Method :"),
+            options=listMethods,
             defaultValue='mbr'
         )
         self.addParameter(method)
@@ -349,31 +372,24 @@ class BuildingRectangle(QgsProcessingAlgorithm):
 
         # Retrieve the other parameter values 
         factor = self.parameterAsDouble(parameters, self.FACTOR, context)
-        method = self.parameterAsString(parameters, self.METHOD, context)
+        method = self.parameterAsEnum(parameters, self.METHOD, context)
+        dicoMethods = {0:'mbr', 1:'mbtr'}
 
         #Preparing the data and process
         gs = gdf.copy()
         for i in range(len(gdf)):
-            print(f"Je suis dans la premiere boucle pour la {i}eme fois.")
             geommultiple = gs['geometry'].loc[i]
             listGeomSimple = list(geommultiple.geoms)
-            print(f"liste des géométrie : {listGeomSimple}")
             listeTraitee = []
 
             for ligne in listGeomSimple:
-                print("Je suis dans la deuxième boucle.")
-                print(f"Le polyg qui va dans le traitement : {ligne}")
-                ligneTraitee = regularize_building_rectangle(ligne, factor=factor, method=method)
-                print(f"Le polyg après le traitement {ligneTraitee}")
+                ligneTraitee = regularize_building_rectangle(ligne, factor=factor, method=dicoMethods[method])
                 listeTraitee.append(ligneTraitee)
-                print(f"Le append a eu lieu. La liste est : {listeTraitee}")
 
-            print(f"La liste de geom qui va être affichée : {listeTraitee}")
             gs.loc[i,'geometry'] = listeTraitee
 
         res = gs.to_dict('records')
         res = list_to_qgis_feature_2(res, source.fields())
-        print(f"Le dictionnaire : {res}")
 
         #Create the ouput sink
         (sink, dest_id) = self.parameterAsSink(
@@ -455,7 +471,17 @@ class BuildingRegression(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Regularize a polygon using recursive linear regression.\n This algorithm was proposed by Bayer and used for remote sensing building regularization in Yang. It first defines the four sides of the polygon using an enclosing rectangle that has one side touching the side of the polygon. Then, every side is recursively subdivided until the standard deviation of the vertex composing the side is below the provided threshold. The standard deviation is calculated using the horizontal or vertical regression line which will output a squared polygon. \n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_regression.html#cartagen.regularize_building_regression ")
+        return self.tr(f"""
+            Regularize a polygon using recursive linear regression.
+            This algorithm was proposed by Bayer and used for remote sensing building regularization in Yang. It first defines the four sides of the polygon using an enclosing rectangle that has one side touching the side of the polygon. Then, every side is recursively subdivided until the standard deviation of the vertex composing the side is below the provided threshold. The standard deviation is calculated using the horizontal or vertical regression line which will output a squared polygon.
+            
+            <h3>Parameters: </h3>
+            <ul>
+                <li> - <em> Sigma </em> : The standard deviation threshold above which the recursion continues. </li> 
+            </ul>
+                       
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.regularize_building_regression.html">help online</a>.
+            """)
     
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -471,15 +497,16 @@ class BuildingRegression(QgsProcessingAlgorithm):
 
         input = QgsProcessingParameterFeatureSource(
             name=self.INPUT_BUILDING,
-            description=self.tr("The polygon to regularize."),
+            description=self.tr("Input building footprint(s) to regularize :"),
             types=[QgsProcessing.TypeVectorPolygon]
         )
         self.addParameter(input)
 
         sigma = QgsProcessingParameterNumber(
             name=self.SIGMA,
-            description=self.tr("The standard deviation threshold above which the recursion continues."),
+            description=self.tr("Sigma  :"),
             type=QgsProcessingParameterNumber.Double,
+            defaultValue=1.0
         )
         self.addParameter(sigma)
 
@@ -493,8 +520,6 @@ class BuildingRegression(QgsProcessingAlgorithm):
         """
         Here is where the processing itself takes place.
         """
-
-        print("fiesta")
 
         import geopandas as gpd
         import pandas
@@ -513,35 +538,24 @@ class BuildingRegression(QgsProcessingAlgorithm):
         #Preparing the data and process
         gs = gdf.copy()
         for i in range(len(gdf)):
-            print(f"Je suis dans la premiere boucle pour la {i}eme fois.")
             geommultiple = gs['geometry'].loc[i]
             listGeomSimple = list(geommultiple.geoms)
-            print(f"liste des géométrie : {listGeomSimple}")
             listeTraitee = []
 
             for ligne in listGeomSimple:
-                print("Je suis dans la deuxième boucle.")
-                print(f"Le polyg qui va dans le traitement : {ligne}")
                 ligneTraitee = regularize_building_regression(ligne, sigma=sigma)
-                print(f"Le polyg après le traitement {ligneTraitee}")
                 listeTraitee.append(ligneTraitee)
-                print(f"Le append a eu lieu. La liste est : {listeTraitee}")
 
-            print(f"La liste de geom qui va être affichée : {listeTraitee}")
             gs.loc[i,'geometry'] = listeTraitee
 
         res = gs.to_dict('records')
         res = list_to_qgis_feature_2(res, source.fields())
-        print(f"Le dictionnaire : {res}")
 
         #Create the ouput sink
         (sink, dest_id) = self.parameterAsSink(
             parameters, self.OUTPUT_BUILDING, context, 
             res[0].fields(), source.wkbType(), source.sourceCrs())
         # Add a feature in the sink
-        print(sink)
-        print(res[0].fields())
-        print(parameters)
         sink.addFeatures(res, QgsFeatureSink.FastInsert)
 
         return {

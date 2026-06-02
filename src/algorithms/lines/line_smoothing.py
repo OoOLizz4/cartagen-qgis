@@ -37,6 +37,7 @@ from qgis.core import (
     QgsProcessingParameterFeatureSink, 
     QgsProcessingParameterNumber,
     QgsProcessingParameterDistance,
+    QgsProcessingParameterEnum,
     QgsProcessingParameterBoolean,
     QgsProcessingException,
     QgsProcessingParameterMultipleLayers
@@ -127,7 +128,19 @@ class CatmullRomSmoothing(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Smooth a line or polygon and preserve vertexes. \n This algorithm was proposed by Catmull and Rom, this is the version proposed by Barry and Goldman \n that makes use of the de Boor’s algorithm for evaluating spline curves in B-spline form. \n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_catmull_rom.html#cartagen.smooth_catmull_rom")
+        helpstring = """
+            Smooth a line or polygon and preserve vertexes.
+            This algorithm was proposed by Catmull and Rom, this is the version proposed by Barry and Goldman that makes use of the de Boor’s algorithm for evaluating spline curves in B-spline form.
+            . Uniform parameterization
+            . Centripetal parameterization (recommended, prevents loops)
+            . Chordal parameterization
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Subdivisions</em> : Number of interpolated points between each pair of control points. Higher values produce smoother curves.</li>
+                <li> - <em>Alpha</em> : Parameterization type:</li>
+            </ul>
+            """
+        return self.tr(helpstring)
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -145,27 +158,28 @@ class CatmullRomSmoothing(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input lines or polygons'),
+                self.tr('Input lines or polygons :'),
                 [QgsProcessing.TypeVectorPolygon, QgsProcessing.TypeVectorLine]
             )
         )
 
         subdivisions = QgsProcessingParameterNumber(
             self.SUBDIVISIONS,
-            self.tr('Number of interpolated points between each pair of control points. Default is 10. Higher values produce smoother curves.'),
+            self.tr('Subdivisions :'),
             type=QgsProcessingParameterNumber.Integer,
             defaultValue=10,
             optional=False
         )
         self.addParameter(subdivisions)
 
-        alpha = QgsProcessingParameterNumber(
+        listAlpha = ['Centrepital Parametrization','Uniform parametrization', 'Chordal parametrization']
+        alpha = QgsProcessingParameterEnum(
             self.ALPHA,
-            self.tr('Parameterization type. Default is 0.5 (centripetal). \n 0.0: uniform parameterization \n 0.5: centripetal parameterization (recommended, prevents loops)\n 1.0: chordal parameterization'),
-            type=QgsProcessingParameterNumber.Double,
-            defaultValue=0.5,
-            optional=False
+            self.tr('Alpha :'),
+            options = listAlpha,
+            defaultValue = 'Centrepital Parametrization'
         )
+        alpha.setFlags(alpha.flags() | QgsProcessingParameterDefinition.FlagAdvanced)        
         self.addParameter(alpha)
 
         # We add a feature sink in which to store our processed features (this
@@ -201,64 +215,48 @@ class CatmullRomSmoothing(QgsProcessingAlgorithm):
         
         # retrieve the other parameters values
         subdivisions = self.parameterAsInt(parameters, self.SUBDIVISIONS, context)
-        alpha = self.parameterAsDouble(parameters, self.ALPHA, context)
+        alpha = self.parameterAsEnum(parameters, self.ALPHA, context)
+        dico = {0:0.5, 1:0.0, 1:1}
 
         #Using CartAGen algorithm and transforming the result to a list of QgsFeature()
         #Depending on the type of geometry of the input data
         if source.wkbType().name == 'Polygon':
-            print("Je suis un polygon")
             gs = gdf.copy()
             for i in range(len(gdf)):
                 try:
-                    gs.loc[i,'geometry'] = smooth_catmull_rom(list(gs.geometry)[i], alpha=alpha, subdivisions=subdivisions)
-                    print("Je suis dans try")
+                    gs.loc[i,'geometry'] = smooth_catmull_rom(list(gs.geometry)[i], alpha=dico[alpha], subdivisions=subdivisions)
                 except:
                     gs.loc[i,'geometry'] = gs.loc[i,'geometry']
-                    print("Je suis dans except")
                 
-                #gs.loc[i,'geometry'] = Polygon(gs.loc[i,'geometry'])
-
             res = gs.to_dict('records')
             res = list_to_qgis_feature_2(res,source.fields())
 
         else:
-            print("Je suis une ligne")
             gs = gdf.copy()
-            print(gs)
             for i in range(len(gdf)):
-                print("Je suis dans la premiere boucle")
                 geommultiple = gs.loc[i,'geometry']
-                print(geommultiple)
                 listGeomSimple = list(geommultiple.geoms)
                 listeTraitee = []
-                print(listGeomSimple)
 
                 for ligne in listGeomSimple:
-                    print("Je suis dans la deuxième boucle.")
-                    print(ligne)
-                    ligneTraitee = smooth_catmull_rom(ligne, alpha=alpha, subdivisions=subdivisions)
+                    ligneTraitee = smooth_catmull_rom(ligne, alpha=dico[alpha], subdivisions=subdivisions)
                     listeTraitee.append(ligneTraitee)
 
-                print(listeTraitee)
                 gs.loc[i,'geometry'] = listeTraitee
-                #     print("Je suis dans try")
-                # except:
-                #     print("Je suis dans except")
-                #     gs.loc[i,'geometry'] = gs.loc[i,'geometry']
             
             res = gs.to_dict('records')
             res = list_to_qgis_feature_2(res,source.fields())
 
-        # Create the output sink    
-        (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
-                context, res[0].fields(), source.wkbType(), source.sourceCrs())
-        
-        # Add a feature in the sink
-        sink.addFeatures(res, QgsFeatureSink.FastInsert)
+            # Create the output sink    
+            (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
+                    context, res[0].fields(), source.wkbType(), source.sourceCrs())
+            
+            # Add a feature in the sink
+            sink.addFeatures(res, QgsFeatureSink.FastInsert)
 
-        return {
-            self.OUTPUT: dest_id
-        }
+            return {
+                self.OUTPUT: dest_id
+            }
     
 class ChaikinSmoothing(QgsProcessingAlgorithm):
     """
@@ -335,7 +333,18 @@ class ChaikinSmoothing(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Smooth a line or polygon by cutting corners. \n This algorithm was proposed by Chaikin and this version makes use of the equivalent multi-step algorithm introduced by Wu et al.\n It is a simple subdivision scheme that repeatedly cuts corners of a line or polygon. Each iteration doubles the number of vertices and produces a smoother curve that converges to a quadratic B-spline. \n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_chaikin.html#cartagen.smooth_chaikin")
+        helpstring = """
+            Smooth a line or polygon by cutting corners.
+            This algorithm was proposed by Chaikin and this version makes use of the equivalent multi-step algorithm introduced by Wu et al.
+            It is a simple subdivision scheme that repeatedly cuts corners of a line or polygon. Each iteration doubles the number of vertices and produces a smoother curve that converges to a quadratic B-spline.
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Iterations</em> : Number of subdivision iterations (k parameter). Each iteration doubles the number of vertices (2^k subdivisions per segment).</li>
+                <li> - <em>Keep ends</em> : Whether to keep the original endpoints fixed for open lines. For closed geometries, this parameter is ignored and corners are always cut.</li>
+            </ul>
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_chaikin.html#cartagen.smooth_chaikin">help online</a>.
+        """
+        return self.tr(helpstring)
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -353,14 +362,14 @@ class ChaikinSmoothing(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input lines or polygons'),
+                self.tr('Input lines or polygons :'),
                 [QgsProcessing.TypeVectorPolygon, QgsProcessing.TypeVectorLine]
             )
         )
 
         iterations = QgsProcessingParameterNumber(
             self.ITERATIONS,
-            self.tr('Number of subdivision iterations (k parameter). Default is 3. Each iteration doubles the number of vertices (2^k subdivisions per segment).'),
+            self.tr('Iterations :'),
             type=QgsProcessingParameterNumber.Integer,
             defaultValue=3,
             optional=False
@@ -413,44 +422,26 @@ class ChaikinSmoothing(QgsProcessingAlgorithm):
         #Using CartAGen algorithm and transforming the result to a list of QgsFeature()
         #Depending on the type of geometry of the input data
         if source.wkbType().name == 'Polygon':
-            print("Je suis un polygon")
+
             gs = gdf.copy()
             for i in range(len(gdf)):
-                #try:
                 gs.loc[i,'geometry'] = smooth_chaikin(list(gs.geometry)[i], iterations=iterations, keep_ends=keep_ends)
-                # except:
-                #     gs.loc[i,'geometry'] = gs.loc[i,'geometry'] 
-                
-                #gs.loc[i,'geometry'] = Polygon(gs.loc[i,'geometry'])
-
+            
             res = gs.to_dict('records')
             res = list_to_qgis_feature_2(res,source.fields())
 
         else:
-            print("Je suis une ligne")
             gs = gdf.copy()
-            print(gs)
             for i in range(len(gdf)):
-                print("Je suis dans la premiere boucle")
                 geommultiple = gs.loc[i,'geometry']
-                print(geommultiple)
                 listGeomSimple = list(geommultiple.geoms)
                 listeTraitee = []
-                print(listGeomSimple)
 
                 for ligne in listGeomSimple:
-                    print("Je suis dans la deuxième boucle.")
-                    print(ligne)
                     ligneTraitee = smooth_chaikin(ligne, iterations=iterations, keep_ends=keep_ends)
                     listeTraitee.append(ligneTraitee)
-
-                print(listeTraitee)
                 gs.loc[i,'geometry'] = listeTraitee
-                #     print("Je suis dans try")
-                # except:
-                #     gs.loc[i,'geometry'] = gs.loc[i,'geometry']
-                #     print("Je suis dans except")
-            
+
             res = gs.to_dict('records')
             res = list_to_qgis_feature_2(res,source.fields())
 
@@ -486,9 +477,7 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
     # calling from the QGIS console.
 
     OUTPUT = 'OUTPUT'
-    
     INPUT = 'INPUT'
-
     SIGMA = 'SIGMA'
     SAMPLE = 'SAMPLE'
     DENSIFY = 'DENSIFY'
@@ -541,8 +530,21 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Smooth a line and attenuate its inflexion points.\nThe gaussian smoothing has been studied by Babaud et al. for image processing, and by Plazanet for the generalisation of cartographic features. \n Accept Multi geometries. If a polygon is provided, it also apply the smoothing to its holes using the same parameters. \n Link to the doc : \n https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_gaussian.html#cartagen.smooth_gaussian")
+        helpstring = """
+            Smooth a line and attenuate its inflexion points.
+            The gaussian smoothing has been studied by Babaud et al. for image processing, and by Plazanet for the generalisation of cartographic features.
+            Accept Multi geometries. If a polygon is provided, it also apply the smoothing to its holes using the same parameters.
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Sigma</em> : Gaussian filter strength. Default value to 30, which is a high value.</li>
+                <li> - <em>Sample</em> : The length in meter between each nodes after resampling the geometry. If not provided, the sample is derived from the geometry and is the average distance between each consecutive vertex.</li>
+                <li> - <em>Densify</em> : Whether the resulting geometry should keep the new vertex density. Default to True.</li>
+            </ul>
+            For more see <a href=" https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_gaussian.html#cartagen.smooth_gaussian">help online</a>.'
+        """
         
+        return self.tr(helpstring)
+    
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
 
@@ -559,15 +561,14 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('The geometry to smooth. \n If a line is provided, the first and last vertexes are kept. If a polygon is provided, every vertex is smoothed.'),
+                self.tr('The geometry to smooth :'),
                 [QgsProcessing.TypeVectorPolygon, QgsProcessing.TypeVectorLine]
             )
         )
 
-
         sigma = QgsProcessingParameterNumber(
             self.SIGMA,
-            self.tr('Gaussian filter strength. \n Default value to 30, which is a high value.'),
+            self.tr('Gaussian filter strength :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=30.0,
             optional=False
@@ -576,7 +577,7 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
        
         densify = QgsProcessingParameterBoolean(
             self.DENSIFY,
-                self.tr('Densify. \n Whether the resulting geometry should keep the new vertex density.'),
+                self.tr('Densify :'),
                 optional=False,
                 defaultValue=True
             )
@@ -585,7 +586,7 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
 
         sample = QgsProcessingParameterNumber(
             self.SAMPLE,
-            self.tr('Length in meter between each nodes after resampling. \n If not provided, the sample is derived from the geometry and is the average distance between each consecutive vertex.'),
+            self.tr('Length in meter between each nodes after resampling :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=30.0,
             optional=False
@@ -633,12 +634,7 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
         if source.wkbType().name == 'Polygon':
             gs = gdf.copy()
             for i in range(len(gdf)):
-                #try:
                 gs.loc[i,'geometry'] = smooth_gaussian(list(gs.geometry)[i], sigma= sigma, sample= sample, densify = densify)
-                # except:
-                #     gs.loc[i,'geometry'] = gs.loc[i,'geometry'] 
-                
-                #gs.loc[i,'geometry'] = Polygon(gs.loc[i,'geometry'])
 
             res = gs.to_dict('records')
             res = list_to_qgis_feature_2(res,source.fields())

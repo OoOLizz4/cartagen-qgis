@@ -86,7 +86,7 @@ class VectorHeatmap(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Vector heatmap'
+        return 'Heatmap Vector'
 
     def displayName(self):
         """
@@ -126,8 +126,21 @@ class VectorHeatmap(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Create a heatmap using the kernel density estimation technique (KDE), in the form of vector layer.\nCell size : the size of the cell of the grid containing density values. Smaller size means smoother result, but also higher computation time.\nRadius : the radius used for the density calculation in each grid cells. For each centroid of grid cell, all the points within the radius are taken in account for density calculation. Higher radius means more generalized results.\nField : name of the attribute of the point to use to weight the density value.\nMethod : name of the smoothing method that calculates the density value of each point within the radius. Each method impacts the way distance is important in the density calculation. Possible values: ‘quartic’, ‘epanechnikov’, ‘gaussian’, ‘uniform’, ‘triangular’\nClip : polygon vector layer to clip the resulting heatmap grid.")
-        
+        helpstring = """
+            Create a heatmap using the kernel density estimation technique (KDE), in the form of vector layer.
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Cell size</em> : the size of the cell of the grid containing density values. Smaller size means smoother result, but also higher computation time.</li>
+                <li> - <em>Radius</em> : the radius used for the density calculation in each grid cells. For each centroid of grid cell, all the points within the radius are taken in account for density calculation. Higher radius means more generalized results.</li>
+                <li> - <em>Field</em> : name of the attribute of the point to use to weight the density value.</li>
+                <li> - <em>Method</em> : name of the smoothing method that calculates the density value of each point within the radius. Each method impacts the way distance is important in the density calculation. Possible values: ‘quartic’, ‘epanechnikov’, ‘gaussian’, ‘uniform’, ‘triangular’</li>
+                <li> - <em>Clip</em> : polygon vector layer to clip the resulting heatmap grid.</li>
+            </ul>
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.heatmap.html#cartagen.heatmap">help online</a>.
+        """
+
+        return self.tr(helpstring)
+
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
 
@@ -144,14 +157,14 @@ class VectorHeatmap(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input point layer'),
+                self.tr('Input point layer :'),
                 [QgsProcessing.TypeVectorPoint]
             )
         )
 
         cell_size = QgsProcessingParameterNumber(
             self.CELL_SIZE,
-            self.tr('Cell size'),
+            self.tr('Cell size :'),
             type=QgsProcessingParameterNumber.Integer,
             defaultValue=500,
             optional=False
@@ -160,7 +173,7 @@ class VectorHeatmap(QgsProcessingAlgorithm):
 
         radius = QgsProcessingParameterNumber(
             self.RADIUS,
-            self.tr('Radius'),
+            self.tr('Radius :'),
             type=QgsProcessingParameterNumber.Integer,
             defaultValue=2000,
             optional=False
@@ -171,7 +184,7 @@ class VectorHeatmap(QgsProcessingAlgorithm):
         
         method = QgsProcessingParameterEnum(
                 self.METHOD,
-                'Smoothing function',
+                'Smoothing function :',
                 methods,
                 defaultValue=1  
             )
@@ -180,7 +193,7 @@ class VectorHeatmap(QgsProcessingAlgorithm):
         
         field = QgsProcessingParameterField(
                 self.FIELD,
-                'Value field',
+                'Value field :',
                 '',
                 self.INPUT,  
                 QgsProcessingParameterField.Numeric,
@@ -191,7 +204,7 @@ class VectorHeatmap(QgsProcessingAlgorithm):
 
         clip = QgsProcessingParameterFeatureSource(
                 self.CLIP,
-                self.tr('Input polygon layer for clipping'),
+                self.tr('Input polygon layer for clipping :'),
                 [QgsProcessing.TypeVectorPolygon],
                 optional = True
             )

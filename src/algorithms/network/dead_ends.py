@@ -119,7 +119,17 @@ class DetectDeadEnds(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("This function detects dead ends inside a road network. Returns the same road network layer with new attributes, including 'deadend' which indicates if the entity is a dead end or not (boolean).\nOutside faces : whether dead-ends should be calculated on the outside faces of the road network. This can induce wrong characterization on the border of the provided dataset.")
+        helpstring = """
+        This function detects dead ends inside a road network. 
+        Returns the same road network layer with new attributes, including 'deadend' which indicates if the entity is a dead end or not (boolean).
+        <h3> Parameters: </h3>
+        <ul>
+            <li> - <em>Outside faces</em> : whether dead-ends should be calculated on the outside faces of the road network. This can induce wrong characterization on the border of the provided dataset.</li>
+        </ul>
+
+        For more see <a href="cartagen.readthedocs.io/en/latest/reference/cartagen.detect_dead_ends.html#cartagen.detect_dead_ends">help online</a>.'
+        """
+        return self.tr(helpstring)
         
     def icon(self):
         """
@@ -140,14 +150,14 @@ class DetectDeadEnds(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input road network'),
+                self.tr('Input road network :'),
                 [QgsProcessing.TypeVectorLine]
             )
         )
   		        
         outside_faces = QgsProcessingParameterBoolean(
             self.OUTSIDE_FACES,
-            self.tr('Outside faces'),
+            self.tr('Outside faces :'),
             defaultValue=True,
             optional=True
         )    
@@ -320,7 +330,16 @@ class EliminateDeadEnds(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Eliminates roads section detected as dead-ends inside a road network if the length of their main component is below a given threshold.\nLength : length below which dead-ends are eliminated. If left to 0, shorter dead-ends are not eliminated.\nKeep_longest : if set to True, in case of complex dead-end, keep only the main component. If False, eliminate the whole dead-end group. This concerns also dead-ends with a length above the provided threshold.")
+        helpstring = """
+            Eliminates roads section detected as dead-ends inside a road network if the length of their main component is below a given threshold.
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Length</em> : length below which dead-ends are eliminated. If left to 0, shorter dead-ends are not eliminated.</li>
+                <li> - <em>Keep longest</em> : if set to True, in case of complex dead-end, keep only the main component. If False, eliminate the whole dead-end group. This concerns also dead-ends with a length above the provided threshold.</li>
+            </ul>
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.eliminate_dead_ends.html#cartagen.eliminate_dead_ends">help online</a>.'
+        """
+        return self.tr(helpstring)
         
     def icon(self):
         """
@@ -341,14 +360,14 @@ class EliminateDeadEnds(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input road network'),
+                self.tr('Input road network :'),
                 [QgsProcessing.TypeVectorLine]
             )
         )
   		        
         keep_longest = QgsProcessingParameterBoolean(
             self.KEEP_LONGEST,
-            self.tr('keep longest'),
+            self.tr('Keep longest ?'),
             defaultValue=True,
             optional=True
         )    
@@ -356,7 +375,7 @@ class EliminateDeadEnds(QgsProcessingAlgorithm):
 	
         length = QgsProcessingParameterNumber(
             self.LENGTH,
-                self.tr('Length'),
+                self.tr('Length :'),
                 type=QgsProcessingParameterNumber.Double,
                 optional=False
             )

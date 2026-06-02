@@ -92,7 +92,7 @@ class DetectRoundaboutsQGIS(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input road network'),
+                self.tr('Input road network :'),
                 [QgsProcessing.TypeVectorLine]
             )
         )
@@ -100,7 +100,7 @@ class DetectRoundaboutsQGIS(QgsProcessingAlgorithm):
         self.addParameter(
                 QgsProcessingParameterNumber(
                 self.AREA,
-                self.tr('Maximum area'),
+                self.tr('Maximum area :'),
                 type=QgsProcessingParameterNumber.Integer,
                 defaultValue=40000,
                 optional=False
@@ -109,7 +109,7 @@ class DetectRoundaboutsQGIS(QgsProcessingAlgorithm):
 
         miller = QgsProcessingParameterNumber(
             self.MILLER,
-            self.tr('Minimum Miller index'),
+            self.tr('Minimum Miller index :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=0.95,
             optional=False
@@ -246,8 +246,22 @@ class DetectRoundaboutsQGIS(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Detect roundabouts based on geometric properties.\nThis algorithm proposed by Touya detects roundabouts inside a road network.\nArea threshold : the area (in square meters) above which the object is not considered a roundabout.\nMiller index : index of compactess that determines if the shape is round or not.")
-        
+        helpstring = """
+            Detect roundabouts based on geometric properties. 
+            This algorithm proposed by Touya detects roundabouts inside a road network.
+            
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Area threshold</em> : the area (in square meters) above which the object is not considered a roundabout.</li>
+                <li> - <em>Miller index</em> : index of compactess that determines if the shape is round or not.</li>
+            </ul>
+            
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.detect_roundabouts.html#cartagen.detect_roundabouts">help online</a>.
+        """
+
+        return self.tr(helpstring)
+
+
     def icon(self):
         """
         Should return a QIcon which is used for your provider inside
@@ -325,7 +339,7 @@ class CollapseRoundaboutsQGIS(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_ROAD,
-                self.tr('Input road network'),
+                self.tr('Input road network :'),
                 [QgsProcessing.TypeVectorLine]
             )
         )
@@ -333,7 +347,7 @@ class CollapseRoundaboutsQGIS(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_ROUNDABOUTS,
-                self.tr('Input roundabouts'),
+                self.tr('Input roundabouts :'),
                 [QgsProcessing.TypeVectorPolygon],
                 optional=False
             )
@@ -342,7 +356,7 @@ class CollapseRoundaboutsQGIS(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_CROSSROADS,
-                self.tr('Input crossroads'),
+                self.tr('Input crossroads :'),
                 [QgsProcessing.TypeVectorPolygon],
                 optional=True
             )
@@ -351,7 +365,7 @@ class CollapseRoundaboutsQGIS(QgsProcessingAlgorithm):
         self.addParameter(
                 QgsProcessingParameterNumber(
                 self.MAXIMUM_DIAMETER,
-                self.tr('Maximum diameter'),
+                self.tr('Maximum diameter :'),
                 type=QgsProcessingParameterNumber.Double,
                 defaultValue=25,
                 optional=False
@@ -456,8 +470,20 @@ class CollapseRoundaboutsQGIS(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Collapse roundabouts to a point.\nThis algorithm proposed by Touya collapses roundabouts to a point if their diameter is below the given value.\nRoundabouts : polygons representing the faces of the network detected as roundabouts.\nCrossroads : polygons representing the faces of the network detected as branching crossroads. This allows incoming branching crossroads on roundabouts to be collapsed as well.\nMaximum_diameter : diameter, in meter, below which roundabouts are collapsed. Collpase all roundabouts if left to None")
-        
+        helpstring = """
+            Collapse roundabouts to a point. 
+            This algorithm proposed by Touya collapses roundabouts to a point if their diameter is below the given value.
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Roundabouts</em> : polygons representing the faces of the network detected as roundabouts.</li>
+                <li> - <em>Crossroads</em> : polygons representing the faces of the network detected as branching crossroads. This allows incoming branching crossroads on roundabouts to be collapsed as well.</li>
+                <li> - <em>Maximum_diameter</em> : diameter, in meter, below which roundabouts are collapsed. Collpase all roundabouts if left to None</li>
+            </ul>
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.collapse_roundabouts.html#cartagen.collapse_roundabouts">help online</a>.
+        """
+
+        return self.tr(helpstring)
+     
     def icon(self):
         """
         Should return a QIcon which is used for your provider inside
