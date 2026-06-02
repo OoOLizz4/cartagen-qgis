@@ -124,15 +124,24 @@ class BoundariesDouglasPeucker(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            "/!\ Doesn't function with multipart geometry /!\ \n"\
-            "Applies the Douglas-Peucker-Ramer algorithm to the boundaries of the polygons. As most polygons share their boundaries with another polygon, the simplification is only applied to the common line, so that no topological disconnection is created between adjacent polygons.\n" \
-            "Works best with administrative boundaries. \n" \
-            "Parameters : \n " \
-            "- Threshold : the distance threshold to remove the vertex from the line. \n" \
-            "- Preserve Topology : If set to True, the algorithm will prevent invalid geometries from being created (checking for collapses, ring-intersections, etc). The trade-off is computational expensivity.\n" \
-            "Link to the doc : \n" \
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.boundaries_douglas_peucker.html#cartagen.boundaries_douglas_peucker")
+        helpstring = """
+            <b> /!\ Doesn't function with multipart geometry /!\ </b>
+
+            Applies the Douglas-Peucker-Ramer algorithm to the boundaries of the polygons. 
+            As most polygons share their boundaries with another polygon, the simplification is only applied to the common line, so that no topological disconnection is created between adjacent polygons.
+            
+            <b> Works best with administrative boundaries. </b>
+            
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Threshold</em> : the distance threshold to remove the vertex from the line.</li>
+                <li> - <em>Preserve Topology</em> : If set to True, the algorithm will prevent invalid geometries from being created (checking for collapses, ring-intersections, etc). The trade-off is computational expensivity.</li>
+            </ul>
+
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.boundaries_douglas_peucker.html#cartagen.boundaries_douglas_peucker">help online</a>.
+        """
+
+        return self.tr(helpstring)
         
     def icon(self):
         """
@@ -161,7 +170,7 @@ class BoundariesDouglasPeucker(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input polygons to simplify'),
+                self.tr('Input polygons to simplify :'),
                 [QgsProcessing.TypeVectorPolygon]
             )
         )
@@ -299,16 +308,24 @@ class BoundariesLiOpenshaw(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            "/!\ Doesn't work with multipart geometry /!\ \n"\
-            "Applies the Li-Openshaw algorithm to the boundaries of the polygons. As most polygons share their boundaries with another polygon, the simplification is only applied to the common line, so that no topological disconnection is created between adjacent polygons.\n" \
-            "This algorithm proposed by Li & Openshaw simplifies lines based on a regular square grid. It first divide the line vertexes into groups partionned by a regular grid, then each group of vertexes is replaced by their centroid.\n" \
-            "Works best with administrative boundaries. \n" \
-            "Parameters : \n"\
-            "- Cell size : the size of the regular grid used to divide the line.\n"\
-            "Link to the doc :\n"\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.boundaries_li_openshaw.html#cartagen.boundaries_li_openshaw"
-            )
+        helpstring = """
+            <b> /!\ Doesn't work with multipart geometry /!\ </b>
+
+            Applies the Li-Openshaw algorithm to the boundaries of the polygons. 
+            As most polygons share their boundaries with another polygon, the simplification is only applied to the common line, so that no topological disconnection is created between adjacent polygons.
+            This algorithm proposed by Li & Openshaw simplifies lines based on a regular square grid. It first divide the line vertexes into groups partionned by a regular grid, then each group of vertexes is replaced by their centroid.
+            
+            <b> Works best with administrative boundaries. </b>
+
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Cell size</em> : the size of the regular grid used to divide the line.</li>
+            </ul>
+
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.boundaries_li_openshaw.html#cartagen.boundaries_li_openshaw">help online</a>.
+        """
+
+        return self.tr(helpstring)
         
     def icon(self):
         """
@@ -337,7 +354,7 @@ class BoundariesLiOpenshaw(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input polygons to simplify'),
+                self.tr('Input polygons to simplify :'),
                 [QgsProcessing.TypeVectorPolygon]
             )
         )
@@ -366,29 +383,23 @@ class BoundariesLiOpenshaw(QgsProcessingAlgorithm):
         """
         import datetime
         # Get the QGIS source from the parameters
-        print("chargement source" + str(datetime.datetime.now()))
         source = self.parameterAsSource(parameters, self.INPUT, context)
         
         # Convert the source to GeoDataFrame, get the list of records and the number of entities
-        print("transformation gdf" + str(datetime.datetime.now()))
         gdf = gpd.GeoDataFrame.from_features(source.getFeatures())
         
         # Retrieve parameters
-        print("récupération paramètre" + str(datetime.datetime.now()))
         cell_size = self.parameterAsDouble(parameters, self.CELL_SIZE, context)
 
         # Actual algorithm
-        print("lancement algo CG" + str(datetime.datetime.now()))
         gdf_final = boundaries_li_openshaw(gdf, cell_size)
         
-        print("transformation en liste de dict" + str(datetime.datetime.now()))
+        # print("transformation en liste de dict" + str(datetime.datetime.now()))
         res = gdf_final.to_dict('records')
         
-        print("transformation en liste de QgsFeature" + str(datetime.datetime.now()))
         res = list_to_qgis_feature_2(res, source.fields())
      
         #Create the feature sink
-        print("création du sink" + str(datetime.datetime.now()))
         (sink, dest_id) = self.parameterAsSink(
             parameters, self.OUTPUT, context,
             fields=res[0].fields(),
@@ -397,7 +408,6 @@ class BoundariesLiOpenshaw(QgsProcessingAlgorithm):
         )
         
         #Add features to the sink
-        print("peuplement du sink" + str(datetime.datetime.now()))
         sink.addFeatures(res, QgsFeatureSink.FastInsert)
         
         return {
@@ -489,18 +499,26 @@ class BoundariesRaposo(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            "/!\ Doesn't work with multipart geometry /!\ \n"\
-            "Applies the Raposo algorithm to the boundaries of the polygons. As most polygons share their boundaries with another polygon, the simplification is only applied to the common line, so that no topological disconnection is created between adjacent polygons.\n"\
-            "This algorithm proposed by Raposo simplifies lines based on a hexagonal tessellation. The idea of the algorithm is to put a hexagonal tessallation on top of the line to simplify, the size of the cells depending on the targeted granularity of the line.\n"\
-            "Works best with administrative boundaries. \n" \
-            "Parameters : \n"\
-            "- Initial scale : initial scale of the provided line (25000.0 for 1:25000 scale).\n" \
-            "- Final scale : final scale of the simplified line.\n" \
-            "- Centroid : if True, uses the center of the hexagonal cells as the new vertex, if False, the center is projected on the nearest point in the initial line.\n" \
-            "- Tobler : if True, compute cell resolution based on Tobler\'s formula, else uses Raposo's formula \n" \
-            "Link to the doc :\n" \
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.boundaries_raposo.html#cartagen.boundaries_raposo")
+        helpstring = """
+            <b> /!\ Doesn't work with multipart geometry. /!\ </b>
+            Applies the Raposo algorithm to the boundaries of the polygons. 
+            As most polygons share their boundaries with another polygon, the simplification is only applied to the common line, so that no topological disconnection is created between adjacent polygons.
+            This algorithm proposed by Raposo simplifies lines based on a hexagonal tessellation. The idea of the algorithm is to put a hexagonal tessallation on top of the line to simplify, the size of the cells depending on the targeted granularity of the line.
+
+            <b> Works best with administrative boundaries. </b>
+
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Initial scale</em> : initial scale of the provided line (25000.0 for 1:25000 scale).</li>
+                <li> - <em>Final scale</em> : final scale of the simplified line.</li>
+                <li> - <em>Centroid</em> : if True, uses the center of the hexagonal cells as the new vertex, if False, the center is projected on the nearest point in the initial line.</li>
+                <li> - <em>Tobler</em> : if True, compute cell resolution based on Tobler's formula, else uses Raposo's formula</li>
+            </ul>
+
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.boundaries_raposo.html#cartagen.boundaries_raposo">help online</a>.
+        """
+
+        return self.tr(helpstring)
         
     def icon(self):
         """
@@ -552,7 +570,7 @@ class BoundariesRaposo(QgsProcessingAlgorithm):
 	
         centroid = QgsProcessingParameterBoolean(
                 self.CENTROID,
-                self.tr('Use grid centroids :'),
+                self.tr('Use grid centroids ?'),
                 defaultValue=True,
                 optional=True
             )
@@ -561,7 +579,7 @@ class BoundariesRaposo(QgsProcessingAlgorithm):
 
         tobler = QgsProcessingParameterBoolean(
                 self.TOBLER,
-                self.tr('Use Tobler\'s formula :'),
+                self.tr('Use Tobler\'s formula ?'),
                 defaultValue=False,
                 optional=True
             )
@@ -689,14 +707,23 @@ class BoundariesVisvalingam(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            "/!\ Doesn't work with multipart geometry. Using a length too low can produce an invalid geometry. /!\ \n" \
-            "Applies the Visvialingam-Whyatt algorithm to the boundaries of the polygons. As most polygons share their boundaries with another polygon, the simplification is only applied to the common line, so that no topological disconnection is created between adjacent polygons.\n" \
-            "Works best with administrative boundaries. \n"\
-            "Parameters : \n" \
-            "- Area tolerance : the minimum triangle area to keep a vertex in the line. \n" \
-            "Link to the doc:\n" \
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.boundaries_visvalingam_whyatt.html#cartagen.boundaries_visvalingam_whyatt")
+        helpstring = """
+            <b> /!\ Doesn't work with multipart geometry. Using a length too low can produce an invalid geometry. /!\ </b>
+            
+            Applies the Visvialingam-Whyatt algorithm to the boundaries of the polygons. 
+            As most polygons share their boundaries with another polygon, the simplification is only applied to the common line, so that no topological disconnection is created between adjacent polygons.
+            
+            <b> Works best with administrative boundaries. </b>
+            
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Area tolerance</em> : the minimum triangle area to keep a vertex in the line.</li>
+            </ul>
+            
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.boundaries_visvalingam_whyatt.html#cartagen.boundaries_visvalingam_whyatt">help online</a>.
+        """
+
+        return self.tr(helpstring)
         
     def icon(self):
         """
@@ -752,28 +779,20 @@ class BoundariesVisvalingam(QgsProcessingAlgorithm):
         """
         import datetime
         # Get the QGIS source from the parameters
-        # print("chargement source" + str(datetime.datetime.now()))
         source = self.parameterAsSource(parameters, self.INPUT, context)
         
         # Convert the source to GeoDataFrame, get the list of records and the number of entities
-        # print("conversion gdf" + str(datetime.datetime.now()))
         gdf = gpd.GeoDataFrame.from_features(source.getFeatures())
         
         # Retrieve parameters
-        # print("récupération paramètre " + str(datetime.datetime.now()))
         area_tolerance = self.parameterAsDouble(parameters, self.AREA_TOLERANCE, context)
         
         # Actual algorithm
-        # print("algo CG " + str(datetime.datetime.now()))
         gdf_final = boundaries_visvalingam_whyatt(gdf, area_tolerance)
-        
-        # print("conversion liste de dict " + str(datetime.datetime.now()))
         res = gdf_final.to_dict('records')
-        # print("conversion liste de qgs feature" + str(datetime.datetime.now()))
         res = list_to_qgis_feature_2(res, source.fields())
      
         #Create the feature sink
-        # print("création sink " + str(datetime.datetime.now()))
         (sink, dest_id) = self.parameterAsSink(
             parameters, self.OUTPUT, context,
             fields=res[0].fields(),
@@ -782,7 +801,6 @@ class BoundariesVisvalingam(QgsProcessingAlgorithm):
         )
         
         #Add features to the sink
-        # print("peuplement sink " + str(datetime.datetime.now()))
         sink.addFeatures(res, QgsFeatureSink.FastInsert)
         
         return {

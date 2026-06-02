@@ -124,7 +124,7 @@ class SquaringPolygonLS(QgsProcessingAlgorithm):
         parameters and outputs associated with it..
         """
         return self.tr(f"""
-            <b>/!\ Drop Z and M /!\ </b>
+            <b>/!\ If you don't drop Z and M, it won't work ! /!\ </b>
             Squares a polygon using the method of least squares. 
             The least squares based polygon squaring algorithm was proposed by Touya and Lokhat and is particularly useful to square buildings.
             In practice, this function iteratively tries to resolve matrices equations until a threshold norm is reached and the provided constraint are satisfied.
@@ -400,7 +400,7 @@ class SquaringPolygonNaive(QgsProcessingAlgorithm):
         parameters and outputs associated with it..
         """
         return self.tr(f"""
-            <b> /!\ Drop Z and M /!\ </b>
+            <b> /!\ If you don't drop Z and M, it won't work ! /!\ </b>
             
             Squares a polygon according to its orientation.
             This method, described in Touya, first calculates the orientation of the polygon. Sides are then corrected depending on the angles formed at the vertexes and on their alignment regarding the calculated orientation.

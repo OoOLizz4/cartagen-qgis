@@ -128,18 +128,19 @@ class CatmullRomSmoothing(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            "Smooth a line or polygon and preserve vertexes. \n"\
-            "This algorithm was proposed by Catmull and Rom, this is the version proposed by Barry and Goldman that makes use of the de Boor’s algorithm for evaluating spline curves in B-spline form. \n"\
-            "Parameters : \n"\
-            "- Subdivisions : Number of interpolated points between each pair of control points. Higher values produce smoother curves. \n"\
-            "- Alpha : Parameterization type: \n  "\
-            ". Uniform parameterization \n  "\
-            ". Centripetal parameterization (recommended, prevents loops) \n  "\
-            ". Chordal parameterization \n"\
-            "Link to the doc : \n"\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_catmull_rom.html#cartagen.smooth_catmull_rom"
-            )
+        helpstring = """
+            Smooth a line or polygon and preserve vertexes.
+            This algorithm was proposed by Catmull and Rom, this is the version proposed by Barry and Goldman that makes use of the de Boor’s algorithm for evaluating spline curves in B-spline form.
+            . Uniform parameterization
+            . Centripetal parameterization (recommended, prevents loops)
+            . Chordal parameterization
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Subdivisions</em> : Number of interpolated points between each pair of control points. Higher values produce smoother curves.</li>
+                <li> - <em>Alpha</em> : Parameterization type:</li>
+            </ul>
+            """
+        return self.tr(helpstring)
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -332,16 +333,18 @@ class ChaikinSmoothing(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            "Smooth a line or polygon by cutting corners. \n"\
-            "This algorithm was proposed by Chaikin and this version makes use of the equivalent multi-step algorithm introduced by Wu et al.\n"\
-            "It is a simple subdivision scheme that repeatedly cuts corners of a line or polygon. Each iteration doubles the number of vertices and produces a smoother curve that converges to a quadratic B-spline. \n"\
-            "Parameters : \n"\
-            "- Iterations : Number of subdivision iterations (k parameter). Each iteration doubles the number of vertices (2^k subdivisions per segment). \n"\
-            "- Keep ends : Whether to keep the original endpoints fixed for open lines. For closed geometries, this parameter is ignored and corners are always cut. \n"\
-            "Link to the doc : \n"\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_chaikin.html#cartagen.smooth_chaikin"
-            )
+        helpstring = """
+            Smooth a line or polygon by cutting corners.
+            This algorithm was proposed by Chaikin and this version makes use of the equivalent multi-step algorithm introduced by Wu et al.
+            It is a simple subdivision scheme that repeatedly cuts corners of a line or polygon. Each iteration doubles the number of vertices and produces a smoother curve that converges to a quadratic B-spline.
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Iterations</em> : Number of subdivision iterations (k parameter). Each iteration doubles the number of vertices (2^k subdivisions per segment).</li>
+                <li> - <em>Keep ends</em> : Whether to keep the original endpoints fixed for open lines. For closed geometries, this parameter is ignored and corners are always cut.</li>
+            </ul>
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_chaikin.html#cartagen.smooth_chaikin">help online</a>.
+        """
+        return self.tr(helpstring)
         
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -527,13 +530,20 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            """
+        helpstring = """
             Smooth a line and attenuate its inflexion points.
             The gaussian smoothing has been studied by Babaud et al. for image processing, and by Plazanet for the generalisation of cartographic features.
-            Accept Multi geometries. If a polygon is provided, it also apply the smoothing to its holes using the same parameters. 
-            Link to the doc : https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_gaussian.html#cartagen.smooth_gaussian"
-            """)
+            Accept Multi geometries. If a polygon is provided, it also apply the smoothing to its holes using the same parameters.
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Sigma</em> : Gaussian filter strength. Default value to 30, which is a high value.</li>
+                <li> - <em>Sample</em> : The length in meter between each nodes after resampling the geometry. If not provided, the sample is derived from the geometry and is the average distance between each consecutive vertex.</li>
+                <li> - <em>Densify</em> : Whether the resulting geometry should keep the new vertex density. Default to True.</li>
+            </ul>
+            For more see <a href=" https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_gaussian.html#cartagen.smooth_gaussian">help online</a>.'
+        """
+        
+        return self.tr(helpstring)
     
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -551,15 +561,14 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('The geometry to smooth. \n If a line is provided, the first and last vertexes are kept. If a polygon is provided, every vertex is smoothed.'),
+                self.tr('The geometry to smooth :'),
                 [QgsProcessing.TypeVectorPolygon, QgsProcessing.TypeVectorLine]
             )
         )
 
-
         sigma = QgsProcessingParameterNumber(
             self.SIGMA,
-            self.tr('Gaussian filter strength. \n Default value to 30, which is a high value.'),
+            self.tr('Gaussian filter strength :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=30.0,
             optional=False
@@ -568,7 +577,7 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
        
         densify = QgsProcessingParameterBoolean(
             self.DENSIFY,
-                self.tr('Densify. \n Whether the resulting geometry should keep the new vertex density.'),
+                self.tr('Densify :'),
                 optional=False,
                 defaultValue=True
             )
@@ -577,7 +586,7 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
 
         sample = QgsProcessingParameterNumber(
             self.SAMPLE,
-            self.tr('Length in meter between each nodes after resampling. \n If not provided, the sample is derived from the geometry and is the average distance between each consecutive vertex.'),
+            self.tr('Length in meter between each nodes after resampling :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=30.0,
             optional=False

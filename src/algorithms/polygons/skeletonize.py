@@ -112,16 +112,21 @@ class SkelNatural(QgsProcessingAlgorithm):
         parameters and outputs associated with it..
         """
 
-        helpstring = self.tr(
-            "/!\ Drop Z and M and don't work with multi-part geometry /!\ \n "\
-            "Create the natural TIN skeleton of a polygon. \n" \
-            " The natural skeleton means the entry points of the skeleton are naturally calculated during the skeleton creation, it depends on the Delaunay triangulation. \n" \
-            "This version is inspired by the enhanced TIN skeleton proposed by Wang. \n" \
-            "Parameters: \n"\
-            "- Threshold range : This value is only used for inner triangles calculated by the Delaunay triangulation. If two of the length ratio between each pair of edges (of an inner triangle) is outside the given range, the skeleton uses the middle of the line connecting the two center of the longest lines of the triangle, else it uses the centroid of the triangle \n" \
-            "Link to the doc : \n "\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.skeletonize_natural.html#cartagen.skeletonize_natural"
-        )
+        helpstring = self.tr("""
+            <b>/!\ If you don't drop Z and M, it won't work ! /!\</b>
+            <b>/!\ Don't work with multi-part geometry /!\</b>
+                             
+            Create the natural TIN skeleton of a polygon.
+            The natural skeleton means the entry points of the skeleton are naturally calculated during the skeleton creation, it depends on the Delaunay triangulation.
+            This version is inspired by the enhanced TIN skeleton proposed by Wang.
+            
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Threshold range</em> : This value is only used for inner triangles calculated by the Delaunay triangulation. If two of the length ratio between each pair of edges (of an inner triangle) is outside the given range, the skeleton uses the middle of the line connecting the two center of the longest lines of the triangle, else it uses the centroid of the triangle</li>
+            </ul>
+            
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.skeletonize_natural.html#cartagen.skeletonize_natural">help online</a>.
+        """)
 
         return helpstring
     
@@ -310,20 +315,27 @@ class SkelArtificial(QgsProcessingAlgorithm):
         parameters and outputs associated with it..
         """
 
-        helpstring = self.tr(
-            "/!\ Drop Z and M /!\ \n" \
-            "Create a TIN skeleton from a polygon by enforcing entry points. \n "\
-            "The artificial skeleton means the entry points of the skeleton are manually set and the natural entry points of the skeleton calculated during the skeleton creation are removed. \n "\
-            "This version is inspired by the enhanced TIN skeleton proposed by Wang \n "\
-            "Parameters: \n "\
-            "- Entries : The entry points of the skeleton. \n"\
-            "- Connection : It can be : \n" \
-            "   .'joint', which forces the entry point to connect to the closest joint \n" \
-            "   .'interior., which first look if there is an interior triangle inside the triangulation and connect directly the entry point to its skeleton joint. If no interior triangle is found, apply ‘joint’ connection instead. \n"\
-            "- Threshold range : This value is only used for inner triangles calculated by the Delaunay triangulation. If two of the length ratio between each pair of edges (of an inner triangle) is outside the given range, the skeleton uses the middle of the line connecting the two center of the longest lines of the triangle, else it uses the centroid of the triangle. \n "\
-            "Link to the doc : \n "\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.skeletonize_artificial.html#cartagen.skeletonize_artificial"
-        )
+        helpstring = self.tr( """
+            <b>/!\ If you don't drop Z and M, it won't work ! /!\</b>
+                             
+            Create a TIN skeleton from a polygon by enforcing entry points.
+            The artificial skeleton means the entry points of the skeleton are manually set and the natural entry points of the skeleton calculated during the skeleton creation are removed.
+            This version is inspired by the enhanced TIN skeleton proposed by Wang
+                             
+            <h3> Parameters: </h3>
+                             
+            <ul>
+                <li> - <em>Entries</em> : The entry points of the skeleton.</li>
+                <li> - <em>Connection</em> : It can be :</li>
+                    <ul>
+                        <li>. <em>'joint'</em>, which forces the entry point to connect to the closest joint</li>
+                        <li>. <em>'interior'</em>, which first look if there is an interior triangle inside the triangulation and connect directly the entry point to its skeleton joint. If no interior triangle is found, apply ‘joint’ connection instead.</li>
+                    </ul>
+                <li> - <em>Threshold range</em> : This value is only used for inner triangles calculated by the Delaunay triangulation. If two of the length ratio between each pair of edges (of an inner triangle) is outside the given range, the skeleton uses the middle of the line connecting the two center of the longest lines of the triangle, else it uses the centroid of the triangle.</li>
+            </ul>
+                             
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.skeletonize_artificial.html#cartagen.skeletonize_artificial">help online</a>.
+        """)
 
         return helpstring
     
@@ -543,19 +555,23 @@ class SkelNetwork(QgsProcessingAlgorithm):
         parameters and outputs associated with it..
         """
 
-        helpstring = self.tr(
-            "/!\ Drop Z and M /!\ \n"\
-            "Create an artificial TIN skeleton and blend it inside a network. \n " \
-            "This function first creates an artificial TIN skeleton by enforcing entry points derived from the provided network (the entry points are the extremities of the provided network touching the polygon ring). Then the network is blended with the skeleton and an optional gaussian smoothing is apply. \n "\
-            "This version is inspired by the enhanced TIN skeleton proposed by Wang \n "\
-            "Parameters: \n "\
-            " - Network : The network touching the ring of the polygon. \n" \
-            " - Sigma : Gaussian filter strength. By default, the skeleton is not smoothed. \n" \
-            " - Blend smoothing : If set to True, the gaussian smoothing is applied to the skeleton after blending with the rest of the network, this can deform the network outside of the dual carriageways. If set to False, the gaussian smoothing is only applied to the skeleton before blending with the rest of the network. \n"\
-            "- Threshold range : This value is only used for inner triangles calculated by the Delaunay triangulation. If two of the length ratio between each pair of edges (of an inner triangle) is outside the given range, the skeleton uses the middle of the line connecting the two center of the longest lines of the triangle, else it uses the centroid of the triangle. \n "\
-            "Link to the doc : \n "\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.skeletonize_network.html#cartagen.skeletonize_network"
-        )
+        helpstring = self.tr("""
+            <b>/!\ If you don't drop Z and M, it won't work ! /!\</b>
+                             
+            Create an artificial TIN skeleton and blend it inside a network.
+            This function first creates an artificial TIN skeleton by enforcing entry points derived from the provided network (the entry points are the extremities of the provided network touching the polygon ring). Then the network is blended with the skeleton and an optional gaussian smoothing is apply.
+            This version is inspired by the enhanced TIN skeleton proposed by Wang
+            
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Network</em> : The network touching the ring of the polygon.</li>
+                <li> - <em>Sigma</em> : Gaussian filter strength. By default, the skeleton is not smoothed.</li>
+                <li> - <em>Blend smoothing</em> : If set to True, the gaussian smoothing is applied to the skeleton after blending with the rest of the network, this can deform the network outside of the dual carriageways. If set to False, the gaussian smoothing is only applied to the skeleton before blending with the rest of the network.</li>
+                <li> - <em>Threshold range</em> : This value is only used for inner triangles calculated by the Delaunay triangulation. If two of the length ratio between each pair of edges (of an inner triangle) is outside the given range, the skeleton uses the middle of the line connecting the two center of the longest lines of the triangle, else it uses the centroid of the triangle.</li>
+            </ul>
+                             
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.skeletonize_network.html#cartagen.skeletonize_network">help online</a>.
+        """)
 
         return helpstring
     
@@ -606,7 +622,7 @@ class SkelNetwork(QgsProcessingAlgorithm):
 
         blend_smoothing = QgsProcessingParameterBoolean(
             name=self.BLEND_SMOOTHING,
-            description="Blend smoothing :",
+            description="Blend smoothing ?",
             defaultValue = False
         )
         blend_smoothing.setFlags(blend_smoothing.flags() | QgsProcessingParameterDefinition.FlagAdvanced)        

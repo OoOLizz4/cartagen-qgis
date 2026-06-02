@@ -110,14 +110,14 @@ class RuralTraffic(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.ROAD_INPUT,
-                self.tr('Input road network'),
+                self.tr('Input road network :'),
                 [QgsProcessing.TypeVectorLine]
             )
         )
         
         min_traffic = QgsProcessingParameterNumber(
                 self.MIN_TRAFFIC,
-                self.tr('road attendance threshold'),
+                self.tr('road attendance threshold :'),
                 type=QgsProcessingParameterNumber.Integer,
                 defaultValue=None,
                 optional=True
@@ -127,7 +127,7 @@ class RuralTraffic(QgsProcessingAlgorithm):
         
         attraction_points = QgsProcessingParameterFeatureSource(
                 self.POINT_INPUT,
-                self.tr('Input attraction points'),
+                self.tr('Input attraction points :'),
                 [QgsProcessing.TypeVectorPoint],
                 optional=True
             )
@@ -136,7 +136,7 @@ class RuralTraffic(QgsProcessingAlgorithm):
         
         max_distance = QgsProcessingParameterNumber(
                 self.MAX_DISTANCE,
-                self.tr('point snapping max distance'),
+                self.tr('point snapping max distance :'),
                 type=QgsProcessingParameterNumber.Double,
                 defaultValue=None,
                 optional=True
@@ -146,7 +146,7 @@ class RuralTraffic(QgsProcessingAlgorithm):
         
         sample_size = QgsProcessingParameterNumber(
                 self.SAMPLE_SIZE,
-                self.tr('Random attraction points sample'),
+                self.tr('Random attraction points sample :'),
                 type=QgsProcessingParameterNumber.Integer,
                 defaultValue=10,
                 optional=True
@@ -156,7 +156,7 @@ class RuralTraffic(QgsProcessingAlgorithm):
         
         export_samples = QgsProcessingParameterBoolean(
                 self.EXPORT_SAMPLE,
-                self.tr('Export point sample'),
+                self.tr('Export point sample :'),
                 defaultValue=False,
                 optional=True
             )
@@ -165,7 +165,7 @@ class RuralTraffic(QgsProcessingAlgorithm):
         
         cost = QgsProcessingParameterField(
             self.COST,
-            self.tr('Attributes of cost of road section'),
+            self.tr('Attributes of cost of road section :'),
             None, 
             'ROAD_INPUT', 
             QgsProcessingParameterField.Numeric, allowMultiple = False, optional = True)
@@ -362,8 +362,24 @@ class RuralTraffic(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Detect central roads inside a network using traffic simulation.\nThis algorithm proposed by Touya detects the most used road inside a network by simulating traffic between attraction points. \n Those points can be provided or they can randomly be extracted from the network. \n Road network : the road network to analyze. \n Attraction points : The attraction points between which traffic will be calculated. If provided, the points doesn't need to be on the network, they will be snapped to the closest node (*i.e.* intersection) on the network. Default to None, meaning a random set a nodes will be taken. \n Sample size : If no attraction points are provided, it is the number of nodes to take into account when calculating traffic. This means the calculation between all pairs of nodes, this can be really resource-intensive. \n Road attendance threshold : the minimum number of time a road must be used to be kept. \n Max distance : if attraction points are provided, it is the maximum distance from which the provided attraction points are snapped to the road network nodes. If further from this distance, the point will not be used. Default to None, meaning the point is snapped no matter its distance from the network. \n Export samples : if set to True, returns the point used for the traffic calculation (provided or randomly generated), in addition to the enriched road network. \n  Cost : the name of the attribute giving the cost of the road section. Default to None, which means the length of the road is used as the cost.")
-        
+        helpstring = """
+            Detect central roads inside a network using traffic simulation. 
+            This algorithm proposed by Touya detects the most used road inside a network by simulating traffic between attraction points. Those points can be provided or they can randomly be extracted from the network.
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Road network</em> : the road network to analyze.</li>
+                <li> - <em>Attraction points</em> : The attraction points between which traffic will be calculated. If provided, the points doesn't need to be on the network, they will be snapped to the closest node (*i.e.* intersection) on the network. Default to None, meaning a random set a nodes will be taken.</li>
+                <li> - <em>Sample size</em> : If no attraction points are provided, it is the number of nodes to take into account when calculating traffic. This means the calculation between all pairs of nodes, this can be really resource-intensive.</li>
+                <li> - <em>Road attendance threshold</em> : the minimum number of time a road must be used to be kept.</li>
+                <li> - <em>Max distance</em> : if attraction points are provided, it is the maximum distance from which the provided attraction points are snapped to the road network nodes. If further from this distance, the point will not be used. Default to None, meaning the point is snapped no matter its distance from the network.</li>
+                <li> - <em>Export samples</em> : if set to True, returns the point used for the traffic calculation (provided or randomly generated), in addition to the enriched road network.</li>
+                <li> - <em>Cost</em> : the name of the attribute giving the cost of the road section. Default to None, which means the length of the road is used as the cost.</li>
+            </ul>
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.rural_traffic.html#cartagen.rural_traffic">help online</a>.
+        """
+
+        return self.tr(helpstring)
+    
     def icon(self):
         """
         Should return a QIcon which is used for your provider inside

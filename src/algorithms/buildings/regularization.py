@@ -115,7 +115,7 @@ class BuildingFER (QgsProcessingAlgorithm):
         parameters and outputs associated with it..
         """
         return self.tr( f"""
-            <b> /!\ Drop Z and M /!\ </b>
+            <b> /!\ If you don't drop Z and M, it won't work ! /!\ </b>
                        
             Regularize a polygon using feature edge reconstruction.
             This algorithm was proposed by Yang et al. FER enforces orthogonality and clean edge alignment on raw segmentation polygons. It first estimates the dominant orientation of a building, then iteratively snaps near-parallel and near-perpendicular edges to that principal axis, using Douglas-Peucker simplification, minimum-rotated-rectangle fitting, and a local reconstruction loop.

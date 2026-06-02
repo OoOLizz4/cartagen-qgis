@@ -153,7 +153,27 @@ class DetectDualCarriageways(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Detect dual carriageways based on geometric properties.\nThis algorithm proposed by Touya detects the network faces as road separator (*i.e.* separation between dual carriageways) when the polygon meets the geometric requirements. Those values can be tweaked to fine-tune the detection, but complex interchange will nonetheless cause wrong characterization.\nImportance : the attribute name of the data on which road importance is based. Default value is set to None which means every road is taken for the network face calculation.\nValue : maximum value of the importance attribute. Roads with an importance higher than this value will not be taken.\nConcavity : maximum concavity. (concavity is the area of the polygon divided by the area of its convex hull)\nElongation : minimum elongation. (elongation is the length of the minimum rotated rectangle divided by its width)\nCompactness : maximum compactness. (compactness is calculated using (4*pi*area)/(perimeter^2))\nArea : area factor to detect very long motorways.\nWidth : maximum width of the the minimum rotated rectangle.\nHuber : Huber width for long motorways")
+        helpstring = """
+            Detect dual carriageways based on geometric properties. 
+            This algorithm proposed by Touya detects the network faces as road separator (*i.e.* separation between dual carriageways) when the polygon meets the geometric requirements. Those values can be tweaked to fine-tune the detection, but complex interchange will nonetheless cause wrong characterization.
+            
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Parameters</em> : </li>
+                <li> - <em>- Importance</em> : the attribute name of the data on which road importance is based. Default value is set to None which means every road is taken for the network face calculation.</li>
+                <li> - <em>- Value</em> : maximum value of the importance attribute. Roads with an importance higher than this value will not be taken.</li>
+                <li> - <em>- Concavity</em> : maximum concavity. (concavity is the area of the polygon divided by the area of its convex hull)</li>
+                <li> - <em>- Elongation</em> : minimum elongation. (elongation is the length of the minimum rotated rectangle divided by its width)</li>
+                <li> - <em>- Compactness</em> : maximum compactness. (compactness is calculated using (4*pi*area)/(perimeter^2))</li>
+                <li> - <em>- Area</em> : area factor to detect very long motorways.</li>
+                <li> - <em>- Width</em> : maximum width of the the minimum rotated rectangle.</li>
+                <li> - <em>- Huber</em> : Huber width for long motorways</li>
+            </ul>
+
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.detect_dual_carriageways.html#cartagen.detect_dual_carriageways">help online</a>.
+        """
+
+        return self.tr(helpstring)
         
     def icon(self):
         """
@@ -174,14 +194,14 @@ class DetectDualCarriageways(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input road network'),
+                self.tr('Input road network:'),
                 [QgsProcessing.TypeVectorLine]
             )
         )
   		        
         importance = QgsProcessingParameterString(
             self.IMPORTANCE,
-            self.tr('Importance attribute name'),
+            self.tr('Importance attribute name:'),
             optional=True,
             defaultValue = 'None'
         )    
@@ -191,7 +211,7 @@ class DetectDualCarriageways(QgsProcessingAlgorithm):
 
         value = QgsProcessingParameterNumber(
             self.VALUE,
-            self.tr('Maximum value of the importance attribute'),
+            self.tr('Maximum value of the importance attribute:'),
             type=QgsProcessingParameterNumber.Integer,
             optional=True,
             defaultValue = 99
@@ -201,7 +221,7 @@ class DetectDualCarriageways(QgsProcessingAlgorithm):
 
         concavity = QgsProcessingParameterNumber(
             self.CONCAVITY,
-            self.tr('Maximum concavity'),
+            self.tr('Maximum concavity:'),
             type=QgsProcessingParameterNumber.Double,
             optional=True,
             defaultValue = 0.85
@@ -211,7 +231,7 @@ class DetectDualCarriageways(QgsProcessingAlgorithm):
 
         elongation = QgsProcessingParameterNumber(
             self.ELONGATION,
-            self.tr('Maximum elongation'),
+            self.tr('Maximum elongation:'),
             type=QgsProcessingParameterNumber.Double,
             optional=True,
             defaultValue = 6
@@ -221,7 +241,7 @@ class DetectDualCarriageways(QgsProcessingAlgorithm):
 
         compactness = QgsProcessingParameterNumber(
             self.COMPACTNESS,
-            self.tr('Maximum compactness'),
+            self.tr('Maximum compactness:'),
             type=QgsProcessingParameterNumber.Double,
             optional=True,
             defaultValue = 0.12
@@ -231,7 +251,7 @@ class DetectDualCarriageways(QgsProcessingAlgorithm):
 
         area = QgsProcessingParameterNumber(
             self.AREA,
-            self.tr('Area factor to detect very long motorways.'),
+            self.tr('Area factor to detect very long motorways:'),
             type=QgsProcessingParameterNumber.Double,
             optional=True,
             defaultValue = 60000
@@ -241,7 +261,7 @@ class DetectDualCarriageways(QgsProcessingAlgorithm):
 
         width = QgsProcessingParameterNumber(
             self.WIDTH,
-            self.tr('Maximum width of the minimum rotated rectangle'),
+            self.tr('Maximum width of the minimum rotated rectangle:'),
             type=QgsProcessingParameterNumber.Double,
             optional=True,
             defaultValue = 20
@@ -251,7 +271,7 @@ class DetectDualCarriageways(QgsProcessingAlgorithm):
 
         huber = QgsProcessingParameterNumber(
             self.HUBER,
-            self.tr('Huber width for long motorways'),
+            self.tr('Huber width for long motorways:'),
             type=QgsProcessingParameterNumber.Integer,
             optional=True,
             defaultValue = 16
@@ -431,8 +451,23 @@ class CollapseDualCarriageways(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Collapse dual carriageways using a TIN skeleton.\nThis algorithm proposed by Thom collapses the network faces considered as dual carriageways using a skeleton calculated from a Delaunay triangulation.\nCarriageways : the polygons representing the faces of the network detected as dual carriageways.\nSigma : if not None, apply a gaussian smoothing to the collapsed dual carriageways to avoid jagged lines that can be created during the TIN skeleton creation.\nPropagate_attributes : propagate the provided list of column name to the resulting network. The propagated attribute is the one from the longest line.")
-        
+
+        helpstring = """
+            Collapse dual carriageways using a TIN skeleton. 
+            This algorithm proposed by Thom collapses the network faces considered as dual carriageways using a skeleton calculated from a Delaunay triangulation.
+            
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Carriageways</em> : the polygons representing the faces of the network detected as dual carriageways.</li>
+                <li> - <em>Sigma</em> : if not None, apply a gaussian smoothing to the collapsed dual carriageways to avoid jagged lines that can be created during the TIN skeleton creation.</li>
+                <li> - <em>Propagate_attributes</em> : propagate the provided list of column name to the resulting network. The propagated attribute is the one from the longest line.</li>
+            </ul>
+            
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.collapse_dual_carriageways.html#cartagen.collapse_dual_carriageways">help online</a>.
+        """
+
+        return self.tr(helpstring)
+
     def icon(self):
         """
         Should return a QIcon which is used for your provider inside
@@ -450,7 +485,7 @@ class CollapseDualCarriageways(QgsProcessingAlgorithm):
         # We add the input vector features source. 
         input_road = QgsProcessingParameterFeatureSource(
                 self.INPUT_ROAD,
-                self.tr('Input road network'),
+                self.tr('Input road network :'),
                 [QgsProcessing.TypeVectorLine]
             )
         self.addParameter(input_road)
@@ -458,7 +493,7 @@ class CollapseDualCarriageways(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_CARRIAGEWAYS,
-                self.tr('Input dual carriageways'),
+                self.tr('Input dual carriageways :'),
                 [QgsProcessing.TypeVectorPolygon],
                 optional=False
             )
@@ -466,7 +501,7 @@ class CollapseDualCarriageways(QgsProcessingAlgorithm):
                 
         sigma = QgsProcessingParameterNumber(
             self.SIGMA,
-                self.tr('Sigma value'),
+                self.tr('Sigma value :'),
                 type=QgsProcessingParameterNumber.Double,
                 optional=True,
                 defaultValue= 0
@@ -474,10 +509,8 @@ class CollapseDualCarriageways(QgsProcessingAlgorithm):
         self.addParameter(sigma)	 
 
         self.addParameter(QgsProcessingParameterField(self.PROPAGATE_ATTRIBUTES,
-            self.tr('Attributes to propagate'),
+            self.tr('Attributes to propagate :'),
             None, 'INPUT_ROAD', QgsProcessingParameterField.Any, True, optional = True))
-
-    
 
         # We add a feature sink in which to store our processed features (this
         # usually takes the form of a newly created vector layer when the

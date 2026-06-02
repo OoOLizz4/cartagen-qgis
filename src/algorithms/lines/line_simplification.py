@@ -838,7 +838,7 @@ class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
             This algorithm proposed by Raposo simplifies lines based on a hexagonal tessellation. The algorithm also works for the simplification of the border of a polygon object. The idea of the algorithm is to put a hexagonal tessellation on top of the line to simplify, the size of the cells depending on the targeted granularity of the line. Similarly to the Li-Openshaw algorithm, only one vertex is kept inside each cell. This point can be the centroid of the removed vertices, or a projection on the initial line of this centroid. The shapes obtained with this algorithm are less sharp than the ones obtained with other algorithms such as Douglas-Peucker.
             The algorithm is dedicated to the smooth simplification of natural features such as rivers, forests, coastlines, lakes.
             
-                       <h3>Parameters:</h3>
+            <h3>Parameters:</h3>
             <ul>
                 <li>- Initial scale : Initial scale of the provided line (25000.0 for 1:25000 scale).</li>
                 <li>- Final scale : Final scale of the simplified line.</li>
@@ -1062,16 +1062,18 @@ class ReumannWitkam(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            "Simplify a line or polygon using a directional distance-based selection. \n"\
-            "This algorithm, proposed by Reumann and Witkam , performs a sequential line simplification by using a “corridor” or “tube” defined by the direction of the first segment. Unlike the Douglas-Peucker algorithm, which considers the line globally, Reumann-Witkam is a local, streaming-friendly filter that processes vertices in order.\n"\
-            "The principle of the algorithm is to define a search pipe using the first two points of a segment. For all subsequent points, the perpendicular distance to the infinite line passing through this initial segment is calculated. As long as the points stay within the tolerance distance, they are marked for deletion. When a point falls outside the pipe, the current point becomes the new starting vertex, and a new pipe direction is established.\n"\
-            "The algorithm is particularly efficient for reducing the density of points in datasets where the direction of the line is relatively constant, making it ideal for real-time thinning of trajectory data or GPS traces. \n"\
-            "Parameters :\n"\
-            "- Tolerance : The width (radius) of the search corridor. Points within this distance from the segment’s trajectory are removed. Higher values = fewer points kept (more aggressive simplification).\n"\
-            "Link to the doc : \n"\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_reumann_witkam.html#cartagen.simplify_reumann_witkam"
-            )
+        return self.tr("""
+            Simplify a line or polygon using a directional distance-based selection.
+            This algorithm, proposed by Reumann and Witkam , performs a sequential line simplification by using a “corridor” or “tube” defined by the direction of the first segment. Unlike the Douglas-Peucker algorithm, which considers the line globally, Reumann-Witkam is a local, streaming-friendly filter that processes vertices in order.
+            The principle of the algorithm is to define a search pipe using the first two points of a segment. For all subsequent points, the perpendicular distance to the infinite line passing through this initial segment is calculated. As long as the points stay within the tolerance distance, they are marked for deletion. When a point falls outside the pipe, the current point becomes the new starting vertex, and a new pipe direction is established.
+            The algorithm is particularly efficient for reducing the density of points in datasets where the direction of the line is relatively constant, making it ideal for real-time thinning of trajectory data or GPS traces.
+            <h3> Parameters: </h3>
+                       
+            <ul>
+                <li> - <em>Tolerance</em> : The width (radius) of the search corridor. Points within this distance from the segment’s trajectory are removed. Higher values = fewer points kept (more aggressive simplification).</li>
+            </ul>
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_reumann_witkam.html#cartagen.simplify_reumann_witkam">help online</a>
+            """)
                        
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -1348,19 +1350,21 @@ class VisvalingamWhyattQGIS(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            "Simplify a line or polygon using an area-based selection.\n"\
-            "This algorithm proposed by Visvalingam and Whyatt performs a line simplification that produces less angular results than the filtering algorithm of Ramer-Douglas-Peucker. The principle of the algorithm is to select the vertices to delete (the less characteristic ones) rather than choosing the vertices to keep (in the Douglas and Peucker algorithm). To select the vertices to delete, there is an iterative process, and at each iteration, the triangles formed by three consecutive vertices are computed. If the area of the smallest triangle is smaller than a threshold, the middle vertex is deleted, and another iteration starts.\n"\
-            "The algorithm is relevant for the simplification of natural line or polygon features such as rivers, forests, or coastlines. This implementation was made by Elliot Hallmark. \n"\
-            "Parameters: \n"\
-            "Methode : Choose the methode used for the calcul : \n "\
-            ". Threshold (float) : The minimum triangle area to keep a vertex in the line. Higher values = more points kept (less aggressive simplification).\n  "\
-            ". Number (int) : The target number of points to keep in the simplified line.\n  "\
-            f". Ratio (float) : The ratio of points to keep (between 0 and 1). Example: 0.5 keeps approximately 50% of the original points.\n"\
-            "Value : The value to use fot the calcul \n"\
-            "Link to the doc : \n"\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_visvalingam_whyatt.html#cartagen.simplify_visvalingam_whyatt"
-            )
+        helpstring = """ 
+            Simplify a line or polygon using an area-based selection.
+            This algorithm proposed by Visvalingam and Whyatt performs a line simplification that produces less angular results than the filtering algorithm of Ramer-Douglas-Peucker. The principle of the algorithm is to select the vertices to delete (the less characteristic ones) rather than choosing the vertices to keep (in the Douglas and Peucker algorithm). To select the vertices to delete, there is an iterative process, and at each iteration, the triangles formed by three consecutive vertices are computed. If the area of the smallest triangle is smaller than a threshold, the middle vertex is deleted, and another iteration starts.
+            The algorithm is relevant for the simplification of natural line or polygon features such as rivers, forests, or coastlines. This implementation was made by Elliot Hallmark.
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Methode</em> : Choose the methode used for the calcul :</li>
+                    . Threshold (float) : The minimum triangle area to keep a vertex in the line. Higher values = more points kept (less aggressive simplification).
+                    . Number (int) : The target number of points to keep in the simplified line.
+                    . Ratio (float) : The ratio of points to keep (between 0 and 1). Example: 0.5 keeps approximately 50% of the original points.
+                <li> - <em>Value</em> : The value to use fot the calcul</li>
+            </ul>
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_visvalingam_whyatt.html#cartagen.simplify_visvalingam_whyatt">help online</a>.
+            """
+        return self.tr(helpstring)
         
 class Whirlpool(QgsProcessingAlgorithm):
 
@@ -1438,15 +1442,18 @@ class Whirlpool(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr(
-            "Simplify a line or polygon using an epsilon-circle based selection. \n"\
-            "This algorithm proposed by Dougenik and Chrisman performs a line simplification that removes spiky vertices while preserving the overall shape of the line. It works by iterating through the vertices of the line and removing those that are within a specified distance (epsilon) from the last kept vertex. \n"\
-            "This method is particularly effective at simplifying lines with many small, sharp angles, such as rivers or coastlines, while maintaining the general form of the line. \n"\
-            "Parameters : \n"\
-            "- Thresold : The minimum epsilon-distance to consider a vertex to be removed. Higher values = fewer points kept (more aggressive simplification). \n"\
-            "Link to the doc : \n"\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_whirlpool.html#cartagen.simplify_whirlpool"
-            )
+        helpstring = """
+            Simplify a line or polygon using an epsilon-circle based selection.
+            This algorithm proposed by Dougenik and Chrisman performs a line simplification that removes spiky vertices while preserving the overall shape of the line. It works by iterating through the vertices of the line and removing those that are within a specified distance (epsilon) from the last kept vertex.
+            This method is particularly effective at simplifying lines with many small, sharp angles, such as rivers or coastlines, while maintaining the general form of the line.
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Thresold</em> : The minimum epsilon-distance to consider a vertex to be removed. Higher values = fewer points kept (more aggressive simplification).</li>
+            </ul>
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_whirlpool.html#cartagen.simplify_whirlpool">help online</a>.
+            """
+        
+        return self.tr(helpstring)
                        
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)

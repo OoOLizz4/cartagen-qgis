@@ -112,8 +112,21 @@ class HullDelaunay(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Create the hull of a set of points using the Delaunay triangulation.\nThis algorithm first computes the Delaunay triangulation of the points, and then removes iteratively the boundary edges that are longer than a given parameter.\nLength: the length in meters below which the Delaunay triangles edges are removed.\nWarning : this algorithm cannot create multiple polygons, unlike hull_swinging_arm(). Using a length too low can produce an invalid geometry.")
-        
+        helpstring = """
+            <b> Warning : this algorithm cannot create multiple polygons, unlike hull_swinging_arm(). Using a length too low can produce an invalid geometry. Create the hull of a set of points using the Delaunay triangulation.</b>
+
+            This algorithm first computes the Delaunay triangulation of the points, and then removes iteratively the boundary edges that are longer than a given parameter. 
+            
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Length</em>: the length in meters below which the Delaunay triangles edges are removed.</li>
+            </ul>
+
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.hull_delaunay.html#cartagen.hull_delaunay">help online</a>.
+        """
+
+        return self.tr(helpstring)
+
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
 
@@ -130,14 +143,14 @@ class HullDelaunay(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input point layer'),
+                self.tr('Input point layer :'),
                 [QgsProcessing.TypeVectorPoint]
             )
         )
 
         length = QgsProcessingParameterNumber(
             self.LENGTH,
-            self.tr('Length threshold'),
+            self.tr('Length threshold :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=2000,
             optional=False
@@ -285,16 +298,19 @@ class HullSwingingArm(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        helpsting = (
-            "Create the hull of a set of points using the swinging arm algorithm.\n"\
-            "Starting at the most northen point, iteratively create the border of a polygon by adding the first point intersecting the line (the arm) rotating around the point.\n"\
-            "Parameters : \n"\
-            " - Length : the length of the line (or arm) that will rotate around the point.\n"\
-            " - Direction : the direction of the arm’s rotation. Can be ‘ccw’ or ‘cw’.\n"\
-            "Notes : This algorithm can create multiple polygons, unlike Hull Delaunay \n"\
-            "Link to the doc : \n"\
-            "https://cartagen.readthedocs.io/en/latest/reference/cartagen.hull_swinging_arm.html#cartagen.hull_swinging_arm"
-            )
+        helpsting = """
+            Create the hull of a set of points using the swinging arm algorithm.
+            Starting at the most northen point, iteratively create the border of a polygon by adding the first point intersecting the line (the arm) rotating around the point.
+            Notes : This algorithm can create multiple polygons, unlike Hull Delaunay
+            
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Length</em> : the length of the line (or arm) that will rotate around the point.</li>
+                <li> - <em>Direction</em> : the direction of the arm’s rotation. Can be ‘ccw’ or ‘cw’.</li>
+            </ul>
+            
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.hull_swinging_arm.html#cartagen.hull_swinging_arm">help online</a>.
+        """
 
         return self.tr(helpsting)
         

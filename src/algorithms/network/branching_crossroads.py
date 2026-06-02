@@ -123,7 +123,7 @@ class DetectBranchingCrossroads(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Detect branching crossroads'
+        return 'Detect Branching Crossroads'
 
     def displayName(self):
         """
@@ -155,7 +155,22 @@ class DetectBranchingCrossroads(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("This algorithm proposed by Touya detects branching crossroads inside a road network based on the proximity between the geometry of the network face and a triangle.\nRoundabouts : the polygons representing the network faces considered as roundabouts. If provided, links the branching crossroad to a roundabout for collapsing.\nArea threshold : the area (in square meters) above which the object is not considered a branching crossroads.\nMaximum_distance_area : the maximum distance area between the actual polygon and the triangle formed by the 3 nodes connecting the junction to the rest of the network.\nAllow_middle_node : if set to True, allow 4 nodes to form the crossroads, but each must have a degree of 3 and the 'middle' node must have an angle of 180°.\nMiddle_angle_tolerance : if allow_middle_node is set to True, indicate an angle tolerance in degree for the fourth node of the crossroad to be considered the middle node.\nAllow_single_4degree_node : if set to True, allow one and only one node to have a degree of 4.")
+
+        helpstring = """
+        Link to the doc : https://cartagen.readthedocs.io/en/latest/reference/cartagen.detect_branching_crossroads.html#cartagen.detect_branching_crossroads
+        Detect branching crossroads based on geometric properties. This algorithm proposed by Touya detects branching crossroads inside a road network based on the proximity between the geometry of the network face and a triangle.
+        <h3> Parameters: </h3>
+        <ul>
+            <li> - <em>Roundabouts</em> : the polygons representing the network faces considered as roundabouts. If provided, links the branching crossroad to a roundabout for collapsing.</li>
+            <li> - <em>Area threshold</em> : the area (in square meters) above which the object is not considered a branching crossroads.</li>
+            <li> - <em>Maximum_distance_area</em> : the maximum distance area between the actual polygon and the triangle formed by the 3 nodes connecting the junction to the rest of the network.</li>
+            <li> - <em>Allow_middle_node</em> : if set to True, allow 4 nodes to form the crossroads, but each must have a degree of 3 and the 'middle' node must have an angle of 180°.</li>
+            <li> - <em>Middle_angle_tolerance</em> : if allow_middle_node is set to True, indicate an angle tolerance in degree for the fourth node of the crossroad to be considered the middle node.</li>
+            <li> - <em>Allow_single_4degree_node</em> : if set to True, allow one and only one node to have a degree of 4.</li>
+        </ul>
+        For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.detect_branching_crossroads.html#cartagen.detect_branching_crossroads">help online</a>.'
+        """
+        return self.tr(helpstring)
         
     def icon(self):
         """
@@ -176,7 +191,7 @@ class DetectBranchingCrossroads(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_ROAD,
-                self.tr('Input road network'),
+                self.tr('Input road network :'),
                 [QgsProcessing.TypeVectorLine]
             )
         )
@@ -184,7 +199,7 @@ class DetectBranchingCrossroads(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_ROUNDABOUT,
-                self.tr('Input roundabouts'),
+                self.tr('Input roundabouts :'),
                 [QgsProcessing.TypeVectorPolygon],
                 optional=True
             )
@@ -192,7 +207,7 @@ class DetectBranchingCrossroads(QgsProcessingAlgorithm):
                 
         area_threshold = QgsProcessingParameterNumber(
             self.AREA_THRESHOLD,
-                self.tr('Area threshold'),
+                self.tr('Area threshold :'),
                 type=QgsProcessingParameterNumber.Double,
                 optional=True,
                 defaultValue= 1000
@@ -201,7 +216,7 @@ class DetectBranchingCrossroads(QgsProcessingAlgorithm):
 
         maximum_distance_area = QgsProcessingParameterNumber(
             self.MAXIMUM_DISTANCE_AREA,
-                self.tr('Maximum distance area'),
+                self.tr('Maximum distance area :'),
                 type=QgsProcessingParameterNumber.Double,
                 optional=True,
                 defaultValue= 0.5
@@ -211,7 +226,7 @@ class DetectBranchingCrossroads(QgsProcessingAlgorithm):
 	
         allow_middle_node = QgsProcessingParameterBoolean(
             self.ALLOW_MIDDLE_NODE,
-                self.tr('Allow middle node'),
+                self.tr('Allow middle node ?'),
                 optional=True,
                 defaultValue=True
             )
@@ -220,7 +235,7 @@ class DetectBranchingCrossroads(QgsProcessingAlgorithm):
 
         middle_angle_tolerance = QgsProcessingParameterNumber(
             self.MIDDLE_ANGLE_TOLERANCE,
-                self.tr('Middle angle tolerance'),
+                self.tr('Middle angle tolerance :'),
                 type=QgsProcessingParameterNumber.Double,
                 optional=True,
                 defaultValue=10
@@ -423,7 +438,17 @@ class CollapseBranchingCrossroads(QgsProcessingAlgorithm):
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr("Collapse branching crossroads to a point.\nThis algorithm proposed by Touya collapses detected branching crossroads below the provided area to a point on what is detected as the main road.\nCrossroads : polygons representing the faces of the network detected as branching crossroads. Crossroads connected to a roundabout won't be collapsed.\nMaximum_area : the area, in square meter, below which branching crossroads are collapsed. Collpase all crossraods if left to None.")
+        helpstring = """
+        Collapse branching crossroads to a point.
+        This algorithm proposed by Touya collapses detected branching crossroads below the provided area to a point on what is detected as the main road.
+        <h3> Parameters: </h3>
+        <ul>
+            <li> - <em>Crossroads</em> : polygons representing the faces of the network detected as branching crossroads. Crossroads connected to a roundabout won't be collapsed.</li>
+            <li> - <em>Maximum_area</em> : the area, in square meter, below which branching crossroads are collapsed. Collpase all crossraods if left to None.</li>
+        </ul>
+        For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.collapse_branching_crossroads.html#cartagen.collapse_branching_crossroads">help online</a>.'
+        """
+        return self.tr(helpstring)
         
     def icon(self):
         """
@@ -443,7 +468,7 @@ class CollapseBranchingCrossroads(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_ROAD,
-                self.tr('Input road network'),
+                self.tr('Input road network :'),
                 [QgsProcessing.TypeVectorLine]
             )
         )
@@ -451,7 +476,7 @@ class CollapseBranchingCrossroads(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_BRANCHING_CROSSROADS,
-                self.tr('Input branching crossroads'),
+                self.tr('Input branching crossroads :'),
                 [QgsProcessing.TypeVectorPolygon],
                 optional=False
             )
@@ -459,7 +484,7 @@ class CollapseBranchingCrossroads(QgsProcessingAlgorithm):
                 
         maximum_area = QgsProcessingParameterNumber(
             self.MAXIMUM_AREA,
-                self.tr('Maximum area'),
+                self.tr('Maximum area :'),
                 type=QgsProcessingParameterNumber.Double,
                 optional=True,
                 defaultValue= 1000
