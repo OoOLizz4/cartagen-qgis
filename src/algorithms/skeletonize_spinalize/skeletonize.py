@@ -83,7 +83,7 @@ class SkelNatural(QgsProcessingAlgorithm):
         formatting characters.
         """
 
-        return "Skeletonize and Spinalize Polygons"
+        return "Skeletonize and Spinalize polygons"
     
     def group(self):
         
@@ -286,7 +286,7 @@ class SkelArtificial(QgsProcessingAlgorithm):
         formatting characters.
         """
 
-        return "Skeletonize and Spinalize Polygons"
+        return "Skeletonize and Spinalize polygons"
     
     def group(self):
         
@@ -526,7 +526,7 @@ class SkelNetwork(QgsProcessingAlgorithm):
         formatting characters.
         """
 
-        return "Skeletonize and Spinalize Polygons"
+        return "Skeletonize and Spinalize polygons"
     
     def group(self):
         

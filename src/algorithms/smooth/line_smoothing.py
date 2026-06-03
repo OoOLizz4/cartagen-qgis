@@ -112,7 +112,7 @@ class CatmullRomSmoothing(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Smooth Lines and Patches'
+        return 'Smooth lines and patches'
 
     def icon(self):
         """
@@ -317,7 +317,7 @@ class ChaikinSmoothing(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Smooth Lines and Patches'
+        return 'Smooth lines and patches'
 
     def icon(self):
         """
@@ -514,7 +514,7 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Smooth Lines and Patches'
+        return 'Smooth lines and patches'
 
     def icon(self):
         """

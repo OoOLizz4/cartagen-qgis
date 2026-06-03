@@ -161,7 +161,6 @@ class NetworkFacesQGIS(QgsProcessingAlgorithm):
             Calculates the faces of one or multiple networks.
 
             This function is often called polygonize. It creates polygons in place of a network of lines.
-
         """)
         return helpstring
 
