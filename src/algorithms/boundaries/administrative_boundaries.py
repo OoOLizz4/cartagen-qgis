@@ -21,18 +21,6 @@ __copyright__ = '(C) 2024 by Guillaume Touya, Justin Berli & Paul Bourcier'
 
 __revision__ = '$Format:%H$'
 
-from qgis.core import (
-    QgsProject,
-    QgsVectorLayer,
-    QgsField,
-    QgsFeature,
-    QgsGeometry,
-    QgsFields,
-)
-from qgis.utils import iface
-from qgis.PyQt.QtCore import QVariant
-
-
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
     QgsProcessing, QgsFeatureSink, QgsProcessingAlgorithm,
@@ -49,7 +37,7 @@ import geopandas as gpd
 
 from cartagen import boundaries_douglas_peucker, boundaries_visvalingam_whyatt, boundaries_raposo, boundaries_li_openshaw
 
-from cartagen4qgis.src.tools import list_to_qgis_feature, list_to_qgis_feature_2
+from cartagen4qgis.src.tools import list_to_qgis_feature_2
 
 class BoundariesDouglasPeucker(QgsProcessingAlgorithm):
     """
@@ -117,6 +105,17 @@ class BoundariesDouglasPeucker(QgsProcessingAlgorithm):
         formatting characters.
         """
         return 'Boundaries'
+    
+    def shortDescription(self):
+        """
+        Returns an optional translated short description of the algorithm. This 
+        should be at most a single sentence, e.g. “Converts 2D features to 3D by 
+        sampling a DEM raster.”
+        """
+        description = self.tr("""
+            Applies the Douglas-Peucker-Ramer algorithm to the administrative boundaries of the polygons. 
+        """)
+        return(description)
 
     def shortHelpString(self):
         """
@@ -301,6 +300,17 @@ class BoundariesLiOpenshaw(QgsProcessingAlgorithm):
         formatting characters.
         """
         return 'Boundaries'
+    
+    def shortDescription(self):
+        """
+        Returns an optional translated short description of the algorithm. This 
+        should be at most a single sentence, e.g. “Converts 2D features to 3D by 
+        sampling a DEM raster.”
+        """
+        description = self.tr("""
+            Applies the Li-Openshaw algorithm to the administrative boundaries of the polygons. 
+        """)
+        return(description)
 
     def shortHelpString(self):
         """
@@ -492,6 +502,17 @@ class BoundariesRaposo(QgsProcessingAlgorithm):
         formatting characters.
         """
         return 'Boundaries'
+    
+    def shortDescription(self):
+        """
+        Returns an optional translated short description of the algorithm. This 
+        should be at most a single sentence, e.g. “Converts 2D features to 3D by 
+        sampling a DEM raster.”
+        """
+        description = self.tr("""
+            Applies the Raposo algorithm to the administrative boundaries of the polygons. 
+        """)
+        return(description)
 
     def shortHelpString(self):
         """
@@ -700,6 +721,17 @@ class BoundariesVisvalingam(QgsProcessingAlgorithm):
         formatting characters.
         """
         return 'Boundaries'
+    
+    def shortDescription(self):
+        """
+        Returns an optional translated short description of the algorithm. This 
+        should be at most a single sentence, e.g. “Converts 2D features to 3D by 
+        sampling a DEM raster.”
+        """
+        description = self.tr("""
+            Applies the Visvialingam-Whyatt algorithm to the administrative boundaries of the polygons. 
+        """)
+        return(description)
 
     def shortHelpString(self):
         """

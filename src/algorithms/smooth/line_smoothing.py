@@ -122,6 +122,17 @@ class CatmullRomSmoothing(QgsProcessingAlgorithm):
         from cartagen4qgis import get_plugin_icon
         return get_plugin_icon()
 
+    def shortDescription(self):
+        """
+        Returns an optional translated short description of the algorithm. This 
+        should be at most a single sentence, e.g. “Converts 2D features to 3D by 
+        sampling a DEM raster.”
+        """
+        first_line = self.shortHelpString().strip().splitlines()[0]
+        description = self.tr(first_line)
+        
+        return(description)
+
     def shortHelpString(self):
         """
         Returns a localised short helper string for the algorithm. This string
@@ -131,14 +142,18 @@ class CatmullRomSmoothing(QgsProcessingAlgorithm):
         helpstring = """
             Smooth a line or polygon and preserve vertexes.
             This algorithm was proposed by Catmull and Rom, this is the version proposed by Barry and Goldman that makes use of the de Boor’s algorithm for evaluating spline curves in B-spline form.
-            . Uniform parameterization
-            . Centripetal parameterization (recommended, prevents loops)
-            . Chordal parameterization
             <h3> Parameters: </h3>
             <ul>
                 <li> - <em>Subdivisions</em> : Number of interpolated points between each pair of control points. Higher values produce smoother curves.</li>
                 <li> - <em>Alpha</em> : Parameterization type:</li>
+                <ul>
+                    <li>. Uniform parameterization </li>
+                    <li>. Centripetal parameterization (recommended, prevents loops) </li>
+                    <li>. Chordal parameterization </li>
+                <ul>
             </ul>
+
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_catmull_rom.html#cartagen.smooth_catmull_rom">help online</a>.
             """
         return self.tr(helpstring)
         
@@ -326,6 +341,17 @@ class ChaikinSmoothing(QgsProcessingAlgorithm):
         """
         from cartagen4qgis import get_plugin_icon
         return get_plugin_icon()
+
+    def shortDescription(self):
+        """
+        Returns an optional translated short description of the algorithm. This 
+        should be at most a single sentence, e.g. “Converts 2D features to 3D by 
+        sampling a DEM raster.”
+        """
+        first_line = self.shortHelpString().strip().splitlines()[0]
+        description = self.tr(first_line)
+        
+        return(description)
 
     def shortHelpString(self):
         """
@@ -523,6 +549,17 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
         """
         from cartagen4qgis import get_plugin_icon
         return get_plugin_icon()
+
+    def shortDescription(self):
+        """
+        Returns an optional translated short description of the algorithm. This 
+        should be at most a single sentence, e.g. “Converts 2D features to 3D by 
+        sampling a DEM raster.”
+        """
+        first_line = self.shortHelpString().strip().splitlines()[0]
+        description = self.tr(first_line)
+        
+        return(description)
 
     def shortHelpString(self):
         """

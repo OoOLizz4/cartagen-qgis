@@ -276,6 +276,17 @@ class DouglasPeucker(QgsProcessingAlgorithm):
         from cartagen4qgis import get_plugin_icon
         return get_plugin_icon()
 
+    def shortDescription(self):
+        """
+        Returns an optional translated short description of the algorithm. This 
+        should be at most a single sentence, e.g. “Converts 2D features to 3D by 
+        sampling a DEM raster.”
+        """
+        first_line = self.shortHelpString().strip().splitlines()[0]
+        description = self.tr(first_line)
+        
+        return(description)
+
     def shortHelpString(self):
         """
         Returns a localised short helper string for the algorithm. This string
@@ -349,6 +360,7 @@ class DouglasPeucker(QgsProcessingAlgorithm):
         """
         Here is where the processing itself takes place.
         """
+        from cartagen import simplify_douglas_peucker
         import geopandas as gpd
         from shapely.wkt import loads
         from cartagen4qgis.src.tools import qgis_source_to_geodataframe, list_to_qgis_feature_2
@@ -460,6 +472,17 @@ class Lang(QgsProcessingAlgorithm):
         """
         from cartagen4qgis import get_plugin_icon
         return get_plugin_icon()
+    
+    def shortDescription(self):
+        """
+        Returns an optional translated short description of the algorithm. This 
+        should be at most a single sentence, e.g. “Converts 2D features to 3D by 
+        sampling a DEM raster.”
+        """
+        first_line = self.shortHelpString().strip().splitlines()[0]
+        description = self.tr(first_line)
+        
+        return(description)
 
     def shortHelpString(self):
         """
@@ -640,6 +663,17 @@ class LiOpenshaw(QgsProcessingAlgorithm):
         from cartagen4qgis import get_plugin_icon
         return get_plugin_icon()
 
+    def shortDescription(self):
+        """
+        Returns an optional translated short description of the algorithm. This 
+        should be at most a single sentence, e.g. “Converts 2D features to 3D by 
+        sampling a DEM raster.”
+        """
+        first_line = self.shortHelpString().strip().splitlines()[0]
+        description = self.tr(first_line)
+        
+        return(description)
+
     def shortHelpString(self):
         """
         Returns a localised short helper string for the algorithm. This string
@@ -753,7 +787,7 @@ class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
     """
     Simplify a line or a polygon using an hexagonal tessellation.
 
-    This algorithm proposed by Raposo [1] simplifies lines based on a hexagonal tessellation. The algorithm also works for the simplification of the border of a polygon object. The idea of the algorithm is to put a hexagonal tessellation on top of the line to simplify, the size of the cells depending on the targeted granularity of the line. Similarly to the Li-Openshaw algorithm, only one vertex is kept inside each cell. This point can be the centroid of the removed vertices, or a projection on the initial line of this centroid. The shapes obtained with this algorithm are less sharp than the ones obtained with other algorithms such as Douglas-Peucker.
+    This algorithm proposed by Raposo simplifies lines based on a hexagonal tessellation. The algorithm also works for the simplification of the border of a polygon object. The idea of the algorithm is to put a hexagonal tessellation on top of the line to simplify, the size of the cells depending on the targeted granularity of the line. Similarly to the Li-Openshaw algorithm, only one vertex is kept inside each cell. This point can be the centroid of the removed vertices, or a projection on the initial line of this centroid. The shapes obtained with this algorithm are less sharp than the ones obtained with other algorithms such as Douglas-Peucker.
 
     The algorithm is dedicated to the smooth simplification of natural features such as rivers, forests, coastlines, lakes.
 
@@ -827,6 +861,17 @@ class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
         from cartagen4qgis import get_plugin_icon
         return get_plugin_icon()
 
+    def shortDescription(self):
+        """
+        Returns an optional translated short description of the algorithm. This 
+        should be at most a single sentence, e.g. “Converts 2D features to 3D by 
+        sampling a DEM raster.”
+        """
+        first_line = self.shortHelpString().strip().splitlines()[0]
+        description = self.tr(first_line)
+        
+        return(description)
+
     def shortHelpString(self):
         """
         Returns a localised short helper string for the algorithm. This string
@@ -840,11 +885,13 @@ class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
             
             <h3>Parameters:</h3>
             <ul>
-                <li>- Initial scale : Initial scale of the provided line (25000.0 for 1:25000 scale).</li>
-                <li>- Final scale : Final scale of the simplified line.</li>
-                <li>- Centroid : If True, uses the center of the hexagonal cells as the new vertex. If False, the center is projected on the nearest point in the initial line.</li>
-                <li>- Tobler : If True, compute cell resolution based on Tobler’s formula, else uses Raposo’s formula.</li>
+                <li>- <em>Initial scale</em> : Initial scale of the provided line (25000.0 for 1:25000 scale).</li>
+                <li>- <em>Final scale</em> : Final scale of the simplified line.</li>
+                <li>- <em>Centroid</em> : If True, uses the center of the hexagonal cells as the new vertex. If False, the center is projected on the nearest point in the initial line.</li>
+                <li>- <em>Tobler</em> : If True, compute cell resolution based on Tobler’s formula, else uses Raposo’s formula.</li>
             </ul>
+                       
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_raposo.html#cartagen.simplify_raposo">help online</a>.
             """)   
 
     def tr(self, string):
@@ -940,8 +987,8 @@ class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
 
         if initial_scale == 0.0:
 
-            # from qgis.PyQt.QtWidgets import QMessageBox
-            # QMessageBox.warning(None, "Initial scale is null !", f"The Initial scale is equal to 0. The algorithm can't function.")
+            from qgis.core import QgsMessageLog, Qgis
+            QgsMessageLog.logMessage(f"The Initial scale is equal to 0. The algorithm Simplify Raposo can't function.", 'CartAGen', Qgis.Warning)
 
             from qgis.core import QgsWkbTypes
             feature = QgsFeature() #create a QgsFeature()
@@ -1055,6 +1102,17 @@ class ReumannWitkam(QgsProcessingAlgorithm):
         """
         from cartagen4qgis import get_plugin_icon
         return get_plugin_icon()
+
+    def shortDescription(self):
+        """
+        Returns an optional translated short description of the algorithm. This 
+        should be at most a single sentence, e.g. “Converts 2D features to 3D by 
+        sampling a DEM raster.”
+        """
+        first_line = self.shortHelpString().strip().splitlines()[0]
+        description = self.tr(first_line)
+        
+        return(description)
 
     def shortHelpString(self):
         """
@@ -1344,6 +1402,17 @@ class VisvalingamWhyattQGIS(QgsProcessingAlgorithm):
     def createInstance(self):
         return VisvalingamWhyattQGIS()
 
+    def shortDescription(self):
+        """
+        Returns an optional translated short description of the algorithm. This 
+        should be at most a single sentence, e.g. “Converts 2D features to 3D by 
+        sampling a DEM raster.”
+        """
+        first_line = self.shortHelpString().strip().splitlines()[0]
+        description = self.tr(first_line)
+        
+        return(description)
+
     def shortHelpString(self):
         """
         Returns a localised short helper string for the algorithm. This string
@@ -1435,6 +1504,17 @@ class Whirlpool(QgsProcessingAlgorithm):
         """
         from cartagen4qgis import get_plugin_icon
         return get_plugin_icon()
+
+    def shortDescription(self):
+        """
+        Returns an optional translated short description of the algorithm. This 
+        should be at most a single sentence, e.g. “Converts 2D features to 3D by 
+        sampling a DEM raster.”
+        """
+        first_line = self.shortHelpString().strip().splitlines()[0]
+        description = self.tr(first_line)
+        
+        return(description)
 
     def shortHelpString(self):
         """
