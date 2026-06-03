@@ -58,7 +58,7 @@ class NetworkFacesQGIS(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterMultipleLayers(
                 self.INPUT,
-                self.tr('Input lines'),
+                self.tr('Input lines :'),
                 layerType=QgsProcessing.TypeVectorLine,
                 optional=False
             )
@@ -70,7 +70,7 @@ class NetworkFacesQGIS(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
-                self.tr('Faces')
+                self.tr('Faces :')
             )
         )
 
@@ -125,7 +125,7 @@ class NetworkFacesQGIS(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Calculate network faces'
+        return 'Calculate Network Faces'
 
     def displayName(self):
         """
@@ -150,6 +150,21 @@ class NetworkFacesQGIS(QgsProcessingAlgorithm):
         formatting characters.
         """
         return 'Partitioning'
+    
+    def shortHelpString(self):
+        """
+        Returns a localised short helper string for the algorithm. This string
+        should provide a basic description about what the algorithm does and the
+        parameters and outputs associated with it..
+        """
+        helpstring = self.tr("""
+            Calculates the faces of one or multiple networks.
+
+            This function is often called polygonize. It creates polygons in place of a network of lines.
+
+        """)
+        return helpstring
+
 
     def icon(self):
         """

@@ -3,7 +3,7 @@ from .buildings import *
 from .processes import *
 from .network import *
 from .points import *
-from .simplify_lines_and_patches import *
-from .skeletonize_and_spinalize_polygons import *
-from .smooth_lines_and_patches import *
+from .simplify import *
+from .skeletonize_spinalize import *
+from .smooth import *
 from .partitioning import *

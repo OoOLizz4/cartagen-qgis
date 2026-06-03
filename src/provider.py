@@ -72,6 +72,7 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             SquaringPolygonNaive,
 
             #Network
+            BuildStrokes,
             CollapseRoundaboutsQGIS,
             CollapseBranchingCrossroads,
             CollapseDualCarriageways,
@@ -82,8 +83,7 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             DetectDualCarriageways,
             RuralTraffic,
 
-            #Tools
-            BuildStrokes,
+            #Partitioning
             NetworkFacesQGIS,
 
             #Points
@@ -94,7 +94,7 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             ReduceLabelgrid,
             ReduceQuadtree,
 
-            #Simplify Lines and Patches
+            #Simplify
             DouglasPeucker,
             Lang,
             LiOpenshaw,
@@ -103,12 +103,12 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             VisvalingamWhyattQGIS,
             Whirlpool,
 
-            #Skeletonize And Spinalize Polygons
+            #Skeletonize And Spinalize
             SkelNatural,
             SkelArtificial,
             SkelNetwork,
             
-            #Smooth Lines and Patches
+            #Smooth
             CatmullRomSmoothing,
             ChaikinSmoothing,
             GaussianSmoothing,
@@ -132,8 +132,8 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(BuildingRectangle())
         self.addAlgorithm(BuildingRegression())
         
-
         # Network
+        self.addAlgorithm(BuildStrokes())
         self.addAlgorithm(DetectRoundaboutsQGIS())
         self.addAlgorithm(DetectDeadEnds())
         self.addAlgorithm(EliminateDeadEnds())
@@ -145,7 +145,6 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(RuralTraffic())
 
         # Partitioning
-        self.addAlgorithm(BuildStrokes())
         self.addAlgorithm(NetworkFacesQGIS())
         
         # Points
@@ -159,7 +158,7 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         # Processes
         # self.addAlgorithm(ConstraintMethodQGIS())
 
-        # Simplify Lines and Patches
+        # Simplify
         self.addAlgorithm(DouglasPeucker())
         self.addAlgorithm(Lang())
         self.addAlgorithm(LiOpenshaw())
@@ -168,12 +167,12 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(VisvalingamWhyattQGIS())
         self.addAlgorithm(Whirlpool())
 
-        #Skeletonize and Spinalize Polygons
+        #Skeletonize and Spinalize
         self.addAlgorithm(SkelNatural())
         self.addAlgorithm(SkelArtificial())
         self.addAlgorithm(SkelNetwork())
         
-        #Smooth Lines and Patches
+        #Smooth
         self.addAlgorithm(GaussianSmoothing())
         self.addAlgorithm(CatmullRomSmoothing())
         self.addAlgorithm(ChaikinSmoothing())

@@ -116,7 +116,7 @@ class BoundariesDouglasPeucker(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Polygons'
+        return 'Boundaries'
 
     def shortHelpString(self):
         """
@@ -300,7 +300,7 @@ class BoundariesLiOpenshaw(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Polygons'
+        return 'Boundaries'
 
     def shortHelpString(self):
         """
@@ -491,7 +491,7 @@ class BoundariesRaposo(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Polygons'
+        return 'Boundaries'
 
     def shortHelpString(self):
         """
@@ -699,7 +699,7 @@ class BoundariesVisvalingam(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Polygons'
+        return 'Boundaries'
 
     def shortHelpString(self):
         """

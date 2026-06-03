@@ -95,7 +95,7 @@ class Angular(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Lines'
+        return 'Simplify Lines and Patches'
 
     def icon(self):
         """
@@ -266,7 +266,7 @@ class DouglasPeucker(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Lines'
+        return 'Simplify Lines and Patches'
 
     def icon(self):
         """
@@ -451,7 +451,7 @@ class Lang(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Lines'
+        return 'Simplify Lines and Patches'
 
     def icon(self):
         """
@@ -630,7 +630,7 @@ class LiOpenshaw(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Lines'
+        return 'Simplify Lines and Patches'
 
     def icon(self):
         """
@@ -817,7 +817,7 @@ class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Lines'
+        return 'Simplify Lines and Patches'
 
     def icon(self):
         """
@@ -1046,7 +1046,7 @@ class ReumannWitkam(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Lines'
+        return 'Simplify Lines and Patches'
 
     def icon(self):
         """
@@ -1328,7 +1328,7 @@ class VisvalingamWhyattQGIS(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Lines'
+        return 'Simplify Lines and Patches'
 
     def icon(self):
         """
@@ -1426,7 +1426,7 @@ class Whirlpool(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Lines'
+        return 'Simplify Lines and Patches'
 
     def icon(self):
         """
