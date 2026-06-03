@@ -113,10 +113,13 @@ class HullDelaunay(QgsProcessingAlgorithm):
         parameters and outputs associated with it..
         """
         helpstring = """
-            <b> Warning : this algorithm cannot create multiple polygons, unlike hull_swinging_arm(). Using a length too low can produce an invalid geometry. Create the hull of a set of points using the Delaunay triangulation.</b>
-
-            This algorithm first computes the Delaunay triangulation of the points, and then removes iteratively the boundary edges that are longer than a given parameter. 
+            <b> /!\ Cannot create multiple polygons, unlike hull_swinging_arm() /!\ </b>
             
+            <b> /!\ Using a length too low can produce an invalid geometry /!\ </b>
+            
+            Create the hull of a set of points using the Delaunay triangulation.
+            This algorithm first computes the Delaunay triangulation of the points, and then removes iteratively the boundary edges that are longer than a given parameter. 
+
             <h3> Parameters: </h3>
             <ul>
                 <li> - <em>Length</em>: the length in meters below which the Delaunay triangles edges are removed.</li>
@@ -403,8 +406,8 @@ class HullSwingingArm(QgsProcessingAlgorithm):
         res = res.to_dict('records')
 
         if not res :
-            from qgis.PyQt.QtWidgets import QMessageBox
-            QMessageBox.warning(None, "Empty output", f"The length of the arm ({length}) is too small. The polygon of the hull can't be created.")
+            # from qgis.PyQt.QtWidgets import QMessageBox
+            # QMessageBox.warning(None, "Empty output", f"The length of the arm ({length}) is too small. The polygon of the hull can't be created.")
 
             feature = QgsFeature() #create a QgsFeature()
             (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,

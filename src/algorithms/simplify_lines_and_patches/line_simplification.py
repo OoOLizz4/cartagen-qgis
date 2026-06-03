@@ -940,8 +940,8 @@ class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
 
         if initial_scale == 0.0:
 
-            from qgis.PyQt.QtWidgets import QMessageBox
-            QMessageBox.warning(None, "Initial scale is null !", f"The Initial scale is equal to 0. The algorithm can't function.")
+            # from qgis.PyQt.QtWidgets import QMessageBox
+            # QMessageBox.warning(None, "Initial scale is null !", f"The Initial scale is equal to 0. The algorithm can't function.")
 
             from qgis.core import QgsWkbTypes
             feature = QgsFeature() #create a QgsFeature()

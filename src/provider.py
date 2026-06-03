@@ -53,6 +53,12 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         
         from .algorithms import (
 
+            #Boundaries
+            BoundariesVisvalingam,
+            BoundariesDouglasPeucker,
+            BoundariesRaposo,
+            BoundariesLiOpenshaw,
+
             #Buildings
             BoffetArea,
             ClosePolygon,
@@ -65,24 +71,6 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             SquaringPolygonLS,
             SquaringPolygonNaive,
 
-            #Bends
-
-            #General
-            BuildStrokes,
-            NetworkFacesQGIS,
-
-            #Lines
-            CatmullRomSmoothing,
-            ChaikinSmoothing,
-            GaussianSmoothing,
-            DouglasPeucker,
-            Lang,
-            LiOpenshaw,
-            RaposoSimplificationQGIS,
-            ReumannWitkam,
-            VisvalingamWhyattQGIS,
-            Whirlpool,
-
             #Network
             CollapseRoundaboutsQGIS,
             CollapseBranchingCrossroads,
@@ -94,6 +82,10 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             DetectDualCarriageways,
             RuralTraffic,
 
+            #Tools
+            BuildStrokes,
+            NetworkFacesQGIS,
+
             #Points
             VectorHeatmap,
             HullDelaunay,
@@ -102,15 +94,31 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             ReduceLabelgrid,
             ReduceQuadtree,
 
-            #Polygons
-            BoundariesVisvalingam,
-            BoundariesDouglasPeucker,
-            BoundariesRaposo,
-            BoundariesLiOpenshaw,
+            #Simplify Lines and Patches
+            DouglasPeucker,
+            Lang,
+            LiOpenshaw,
+            RaposoSimplificationQGIS,
+            ReumannWitkam,
+            VisvalingamWhyattQGIS,
+            Whirlpool,
+
+            #Skeletonize And Spinalize Polygons
             SkelNatural,
             SkelArtificial,
-            SkelNetwork
+            SkelNetwork,
+            
+            #Smooth Lines and Patches
+            CatmullRomSmoothing,
+            ChaikinSmoothing,
+            GaussianSmoothing,
         )
+
+        #Boundaries
+        self.addAlgorithm(BoundariesVisvalingam())
+        self.addAlgorithm(BoundariesDouglasPeucker())
+        self.addAlgorithm(BoundariesLiOpenshaw())
+        self.addAlgorithm(BoundariesRaposo())
 
         # Buildings
         self.addAlgorithm(SquaringPolygonLS())
@@ -124,20 +132,6 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(BuildingRectangle())
         self.addAlgorithm(BuildingRegression())
         
-        # Lines
-        self.addAlgorithm(DouglasPeucker())
-        self.addAlgorithm(Lang())
-        self.addAlgorithm(LiOpenshaw())
-        self.addAlgorithm(RaposoSimplificationQGIS())
-        self.addAlgorithm(ReumannWitkam())
-        self.addAlgorithm(VisvalingamWhyattQGIS())
-        self.addAlgorithm(Whirlpool())
-        self.addAlgorithm(GaussianSmoothing())
-        self.addAlgorithm(CatmullRomSmoothing())
-        self.addAlgorithm(ChaikinSmoothing())
-        
-        # General
-        # self.addAlgorithm(ConstraintMethodQGIS())
 
         # Network
         self.addAlgorithm(DetectRoundaboutsQGIS())
@@ -148,10 +142,10 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(CollapseBranchingCrossroads())
         self.addAlgorithm(DetectDualCarriageways())
         self.addAlgorithm(CollapseDualCarriageways())
-        self.addAlgorithm(BuildStrokes())
         self.addAlgorithm(RuralTraffic())
 
-        # Tools
+        # Partitioning
+        self.addAlgorithm(BuildStrokes())
         self.addAlgorithm(NetworkFacesQGIS())
         
         # Points
@@ -162,14 +156,27 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(HullSwingingArm())
         self.addAlgorithm(VectorHeatmap())
 
-        #Polygon
+        # Processes
+        # self.addAlgorithm(ConstraintMethodQGIS())
+
+        # Simplify Lines and Patches
+        self.addAlgorithm(DouglasPeucker())
+        self.addAlgorithm(Lang())
+        self.addAlgorithm(LiOpenshaw())
+        self.addAlgorithm(RaposoSimplificationQGIS())
+        self.addAlgorithm(ReumannWitkam())
+        self.addAlgorithm(VisvalingamWhyattQGIS())
+        self.addAlgorithm(Whirlpool())
+
+        #Skeletonize and Spinalize Polygons
         self.addAlgorithm(SkelNatural())
         self.addAlgorithm(SkelArtificial())
         self.addAlgorithm(SkelNetwork())
-        self.addAlgorithm(BoundariesVisvalingam())
-        self.addAlgorithm(BoundariesDouglasPeucker())
-        self.addAlgorithm(BoundariesRaposo())
-        self.addAlgorithm(BoundariesLiOpenshaw())
+        
+        #Smooth Lines and Patches
+        self.addAlgorithm(GaussianSmoothing())
+        self.addAlgorithm(CatmullRomSmoothing())
+        self.addAlgorithm(ChaikinSmoothing())
         
         self._algorithms_loaded = True
 
