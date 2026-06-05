@@ -369,7 +369,6 @@ class HullSwingingArm(QgsProcessingAlgorithm):
         )
         self.addParameter(length)
 
-
         directions = ['cw', 'ccw']
         direction = QgsProcessingParameterEnum(
                 self.DIRECTION,

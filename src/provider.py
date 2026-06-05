@@ -54,10 +54,10 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         from .algorithms import (
 
             #Boundaries
-            BoundariesVisvalingam,
-            BoundariesDouglasPeucker,
-            BoundariesRaposo,
-            BoundariesLiOpenshaw,
+            # BoundariesVisvalingam,
+            # BoundariesDouglasPeucker,
+            # BoundariesRaposo,
+            # BoundariesLiOpenshaw,
 
             #Buildings
             BoffetArea,
@@ -95,12 +95,14 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             ReduceQuadtree,
 
             #Simplify
+            SimplifyAngular,
             DouglasPeucker,
             Lang,
             LiOpenshaw,
             RaposoSimplificationQGIS,
             ReumannWitkam,
             VisvalingamWhyattQGIS,
+            SimplifyWangMuller,
             Whirlpool,
 
             #Skeletonize And Spinalize
@@ -115,10 +117,10 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         )
 
         #Boundaries
-        self.addAlgorithm(BoundariesVisvalingam())
-        self.addAlgorithm(BoundariesDouglasPeucker())
-        self.addAlgorithm(BoundariesLiOpenshaw())
-        self.addAlgorithm(BoundariesRaposo())
+        # self.addAlgorithm(BoundariesVisvalingam())
+        # self.addAlgorithm(BoundariesDouglasPeucker())
+        # self.addAlgorithm(BoundariesLiOpenshaw())
+        # self.addAlgorithm(BoundariesRaposo())
 
         # Buildings
         self.addAlgorithm(SquaringPolygonLS())
@@ -159,12 +161,14 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         # self.addAlgorithm(ConstraintMethodQGIS())
 
         # Simplify
+        self.addAlgorithm(SimplifyAngular())
         self.addAlgorithm(DouglasPeucker())
         self.addAlgorithm(Lang())
         self.addAlgorithm(LiOpenshaw())
         self.addAlgorithm(RaposoSimplificationQGIS())
         self.addAlgorithm(ReumannWitkam())
         self.addAlgorithm(VisvalingamWhyattQGIS())
+        self.addAlgorithm(SimplifyWangMuller())
         self.addAlgorithm(Whirlpool())
 
         #Skeletonize and Spinalize

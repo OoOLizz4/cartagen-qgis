@@ -39,20 +39,23 @@ from qgis.core import (
     QgsProcessingParameterMultipleLayers
 )
 
-class Angular(QgsProcessingAlgorithm):
+class SimplifyAngular (QgsProcessingAlgorithm):
     """
-    Simplify a line or polygon by removing vertexes with small angles.
+        Simplify a line or polygon by removing vertexes with small angles.
 
-    This algorithm, proposed by McMaster [1], eliminates vertices that represent very small turning angles (< 10 degrees). This prevents rounding filters from destroying sharp curvatures, granting the resulting geometry a ‘manually generalised’ characteristic where significant bends remain prominent.
+        This algorithm, proposed by McMaster [1], eliminates vertices that represent very small turning angles (< 10 degrees). This prevents rounding filters from destroying sharp curvatures, granting the resulting geometry a ‘manually generalised’ characteristic where significant bends remain prominent.
 
-    Accept Multi geometries. If a polygon is provided, it also applies the thinning to its holes using the same parameters.
+        Accept Multi geometries. If a polygon is provided, it also applies the thinning to its holes using the same parameters.
 
-    Parameters:
+        Parameters:
 
             geometry (LineString, MultiLineString, Polygon, MultiPolygon, LinearRing) – The geometry to thin. If an open line is provided, the endpoints are preserved. If a closed ring or polygon is provided, the angles wrap around.
 
             angle (float, optional) – Turning-angle threshold in degrees. Vertices creating an exterior angle below this limit will be iteratively removed. Default is 10.0.
 
+        Returns:
+
+        LineString, MultiLineString, Polygon, MultiPolygon, LinearRing - Thinned geometry of the same type as input.
     """
 
     # Constants used to refer to parameters and outputs. They will be
@@ -61,8 +64,9 @@ class Angular(QgsProcessingAlgorithm):
 
     OUTPUT = 'OUTPUT'
     INPUT = 'INPUT'
-    ANGLE = 'ANGLE'
- 
+    ANGLE='ANGLE'
+
+            
     def name(self):
         """
         Returns the algorithm name, used for identifying the algorithm. This
@@ -105,42 +109,58 @@ class Angular(QgsProcessingAlgorithm):
         from cartagen4qgis import get_plugin_icon
         return get_plugin_icon()
 
+    def shortDescription(self):
+        """
+        Returns an optional translated short description of the algorithm. This 
+        should be at most a single sentence, e.g. “Converts 2D features to 3D by 
+        sampling a DEM raster.”
+        """
+        first_line = self.shortHelpString().strip().splitlines()[0]
+        description = self.tr(first_line)
+        
+        return(description)
+
     def shortHelpString(self):
         """
         Returns a localised short helper string for the algorithm. This string
         should provide a basic description about what the algorithm does and the
         parameters and outputs associated with it..
         """
-        return self.tr( f"""
+        helpstring = """
             Simplify a line or polygon by removing vertexes with small angles.
-            This algorithm, proposed by McMaster, eliminates vertices that represent very small turning angles (< 10 degrees). This prevents rounding filters from destroying sharp curvatures, granting the resulting geometry a ‘manually generalised’ characteristic where significant bends remain prominent.
-            Accept Multi geometries. If a polygon is provided, it also applies the thinning to its holes using the same parameters.
-            Parameter :
-            - Angle : Turning-angle threshold in degrees. Vertices creating an exterior angle below this limit will be iteratively removed. Default is 10.0.
-            Link to the doc :
-            https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_angular.html#cartagen.simplify_angular"
-            """)
+            This algorithm, proposed by McMaster, eliminates vertices that represent very small turning angles (under 10 degrees). This prevents rounding filters from destroying sharp curvatures, granting the resulting geometry a ‘manually generalised’ characteristic where significant bends remain prominent. 
+            
+            <b> Accept Multi geometries. </b>
+            <b>If a polygon is provided, it also applies the thinning to its holes using the same parameters. </b>
+            
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Angle </em> :  Turning-angle threshold in degrees. Vertices creating an exterior angle below this limit will be iteratively removed. Default is 10.0. </li>
+            </ul>
+
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_angular.html#cartagen.simplify_angular">help online</a>.
+        """
         
+        return self.tr(helpstring)
+    
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
 
     def createInstance(self):
-        return DouglasPeucker()
+        return SimplifyAngular()
 
     def initAlgorithm(self, config):
         """
         Here we define the inputs and output of the algorithm, along
         with some other properties.
-        """
-
+        """   
         # We add the input vector features source.
-        self.addParameter(
-            QgsProcessingParameterFeatureSource(
+        input = QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Input lines or polygons :'),
-                [QgsProcessing.TypeVectorPolygon, QgsProcessing.TypeVectorLine]
+                self.tr('The geometry to thin :'),
+                [QgsProcessing.TypeVectorLine, QgsProcessing.TypeVectorPolygon]
             )
-        )
+        self.addParameter(input)
 
         angle = QgsProcessingParameterNumber(
             self.ANGLE,
@@ -150,16 +170,14 @@ class Angular(QgsProcessingAlgorithm):
             optional=False
         )
         self.addParameter(angle)
-       
+
         # We add a feature sink in which to store our processed features (this
         # usually takes the form of a newly created vector layer when the
-        # algorithm is run in QGIS).
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
+        # algorithm is run in QGIS).   
+        output = QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
-                self.tr('Simplified Angular')
-            )
-        )
+                self.tr('Simplified Angular'))
+        self.addParameter(output)
 
     def processAlgorithm(self, parameters, context, feedback):
         """
@@ -167,38 +185,41 @@ class Angular(QgsProcessingAlgorithm):
         """
         import geopandas as gpd
         from cartagen import simplify_angular
-        from shapely.wkt import loads
-        from cartagen4qgis.src.tools import qgis_source_to_geodataframe, list_to_qgis_feature_2
+        from cartagen4qgis.src.tools import list_to_qgis_feature_2
 
         # Retrieve the feature source and sink. The 'dest_id' variable is used
         # to uniquely identify the feature sink, and must be included in the
         # dictionary returned by the processAlgorithm function.
         source = self.parameterAsSource(parameters, self.INPUT, context)
-
         gdf = gpd.GeoDataFrame.from_features(source.getFeatures())
         
-        # Retrieve the other parameter values 
+        # Compute the number of steps to display within the progress bar and
+        # get features from source
+        #total = 100.0 / source.featureCount() if source.featureCount() else 0
+        
+        # retrieve the other parameters values
         angle = self.parameterAsDouble(parameters, self.ANGLE, context)
 
-        # Perform the CartAGen algorithm and convert the result to a list of QgsFeature()
+        #Using CartAGen algorithm and transforming the result to a list of QgsFeature()
+        #Depending on the type of geometry of the input data
+
         dp = gdf.copy()
         for i in range(len(gdf)):
-            dp.loc[i,'geometry'] = simplify_angular(list(gdf.geometry)[i],angle=angle)
+            dp.loc[i,'geometry'] = simplify_angular(list(gdf.geometry)[i], angle=angle)
+        
             res = dp.to_dict('records')
-            res = list_to_qgis_feature_2(res, source.fields())
+            res = list_to_qgis_feature_2(res,source.fields())
 
         # Create the output sink    
-        (sink, dest_id) = self.parameterAsSink(
-            parameters, self.OUTPUT, context,
-            res[0].fields(), source.wkbType(), source.sourceCrs()
-        )
+        (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
+                context, res[0].fields(), source.wkbType(), source.sourceCrs())
         
         # Add a feature in the sink
         sink.addFeatures(res, QgsFeatureSink.FastInsert)
 
         return {
             self.OUTPUT: dest_id
-        }
+            }
 
 class DouglasPeucker(QgsProcessingAlgorithm):
     """
@@ -382,7 +403,6 @@ class DouglasPeucker(QgsProcessingAlgorithm):
             dp.loc[i,'geometry'] = simplify_douglas_peucker(list(gdf.geometry)[i],threshold=threshold, preserve_topology=preserve_topology)
             res = dp.to_dict('records')
             res = list_to_qgis_feature_2(res, source.fields())
-
 
         # Create the output sink    
         (sink, dest_id) = self.parameterAsSink(
@@ -1212,7 +1232,6 @@ class ReumannWitkam(QgsProcessingAlgorithm):
             self.OUTPUT: dest_id
         }
     
-
 class VisvalingamWhyattQGIS(QgsProcessingAlgorithm):
     """
     Simplify a line or polygon using an area-based selection.
@@ -1434,7 +1453,192 @@ class VisvalingamWhyattQGIS(QgsProcessingAlgorithm):
             For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_visvalingam_whyatt.html#cartagen.simplify_visvalingam_whyatt">help online</a>.
             """
         return self.tr(helpstring)
+
+class SimplifyWangMuller (QgsProcessingAlgorithm):
+    """
+            
+    Simplify a line or polygon using a bend-reduction method.
+
+    This algorithm proposed by Wang & Müller [1] analyses the bends (curves) of a line or polygon and reduces those whose size falls below a given diameter tolerance, emulating the decisions a cartographer would make when generalising a line by hand. Topology is preserved throughout, a bend is only reduced if doing so does not cause the resulting geometry to self-intersect, cross another feature, or violate sidedness constraints.
+
+    This is a translation to work outside QGIS of the reduce bend algorithm of the geo_sim_processing QGIS plugin.
+
+    Parameters:
+
+            geometry (LineString, MultiLineString, Polygon, MultiPolygon, LinearRing) – The geometry to simplify.
+
+            tolerance (float) – Theoretical diameter (in the coordinate reference system units) of a bend to remove. Bends whose adjusted area is smaller than the iso-perimetric equivalent of a circle with this diameter are candidates for reduction. A good rule of thumb for cartographic generalisation is to use 0.5 mm at the target map scale (e.g. tolerance = 25 for a 1:50 000 map in metres). Higher values = more aggressive simplification.
+
+    Returns:
+
+        LineString, MultiLineString, Polygon, MultiPolygon, LinearRing  Simplified geometry of the same type as the input.
+
+    
+    """
+
+    # Constants used to refer to parameters and outputs. They will be
+    # used when calling the algorithm from another algorithm, or when
+    # calling from the QGIS console.
+
+    OUTPUT = 'OUTPUT'
+    INPUT = 'INPUT'
+    TOLERANCE='TOLERANCE'
+
+            
+    def name(self):
+        """
+        Returns the algorithm name, used for identifying the algorithm. This
+        string should be fixed for the algorithm, and must not be localised.
+        The name should be unique within each provider. Names should contain
+        lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'Simplify Wang-Muller'
+
+    def displayName(self):
+        """
+        Returns the translated algorithm name, which should be used for any
+        user-visible display of the algorithm name.
+        """
+        return self.tr(self.name())
+
+    def group(self):
+        """
+        Returns the name of the group this algorithm belongs to. This string
+        should be localised.
+        """
+        return self.tr(self.groupId())
+
+    def groupId(self):
+        """
+        Returns the unique ID of the group this algorithm belongs to. This
+        string should be fixed for the algorithm, and must not be localised.
+        The group id should be unique within each provider. Group id should
+        contain lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'Simplify lines and patches'
+
+    def icon(self):
+        """
+        Should return a QIcon which is used for your provider inside
+        the Processing toolbox.
+        """
+        from cartagen4qgis import get_plugin_icon
+        return get_plugin_icon()
+
+    def shortDescription(self):
+        """
+        Returns an optional translated short description of the algorithm. This 
+        should be at most a single sentence, e.g. “Converts 2D features to 3D by 
+        sampling a DEM raster.”
+        """
+        first_line = self.shortHelpString().strip().splitlines()[0]
+        description = self.tr(first_line)
         
+        return(description)
+
+    def shortHelpString(self):
+        """
+        Returns a localised short helper string for the algorithm. This string
+        should provide a basic description about what the algorithm does and the
+        parameters and outputs associated with it..
+        """
+        helpstring = """
+        Simplify a line or polygon using a bend-reduction method.
+        This algorithm proposed by Wang & Müller analyses the bends (curves) of a line or polygon and reduces those whose size falls below a given diameter tolerance, emulating the decisions a cartographer would make when generalising a line by hand. Topology is preserved throughout, a bend is only reduced if doing so does not cause the resulting geometry to self-intersect, cross another feature, or violate sidedness constraints. 
+        This is a translation to work outside QGIS of the reduce bend algorithm of the geo_sim_processing QGIS plugin.
+        
+        <h3> Parameters: </h3>
+        <ul>
+          <li> - <em>Tolerance </em> :  Theoretical diameter (in the coordinate reference system units) of a bend to remove. Bends whose adjusted area is smaller than the iso-perimetric equivalent of a circle with this diameter are candidates for reduction. A good rule of thumb for cartographic generalisation is to use 0.5 mm at the target map scale (e.g. tolerance = 25 for a 1:50 000 map in metres). Higher values = more aggressive simplification. </li>
+        </ul>
+        For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.simplify_wang_muller.html#cartagen.simplify_wang_muller">help online</a>. 
+        """
+        
+        return self.tr(helpstring)
+    
+    def tr(self, string):
+        return QCoreApplication.translate('Processing', string)
+
+    def createInstance(self):
+        return SimplifyWangMuller()
+
+    def initAlgorithm(self, config):
+        """
+        Here we define the inputs and output of the algorithm, along
+        with some other properties.
+        """
+
+        # We add the input vector features source.
+        input = QgsProcessingParameterFeatureSource(
+                self.INPUT,
+                self.tr(' The geometry to simplify :'),
+                [QgsProcessing.TypeVectorLine, QgsProcessing.TypeVectorPolygon]
+            )
+        self.addParameter(input)
+
+        tolerance = QgsProcessingParameterNumber(
+            self.TOLERANCE,
+            self.tr('Tolerance :'),
+            type=QgsProcessingParameterNumber.Double,
+            defaultValue=25,
+            optional=False
+        )
+        self.addParameter(tolerance)
+            
+        # We add a feature sink in which to store our processed features (this
+        # usually takes the form of a newly created vector layer when the
+        # algorithm is run in QGIS).   
+        output = QgsProcessingParameterFeatureSink(
+                self.OUTPUT,
+                self.tr('SimplifyWd angMuller'))
+        self.addParameter(output)
+
+    def processAlgorithm(self, parameters, context, feedback):
+        """
+        Here is where the processing itself takes place.
+        """
+        import geopandas as gpd
+        import pandas
+        from cartagen import simplify_wang_muller
+        from cartagen4qgis.src.tools import list_to_qgis_feature_2
+
+        # Retrieve the feature source and sink. The 'dest_id' variable is used
+        # to uniquely identify the feature sink, and must be included in the
+        # dictionary returned by the processAlgorithm function.
+        source = self.parameterAsSource(parameters, self.INPUT, context)
+        gdf = gpd.GeoDataFrame.from_features(source.getFeatures())
+        
+        # Compute the number of steps to display within the progress bar and
+        # get features from source
+        #total = 100.0 / source.featureCount() if source.featureCount() else 0
+        
+        # retrieve the other parameters values
+        tolerance = self.parameterAsDouble(parameters, self.TOLERANCE, context)
+            
+        #Using CartAGen algorithm and transforming the result to a list of QgsFeature()
+        #Depending on the type of geometry of the input data
+
+        dp = gdf.copy()
+        for i in range(len(gdf)):
+            dp.loc[i,'geometry'] = simplify_wang_muller (list(gdf.geometry)[i], tolerance=tolerance)
+            res = dp.to_dict('records')
+            res = list_to_qgis_feature_2(res,source.fields())
+
+        # Create the output sink    
+        (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
+                context, res[0].fields(), source.wkbType(), source.sourceCrs())
+        
+        # Add a feature in the sink
+        sink.addFeatures(res, QgsFeatureSink.FastInsert)
+        
+        return {
+            self.OUTPUT: dest_id
+            }
+
+
+
 class Whirlpool(QgsProcessingAlgorithm):
 
     """

@@ -1,1 +1,1 @@
-from .line_simplification import DouglasPeucker, VisvalingamWhyattQGIS, RaposoSimplificationQGIS, Lang, LiOpenshaw, ReumannWitkam, Whirlpool
+from .line_simplification import SimplifyAngular, DouglasPeucker, VisvalingamWhyattQGIS, RaposoSimplificationQGIS, Lang, LiOpenshaw, ReumannWitkam, SimplifyWangMuller, Whirlpool
