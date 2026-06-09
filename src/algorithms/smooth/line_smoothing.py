@@ -709,3 +709,200 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
             self.OUTPUT: dest_id
         }
     
+class SmoothPlatre (QgsProcessingAlgorithm):
+    """  
+    Smooth a line and preserve the integrity of sharp turns.
+
+    The PLATRE algorithm was created by Emmanuel Fritsch to attenuate minor bends in a polyline while preserving the position and integrity of the sharpest turns. Unlike simple coordinate-based filters, it operates on the line’s intrinsic geometry (curvature/angle) to maintain structural consistency.
+
+    Parameters:
+
+            geometry (LineString or MultiLineString) – The geometry to smooth.
+
+            sigma (float, optional) – Strength of the smoothing.
+
+            curvature (float, optional) – The curvature threshold to identify sharpest turns. Low values is closer to the original line.
+
+    Returns:
+
+        LineString, MultiLineString
+    """
+
+    # Constants used to refer to parameters and outputs. They will be
+    # used when calling the algorithm from another algorithm, or when
+    # calling from the QGIS console.
+
+    OUTPUT = 'OUTPUT'
+    INPUT = 'INPUT'
+    SIGMA='SIGMA'
+    CURVATURE='CURVATURE'
+
+            
+    def name(self):
+        """
+        Returns the algorithm name, used for identifying the algorithm. This
+        string should be fixed for the algorithm, and must not be localised.
+        The name should be unique within each provider. Names should contain
+        lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'Smooth Platre'
+
+    def displayName(self):
+        """
+        Returns the translated algorithm name, which should be used for any
+        user-visible display of the algorithm name.
+        """
+        return self.tr(self.name())
+
+    def group(self):
+        """
+        Returns the name of the group this algorithm belongs to. This string
+        should be localised.
+        """
+        return self.tr(self.groupId())
+
+    def groupId(self):
+        """
+        Returns the unique ID of the group this algorithm belongs to. This
+        string should be fixed for the algorithm, and must not be localised.
+        The group id should be unique within each provider. Group id should
+        contain lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'Smooth lines and patches'
+
+    def icon(self):
+        """
+        Should return a QIcon which is used for your provider inside
+        the Processing toolbox.
+        """
+        from cartagen4qgis import get_plugin_icon
+        return get_plugin_icon()
+
+    def shortDescription(self):
+        """
+        Returns an optional translated short description of the algorithm. This 
+        should be at most a single sentence, e.g. “Converts 2D features to 3D by 
+        sampling a DEM raster.”
+        """
+        first_line = self.shortHelpString().strip().splitlines()[3]
+        description = self.tr(first_line)
+        
+        return(description)
+
+    def shortHelpString(self):
+        """
+        Returns a localised short helper string for the algorithm. This string
+        should provide a basic description about what the algorithm does and the
+        parameters and outputs associated with it..
+        """
+        helpstring = """
+            <b>/!\Doesn't work with multipart geometry/!\</b>
+            <b>/!\You need to drop Z and M for the algorithm to function/!\</b>
+
+            Smooth a line and preserve the integrity of sharp turns.
+            The PLATRE algorithm was created by Emmanuel Fritsch to attenuate minor bends in a polyline while preserving the position and integrity of the sharpest turns. Unlike simple coordinate-based filters, it operates on the line’s intrinsic geometry (curvature/angle) to maintain structural consistency.
+            
+            <h3> Parameters: </h3>
+            <ul>
+                <li> - <em>Sigma </em> :  Strength of the smoothing. </li>
+                <li> - <em>Curvature </em> :  The curvature threshold to identify sharpest turns. Low values is closer to the original line. </li>
+            </ul>
+
+            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_platre.html#cartagen.smooth_platre">help online</a>.
+        """
+        
+        return self.tr(helpstring)
+    
+    def tr(self, string):
+        return QCoreApplication.translate('Processing', string)
+
+    def createInstance(self):
+        return SmoothPlatre()
+
+    def initAlgorithm(self, config):
+        """
+        Here we define the inputs and output of the algorithm, along
+        with some other properties.
+        """
+
+        # We add the input vector features source.
+        input = QgsProcessingParameterFeatureSource(
+                self.INPUT,
+                self.tr('The line to smooth :'),
+                [QgsProcessing.TypeVectorLine]
+            )
+        self.addParameter(input)
+
+        sigma = QgsProcessingParameterNumber(
+            self.SIGMA,
+            self.tr('Sigma :'),
+            type=QgsProcessingParameterNumber.Double,
+            defaultValue=30.0,
+            optional=False
+        )
+        self.addParameter(sigma)
+    
+        curvature = QgsProcessingParameterNumber(
+            self.CURVATURE,
+            self.tr('Curvature :'),
+            type=QgsProcessingParameterNumber.Double,
+            defaultValue=30.0,
+            optional=False
+        )
+        self.addParameter(curvature)
+
+        # We add a feature sink in which to store our processed features (this
+        # usually takes the form of a newly created vector layer when the
+        # algorithm is run in QGIS).   
+        output = QgsProcessingParameterFeatureSink(
+                self.OUTPUT,
+                self.tr('Smoothed Platre'))
+        self.addParameter(output)
+
+    def processAlgorithm(self, parameters, context, feedback):
+        """
+        Here is where the processing itself takes place.
+        """
+        import geopandas as gpd
+        import pandas
+        from cartagen import smooth_platre
+        from cartagen4qgis.src.tools import list_to_qgis_feature_2
+
+        # Retrieve the feature source and sink. The 'dest_id' variable is used
+        # to uniquely identify the feature sink, and must be included in the
+        # dictionary returned by the processAlgorithm function.
+        source = self.parameterAsSource(parameters, self.INPUT, context)
+        gdf = gpd.GeoDataFrame.from_features(source.getFeatures())
+        
+        # retrieve the other parameters values
+        sigma = self.parameterAsDouble(parameters, self.SIGMA, context)
+        curvature = self.parameterAsDouble(parameters, self.CURVATURE, context)
+            
+        #Using CartAGen algorithm and transforming the result to a list of QgsFeature()
+        #Depending on the type of geometry of the input data
+        
+        # Compute the number of steps to display within the progress bar and
+        # get features from source
+        total = 100.0 / source.featureCount() if source.featureCount() else 0
+
+        dp = gdf.copy()
+        for i in range(len(gdf)):
+            dp.loc[i,'geometry'] = smooth_platre(list(gdf.geometry)[i], sigma=sigma,curvature=curvature)
+            # Update the progress bar
+            feedback.setProgress(int(i * total))
+        res = dp.to_dict('records')
+        res = list_to_qgis_feature_2(res,source.fields())
+
+        # Create the output sink    
+        (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
+                context, res[0].fields(), source.wkbType(), source.sourceCrs())
+        
+        # Add a feature in the sink
+        sink.addFeatures(res, QgsFeatureSink.FastInsert)
+        
+        return {
+            self.OUTPUT: dest_id
+            }
+    
