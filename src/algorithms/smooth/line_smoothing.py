@@ -128,7 +128,7 @@ class CatmullRomSmoothing(QgsProcessingAlgorithm):
         should be at most a single sentence, e.g. “Converts 2D features to 3D by 
         sampling a DEM raster.”
         """
-        first_line = self.shortHelpString().strip().splitlines()[0]
+        first_line = self.shortHelpString().strip().splitlines()[3]
         description = self.tr(first_line)
         
         return(description)
@@ -140,6 +140,9 @@ class CatmullRomSmoothing(QgsProcessingAlgorithm):
         parameters and outputs associated with it..
         """
         helpstring = """
+            <b>/!\Doesn't work with multipart geometry/!\</b>
+            <b>/!\You need to drop Z and M for the algorithm to function/!\</b>
+
             Smooth a line or polygon and preserve vertexes.
             This algorithm was proposed by Catmull and Rom, this is the version proposed by Barry and Goldman that makes use of the de Boor’s algorithm for evaluating spline curves in B-spline form.
             <h3> Parameters: </h3>
@@ -147,9 +150,9 @@ class CatmullRomSmoothing(QgsProcessingAlgorithm):
                 <li> - <em>Subdivisions</em> : Number of interpolated points between each pair of control points. Higher values produce smoother curves.</li>
                 <li> - <em>Alpha</em> : Parameterization type:</li>
                 <ul>
-                    <li>. Uniform parameterization </li>
-                    <li>. Centripetal parameterization (recommended, prevents loops) </li>
-                    <li>. Chordal parameterization </li>
+                    <li>  . Uniform parameterization </li>
+                    <li>  . Centripetal parameterization (recommended, prevents loops) </li>
+                    <li>  . Chordal parameterization </li>
                 <ul>
             </ul>
 
@@ -226,7 +229,7 @@ class CatmullRomSmoothing(QgsProcessingAlgorithm):
         
         # Compute the number of steps to display within the progress bar and
         # get features from source
-        #total = 100.0 / source.featureCount() if source.featureCount() else 0
+        total = 100.0 / source.featureCount() if source.featureCount() else 0
         
         # retrieve the other parameters values
         subdivisions = self.parameterAsInt(parameters, self.SUBDIVISIONS, context)
@@ -242,12 +245,15 @@ class CatmullRomSmoothing(QgsProcessingAlgorithm):
                     gs.loc[i,'geometry'] = smooth_catmull_rom(list(gs.geometry)[i], alpha=dico[alpha], subdivisions=subdivisions)
                 except:
                     gs.loc[i,'geometry'] = gs.loc[i,'geometry']
+            # Update the progress bar
+            feedback.setProgress(int(i* total))
                 
             res = gs.to_dict('records')
             res = list_to_qgis_feature_2(res,source.fields())
 
         else:
             gs = gdf.copy()
+
             for i in range(len(gdf)):
                 geommultiple = gs.loc[i,'geometry']
                 listGeomSimple = list(geommultiple.geoms)
@@ -257,22 +263,25 @@ class CatmullRomSmoothing(QgsProcessingAlgorithm):
                     ligneTraitee = smooth_catmull_rom(ligne, alpha=dico[alpha], subdivisions=subdivisions)
                     listeTraitee.append(ligneTraitee)
 
+                # Update the progress bar
+                feedback.setProgress(int(i * total))
+
                 gs.loc[i,'geometry'] = listeTraitee
             
             res = gs.to_dict('records')
             res = list_to_qgis_feature_2(res,source.fields())
 
-            # Create the output sink    
-            (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
-                    context, res[0].fields(), source.wkbType(), source.sourceCrs())
-            
-            # Add a feature in the sink
-            sink.addFeatures(res, QgsFeatureSink.FastInsert)
+        # Create the output sink    
+        (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
+                context, res[0].fields(), source.wkbType(), source.sourceCrs())
+        
+        # Add a feature in the sink
+        sink.addFeatures(res, QgsFeatureSink.FastInsert)
 
-            return {
-                self.OUTPUT: dest_id
-            }
-    
+        return {
+            self.OUTPUT: dest_id
+        }
+
 class ChaikinSmoothing(QgsProcessingAlgorithm):
     """
     Smooth a line or polygon by cutting corners.
@@ -439,7 +448,7 @@ class ChaikinSmoothing(QgsProcessingAlgorithm):
         
         # Compute the number of steps to display within the progress bar and
         # get features from source
-        #total = 100.0 / source.featureCount() if source.featureCount() else 0
+        total = 100.0 / source.featureCount() if source.featureCount() else 0
         
         # retrieve the other parameters values
         iterations = self.parameterAsInt(parameters, self.ITERATIONS, context)
@@ -452,7 +461,8 @@ class ChaikinSmoothing(QgsProcessingAlgorithm):
             gs = gdf.copy()
             for i in range(len(gdf)):
                 gs.loc[i,'geometry'] = smooth_chaikin(list(gs.geometry)[i], iterations=iterations, keep_ends=keep_ends)
-            
+                feedback.setProgress(int(i* total))
+
             res = gs.to_dict('records')
             res = list_to_qgis_feature_2(res,source.fields())
 
@@ -466,6 +476,8 @@ class ChaikinSmoothing(QgsProcessingAlgorithm):
                 for ligne in listGeomSimple:
                     ligneTraitee = smooth_chaikin(ligne, iterations=iterations, keep_ends=keep_ends)
                     listeTraitee.append(ligneTraitee)
+                    feedback.setProgress(int(i* total))
+
                 gs.loc[i,'geometry'] = listeTraitee
 
             res = gs.to_dict('records')
@@ -556,7 +568,7 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
         should be at most a single sentence, e.g. “Converts 2D features to 3D by 
         sampling a DEM raster.”
         """
-        first_line = self.shortHelpString().strip().splitlines()[0]
+        first_line = self.shortHelpString().strip().splitlines()[3]
         description = self.tr(first_line)
         
         return(description)
@@ -568,6 +580,9 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
         parameters and outputs associated with it..
         """
         helpstring = """
+            <b>/!\Doesn't work with multipart geometry/!\</b>
+            <b>/!\You need to drop Z and M for the algorithm to function/!\</b>
+
             Smooth a line and attenuate its inflexion points.
             The gaussian smoothing has been studied by Babaud et al. for image processing, and by Plazanet for the generalisation of cartographic features.
             Accept Multi geometries. If a polygon is provided, it also apply the smoothing to its holes using the same parameters.
@@ -577,7 +592,7 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
                 <li> - <em>Sample</em> : The length in meter between each nodes after resampling the geometry. If not provided, the sample is derived from the geometry and is the average distance between each consecutive vertex.</li>
                 <li> - <em>Densify</em> : Whether the resulting geometry should keep the new vertex density. Default to True.</li>
             </ul>
-            For more see <a href=" https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_gaussian.html#cartagen.smooth_gaussian">help online</a>.'
+            For more see <a href=" https://cartagen.readthedocs.io/en/latest/reference/cartagen.smooth_gaussian.html#cartagen.smooth_gaussian">help online</a>.
         """
         
         return self.tr(helpstring)
@@ -605,7 +620,7 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
 
         sigma = QgsProcessingParameterNumber(
             self.SIGMA,
-            self.tr('Gaussian filter strength :'),
+            self.tr('Sigma :'),
             type=QgsProcessingParameterNumber.Double,
             defaultValue=30.0,
             optional=False
@@ -614,7 +629,7 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
        
         densify = QgsProcessingParameterBoolean(
             self.DENSIFY,
-                self.tr('Densify :'),
+                self.tr('Densify ?'),
                 optional=False,
                 defaultValue=True
             )
@@ -623,9 +638,9 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
 
         sample = QgsProcessingParameterNumber(
             self.SAMPLE,
-            self.tr('Length in meter between each nodes after resampling :'),
+            self.tr('Sample :'),
             type=QgsProcessingParameterNumber.Double,
-            defaultValue=30.0,
+            defaultValue=None,
             optional=False
         )
         self.addParameter(sample)
@@ -659,7 +674,7 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
         
         # Compute the number of steps to display within the progress bar and
         # get features from source
-        #total = 100.0 / source.featureCount() if source.featureCount() else 0
+        total = 100.0 / source.featureCount() if source.featureCount() else 0
         
         # retrieve the other parameters values
         sigma = self.parameterAsDouble(parameters, self.SIGMA, context)
@@ -668,24 +683,20 @@ class GaussianSmoothing(QgsProcessingAlgorithm):
 
         #Using CartAGen algorithm and transforming the result to a list of QgsFeature()
         #Depending on the type of geometry of the input data
-        if source.wkbType().name == 'Polygon':
-            gs = gdf.copy()
+        
+        gs = gdf.copy()
+ 
+        if sample == 0:
             for i in range(len(gdf)):
-                gs.loc[i,'geometry'] = smooth_gaussian(list(gs.geometry)[i], sigma= sigma, sample= sample, densify = densify)
-
-            res = gs.to_dict('records')
-            res = list_to_qgis_feature_2(res,source.fields())
-
+                gs.loc[i,'geometry'] = smooth_gaussian(list(gs.geometry)[i], sigma=sigma, densify=densify)
+                feedback.setProgress(int(i* total))
         else:
-            gs = gdf.copy()
             for i in range(len(gdf)):
-                try:
-                    gs.loc[i,'geometry'] = smooth_gaussian(list(gs.geometry)[i], sigma= sigma, sample= sample, densify = densify)
-                except:
-                    gs.loc[i,'geometry'] = gs.loc[i,'geometry']
-            
-            res = gs.to_dict('records')
-            res = list_to_qgis_feature_2(res,source.fields())
+                gs.loc[i,'geometry'] = smooth_gaussian(list(gs.geometry)[i], sigma=sigma, sample=sample, densify=densify)
+                feedback.setProgress(int(i* total))
+
+        res = gs.to_dict('records')
+        res = list_to_qgis_feature_2(res,source.fields())
 
         # Create the output sink    
         (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
