@@ -1,4 +1,5 @@
 # from .boundaries import *
+from .boundaries import *
 from .buildings import *
 from .processes import *
 from .network import *

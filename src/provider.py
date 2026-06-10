@@ -54,10 +54,10 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         from .algorithms import (
 
             #Boundaries
-            # BoundariesVisvalingam,
-            # BoundariesDouglasPeucker,
-            # BoundariesRaposo,
-            # BoundariesLiOpenshaw,
+            BoundariesDouglasPeucker,
+            BoundariesRaposo,
+            BoundariesLiOpenshaw,
+            BoundariesVisvalingam,
 
             #Buildings
             BoffetArea,
@@ -123,10 +123,10 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         )
 
         #Boundaries
-        # self.addAlgorithm(BoundariesVisvalingam())
-        # self.addAlgorithm(BoundariesDouglasPeucker())
-        # self.addAlgorithm(BoundariesLiOpenshaw())
-        # self.addAlgorithm(BoundariesRaposo())
+        self.addAlgorithm(BoundariesDouglasPeucker())
+        self.addAlgorithm(BoundariesLiOpenshaw())
+        self.addAlgorithm(BoundariesRaposo())
+        self.addAlgorithm(BoundariesVisvalingam())
 
         # Buildings
         self.addAlgorithm(SquaringPolygonLS())
