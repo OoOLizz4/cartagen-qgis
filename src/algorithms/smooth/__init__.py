@@ -1,1 +1,1 @@
-from .line_smoothing import GaussianSmoothing, CatmullRomSmoothing, ChaikinSmoothing, SmoothPlatre
+from .line_smoothing import GaussianSmoothing, CatmullRomSmoothing, ChaikinSmoothing, SmoothPlatre, SmoothSnake, SmoothTaubin, SmoothTopographic, SmoothWMA

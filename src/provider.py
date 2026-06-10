@@ -114,7 +114,12 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             CatmullRomSmoothing,
             ChaikinSmoothing,
             GaussianSmoothing,
-            SmoothPlatre
+            SmoothPlatre,
+            SmoothSnake,
+            SmoothTaubin,
+            SmoothTopographic,
+            SmoothWMA
+
         )
 
         #Boundaries
@@ -182,7 +187,11 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(CatmullRomSmoothing())
         self.addAlgorithm(ChaikinSmoothing())
         self.addAlgorithm(SmoothPlatre())
-        
+        self.addAlgorithm(SmoothSnake())
+        self.addAlgorithm(SmoothTaubin())
+        self.addAlgorithm(SmoothTopographic())
+        self.addAlgorithm(SmoothWMA())
+                
         self._algorithms_loaded = True
 
     def id(self):
