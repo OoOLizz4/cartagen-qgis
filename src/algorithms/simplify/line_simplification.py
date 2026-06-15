@@ -1044,8 +1044,10 @@ class RaposoSimplificationQGIS(QgsProcessingAlgorithm):
 
         if initial_scale == 0.0:
 
-            from qgis.core import QgsMessageLog, Qgis
+            from qgis.core import QgsMessageLog, Qgis, QgsLogger
             QgsMessageLog.logMessage(f"The Initial scale is equal to 0. The algorithm Simplify Raposo can't function.", 'CartAGen', Qgis.Warning)
+            QgsLogger.logMessageToFile("Fesse")
+            QgsLogger.critical("Fesse2")
 
             from qgis.core import QgsWkbTypes
             feature = QgsFeature() #create a QgsFeature()

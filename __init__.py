@@ -45,4 +45,4 @@ def classFactory(iface):
     :type iface: QgsInterface
     """
     from .cartagenplugin import CartAGen4QGISPlugin
-    return CartAGen4QGISPlugin()
+    return CartAGen4QGISPlugin(iface)

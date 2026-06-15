@@ -22,6 +22,11 @@ import sys
 import subprocess
 import inspect
 
+from qgis.gui import QgisInterface
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAction
+
+
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 if cmd_folder not in sys.path:
     sys.path.insert(0, cmd_folder)
@@ -29,10 +34,16 @@ if cmd_folder not in sys.path:
 
 class CartAGen4QGISPlugin(object):
     
-    def __init__(self):
+    def __init__(self, iface):
         self.provider = None
         self.plugin_dir = os.path.dirname(__file__)
         self.initialized = False
+
+        self.iface: QgisInterface = iface
+        self.menu = "CartAGen"
+        self.actions = []
+        self.toolbar = self.iface.addToolBar("CartAgen")
+        self.toolbar.setObjectName("cartagen4qgis")
     
     def initProcessing(self):
         """Init Processing provider for QGIS >= 3.8."""
@@ -57,6 +68,7 @@ class CartAGen4QGISPlugin(object):
     def initGui(self):
         # Delay qt modules import
         try:
+            print("dans initGui")
             from qgis.core import QgsMessageLog, Qgis
 
             # Check dependencies
@@ -68,7 +80,22 @@ class CartAGen4QGISPlugin(object):
 
             if not self.initialized:
                 self.initProcessing()
-                    
+                print("initProcessing a eu lieu")
+                from cartagen4qgis import get_plugin_icon
+
+                self.add_action(
+                    icon_path=get_plugin_icon(),
+                    text="Network",
+                    callback=self.run_interactive_console_network,
+                    add_to_toolbar=False,
+                    add_to_specific_toolbar=self.toolbar,
+                )       
+                print(f"action 3 done")
+                        
+            # will be set False in run()
+            self.first_start = True
+            print("first start c bon")
+
         except Exception as e:
             # Use a try catch to avoid QGIS crashing
             try:
@@ -89,6 +116,16 @@ class CartAGen4QGISPlugin(object):
                 QgsApplication.processingRegistry().removeProvider(self.provider)
                 self.provider = None
                 self.initialized = False
+                QgsApplication.processingRegistry().removeProvider(self.provider)
+
+                for action in self.actions:
+                    self.iface.removePluginMenu("CartAgen", action)
+                    self.iface.removePluginVectorMenu("CartAgen", action)
+
+                    self.toolbar.removeAction(action)
+
+                del self.toolbar
+
         except Exception as e:
             # Ignorer les erreurs au déchargement
             pass
@@ -330,3 +367,57 @@ flatpak install org.kde.Sdk/x86_64/VERSION
                 'CartAGen',
                 Qgis.Critical
             )
+
+    def add_action(
+        self,
+        icon_path,
+        text,
+        callback,
+        enabled_flag=True,
+        add_to_menu=True,
+        add_to_toolbar=True,
+        status_tip=None,
+        whats_this=None,
+        parent=None,
+        add_to_specific_toolbar=None,
+    ):
+        
+        print('Je suis dans add_action lezz go')
+
+        icon = QIcon(icon_path)
+        action = QAction(icon, text, parent)
+        action.triggered.connect(callback)
+        action.setEnabled(enabled_flag)
+
+        if status_tip is not None:
+            action.setStatusTip(status_tip)
+
+        if whats_this is not None:
+            action.setWhatsThis(whats_this)
+
+        if add_to_toolbar:
+            # Adds plugin icon to Plugins toolbar
+            self.iface.addToolBarIcon(action)
+
+        if add_to_menu:
+            self.iface.addPluginToMenu(self.menu, action)
+            self.iface.addPluginToVectorMenu(self.menu, action)
+
+        if add_to_specific_toolbar:
+            add_to_specific_toolbar.addAction(action)
+
+        self.actions.append(action)
+
+        return action
+
+    def run_interactive_console_network(self):
+        from .gui.dialog_network import InteractiveNetwork
+
+        dlg = InteractiveNetwork(parent=self.iface.mainWindow(), iface=self.iface)
+
+        result = dlg.exec_()
+
+        if result == 1:
+            QgsProject.instance().addMapLayer(dlg.get_layer_for_project())
+
+        dlg = None
