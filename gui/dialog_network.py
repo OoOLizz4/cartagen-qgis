@@ -121,7 +121,7 @@ class InteractiveNetwork(QDialog):
     def generalize_layer(self) -> None:
         self.process.process_layer(
             simplify_percent=self.percent_widget.value(),
-            simplify_method=SimplifyAlgorithm.get_method(self.methods.currentIndex()),
+            simplify_method='pasta',
         )
 
         self.data_generalized.emit()
