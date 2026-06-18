@@ -10,7 +10,7 @@ from qgis.core import (
     QgsVectorLayerJoinInfo,
     QgsVectorLayerUtils,
 )
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 
 from .class_qmapshaper_file import QMapshaperFile, QMapshaperGeojsonFile
 
@@ -99,7 +99,7 @@ class QMapshaperDataPreparer:
     def add_mapshaper_id_field(layer: QgsVectorLayer) -> int:
         layer.startEditing()
 
-        field_index = layer.addExpressionField("$id", QgsField("id_cartagen", QVariant.Int))
+        field_index = layer.addExpressionField("$id", QgsField("id_cartagen", QMetaType.Int))
 
         layer.commitChanges()
 
@@ -118,7 +118,7 @@ class QMapshaperDataPreparer:
 
         layer.startEditing()
 
-        field_index = layer.addExpressionField(expr, QgsField("id_cartagen", QVariant.Bool))
+        field_index = layer.addExpressionField(expr, QgsField("id_cartagen", QMetaType.Bool))
 
         layer.commitChanges()
 

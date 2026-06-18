@@ -427,8 +427,8 @@ class HullSwingingArm(QgsProcessingAlgorithm):
         res = res.to_dict('records')
 
         if not res :
-            # from qgis.PyQt.QtWidgets import QMessageBox
-            # QMessageBox.warning(None, "Empty output", f"The length of the arm ({length}) is too small. The polygon of the hull can't be created.")
+            feedback.pushInfo("ERROR WITH CARTAGEN :")
+            feedback.pushInfo(f"The length of the arm ({length}) is too small. The polygon of the hull can't be created.")
 
             feature = QgsFeature() #create a QgsFeature()
             (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,

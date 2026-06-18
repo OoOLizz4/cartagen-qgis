@@ -35,8 +35,8 @@ class MapshaperProcess(QProcess):
         self.waitForFinished()
 
     def read_output(self):
-        self.output_lines = bytes(self.readAllStandardOutput()).decode("utf8")
-        self.error_lines = bytes(self.readAllStandardError()).decode("utf8")
+        self.output_lines = bytes(self.readAllStandardOutput()).decode("utf-8", errors="ignore")
+        self.error_lines = bytes(self.readAllStandardError()).decode("utf-8")
 
         if "Wrote" in self.output_lines:
             self.finished_correctly = True
@@ -71,7 +71,7 @@ class MapshaperProcessChecker(QProcess):
 
         self.waitForFinished()
 
-        self.output_lines = bytes(self.readAllStandardOutput()).decode("utf8")
+        self.output_lines = bytes(self.readAllStandardOutput()).decode("utf-8")
 
         if "Usage:  mapshaper -<command>" in self.output_lines:
             self.found = True
@@ -100,7 +100,7 @@ class NpmPackageLocationCheckerProcess:
 
         p.waitForFinished()
 
-        output_lines = bytes(p.readAllStandardOutput()).decode("utf8")
+        output_lines = bytes(p.readAllStandardOutput()).decode("utf-8")
 
         if "npm <command>" in output_lines:
             return True
@@ -119,7 +119,7 @@ class NpmPackageLocationCheckerProcess:
 
         p.waitForFinished()
 
-        output_lines = bytes(p.readAllStandardOutput()).decode("utf8")
+        output_lines = bytes(p.readAllStandardOutput()).decode("utf-8")
 
         if 0 < len(output_lines):
             self.packages_location = output_lines.strip()
@@ -140,7 +140,7 @@ class NpmPackageLocationCheckerProcess:
 
         p.waitForFinished()
 
-        output_lines = bytes(p.readAllStandardOutput()).decode("utf8")
+        output_lines = bytes(p.readAllStandardOutput()).decode("utf-8")
 
         if "mapshaper" in output_lines:
             self.mapshaper_present = True
