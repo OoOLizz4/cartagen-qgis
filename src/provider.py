@@ -70,9 +70,9 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             BuildingDisplacementRandomQGIS,
             SquaringPolygonLS,
             SquaringPolygonNaive,
+            SquarePolygonOrthogonal,
 
             #Network
-            BuildStrokes,
             CollapseRoundaboutsQGIS,
             CollapseBranchingCrossroads,
             CollapseDualCarriageways,
@@ -82,8 +82,11 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             EliminateDeadEnds,
             DetectDualCarriageways,
             RuralTraffic,
+            RuralBetweeness,
 
             #Partitioning
+            StrokesRoads,
+            BuildStrokesRivers,
             NetworkFacesQGIS,
 
             #Points
@@ -131,6 +134,7 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         # Buildings
         self.addAlgorithm(SquaringPolygonLS())
         self.addAlgorithm(SquaringPolygonNaive())
+        self.addAlgorithm(SquarePolygonOrthogonal())
         self.addAlgorithm(BuildingSimplificationRuasQGIS())
         self.addAlgorithm(BuildingDisplacementRandomQGIS())
         self.addAlgorithm(MorphologicalAmalgamation())
@@ -141,7 +145,6 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(BuildingRegression())
         
         # Network
-        self.addAlgorithm(BuildStrokes())
         self.addAlgorithm(DetectRoundaboutsQGIS())
         self.addAlgorithm(DetectDeadEnds())
         self.addAlgorithm(EliminateDeadEnds())
@@ -151,8 +154,11 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(DetectDualCarriageways())
         self.addAlgorithm(CollapseDualCarriageways())
         self.addAlgorithm(RuralTraffic())
+        self.addAlgorithm(RuralBetweeness())
 
         # Partitioning
+        self.addAlgorithm(StrokesRoads())
+        self.addAlgorithm(BuildStrokesRivers())
         self.addAlgorithm(NetworkFacesQGIS())
         
         # Points

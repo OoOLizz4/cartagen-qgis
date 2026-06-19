@@ -135,7 +135,7 @@ class BoundariesDouglasPeucker(QgsProcessingAlgorithm):
                 <li> - <em>Preserve Topology</em> : If set to True, the algorithm will prevent invalid geometries from being created (checking for collapses, ring-intersections, etc). The trade-off is computational expensivity.</li>
             </ul>
 
-            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.boundaries_douglas_peucker.html#cartagen.boundaries_douglas_peucker">help online</a>.
+            For more see <a href="https://cartagen.readthedocs.io/en/main/reference/cartagen.generalize_boundaries.html#cartagen.generalize_boundaries">help online</a>.
         """
 
         return self.tr(helpstring)
@@ -334,7 +334,7 @@ class BoundariesLiOpenshaw(QgsProcessingAlgorithm):
                 <li> - <em>Cell size</em> : the size of the regular grid used to divide the line.</li>
             </ul>
 
-            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.boundaries_li_openshaw.html#cartagen.boundaries_li_openshaw">help online</a>.
+            For more see <a href="https://cartagen.readthedocs.io/en/main/reference/cartagen.generalize_boundaries.html#cartagen.generalize_boundaries">help online</a>.
         """
 
         return self.tr(helpstring)
@@ -541,7 +541,7 @@ class BoundariesRaposo(QgsProcessingAlgorithm):
                 <li> - <em>Tobler</em> : if True, compute cell resolution based on Tobler's formula, else uses Raposo's formula</li>
             </ul>
 
-            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.boundaries_raposo.html#cartagen.boundaries_raposo">help online</a>.
+            For more see <a href="https://cartagen.readthedocs.io/en/main/reference/cartagen.generalize_boundaries.html#cartagen.generalize_boundaries">help online</a>.
         """
 
         return self.tr(helpstring)
@@ -761,7 +761,7 @@ class BoundariesVisvalingam(QgsProcessingAlgorithm):
                 <li> - <em>Area tolerance</em> : the minimum triangle area to keep a vertex in the line.</li>
             </ul>
             
-            For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.boundaries_visvalingam_whyatt.html#cartagen.boundaries_visvalingam_whyatt">help online</a>.
+            For more see <a href="https://cartagen.readthedocs.io/en/main/reference/cartagen.generalize_boundaries.html#cartagen.generalize_boundaries">help online</a>.
         """
 
         return self.tr(helpstring)

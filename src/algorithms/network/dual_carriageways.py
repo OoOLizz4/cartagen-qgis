@@ -121,7 +121,7 @@ class DetectDualCarriageways(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Detect dual carriageways'
+        return 'Detect DualCarriageways'
 
     def displayName(self):
         """
@@ -430,7 +430,7 @@ class CollapseDualCarriageways(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Collapse dual carriageways'
+        return 'Collapse DualCarriageways'
 
     def displayName(self):
         """

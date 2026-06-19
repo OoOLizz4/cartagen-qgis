@@ -1,6 +1,6 @@
 from .displacement import BuildingDisplacementRandomQGIS
 from .simplification import BuildingSimplificationRuasQGIS
-from .squaring import SquaringPolygonLS, SquaringPolygonNaive
+from .squaring import SquaringPolygonLS, SquaringPolygonNaive, SquarePolygonOrthogonal
 from .morphological_amalgamation import MorphologicalAmalgamation
 from .boffet_areas import BoffetArea
 from .close_polygon import ClosePolygon
