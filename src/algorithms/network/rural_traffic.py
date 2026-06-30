@@ -329,7 +329,7 @@ class RuralTraffic(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Detect Rural Traffic'
+        return 'Rural Traffic'
 
     def displayName(self):
         """
@@ -443,7 +443,7 @@ class RuralBetweeness (QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Detect Rural Betweeness'
+        return 'Rural Betweeness'
 
     def displayName(self):
         """

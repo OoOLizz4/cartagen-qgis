@@ -54,10 +54,15 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         from .algorithms import (
 
             #Boundaries
+            BoundariesAngular,
             BoundariesDouglasPeucker,
-            BoundariesRaposo,
+            BoundariesLang,
             BoundariesLiOpenshaw,
+            BoundariesRaposo,
+            BoundariesReumannWitkam,
             BoundariesVisvalingam,
+            BoundariesWangMuller,
+            BoundariesWhirlpool,
 
             #Buildings
             BoffetArea,
@@ -122,14 +127,18 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             SmoothTaubin,
             SmoothTopographic,
             SmoothWMA
-
         )
 
         #Boundaries
+        self.addAlgorithm(BoundariesAngular())
         self.addAlgorithm(BoundariesDouglasPeucker())
+        self.addAlgorithm(BoundariesLang())
         self.addAlgorithm(BoundariesLiOpenshaw())
         self.addAlgorithm(BoundariesRaposo())
+        self.addAlgorithm(BoundariesReumannWitkam())
         self.addAlgorithm(BoundariesVisvalingam())
+        self.addAlgorithm(BoundariesWangMuller())
+        self.addAlgorithm(BoundariesWhirlpool())
 
         # Buildings
         self.addAlgorithm(SquaringPolygonLS())
