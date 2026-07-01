@@ -2,6 +2,7 @@
 from .boundaries import *
 from .buildings import *
 from .network import *
+from .lines import *
 from .partitioning import *
 from .points import *
 from .processes import *

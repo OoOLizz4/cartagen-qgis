@@ -76,6 +76,9 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             TypifyMatching,
             TypifyBurghardtCecconi,
 
+            #Lines
+            BeamsDisplacement,
+
             #Network
             CollapseRoundaboutsQGIS,
             CollapseBranchingCrossroads,
@@ -155,6 +158,9 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(BuildingDisplacementRandomQGIS())
         self.addAlgorithm(TypifyMatching())
         self.addAlgorithm(TypifyBurghardtCecconi())
+
+        #Lines
+        self.addAlgorithm(BeamsDisplacement())
 
         # Network
         self.addAlgorithm(DetectRoundaboutsQGIS())
