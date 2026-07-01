@@ -1,10 +1,11 @@
 # from .boundaries import *
 from .boundaries import *
 from .buildings import *
-from .processes import *
 from .network import *
+from .partitioning import *
 from .points import *
+from .processes import *
 from .simplify import *
 from .skeletonize_spinalize import *
 from .smooth import *
-from .partitioning import *
+from .regularize import *

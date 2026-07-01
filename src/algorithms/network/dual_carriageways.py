@@ -530,9 +530,17 @@ class CollapseDualCarriageways(QgsProcessingAlgorithm):
             )
         self.addParameter(sigma)	 
 
-        self.addParameter(QgsProcessingParameterField(self.PROPAGATE_ATTRIBUTES,
+
+        attribute = QgsProcessingParameterField(
+            self.PROPAGATE_ATTRIBUTES,
             self.tr('Attributes to propagate :'),
-            None, 'INPUT_ROAD', QgsProcessingParameterField.Any, True, optional = True))
+            None, 
+            'INPUT_ROAD', 
+            QgsProcessingParameterField.Any,
+            True,
+            optional = True
+        )
+        self.addParameter(attribute)
 
         # We add a feature sink in which to store our processed features (this
         # usually takes the form of a newly created vector layer when the

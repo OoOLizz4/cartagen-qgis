@@ -1702,7 +1702,7 @@ class BoundariesWhirlpool (QgsProcessingAlgorithm):
             self.THRESHOLD,
             self.tr('Threshold :'),
             type=QgsProcessingParameterNumber.Double,
-            defaultValue=1,
+            defaultValue=30,
             optional=False
         )
         self.addParameter(threshold)
@@ -1712,7 +1712,7 @@ class BoundariesWhirlpool (QgsProcessingAlgorithm):
         # algorithm is run in QGIS).   
         output = QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
-                self.tr('Boundariesed Whirlpool'))
+                self.tr('Simplified Whirlpool Boundaries'))
         self.addParameter(output)
 
     def processAlgorithm(self, parameters, context, feedback):

@@ -68,14 +68,13 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             BoffetArea,
             ClosePolygon,
             MorphologicalAmalgamation,
-            BuildingFER,
-            BuildingRectangle,
-            BuildingRegression,
             BuildingSimplificationRuasQGIS,
             BuildingDisplacementRandomQGIS,
             SquaringPolygonLS,
             SquaringPolygonNaive,
             SquarePolygonOrthogonal,
+            TypifyMatching,
+            TypifyBurghardtCecconi,
 
             #Network
             CollapseRoundaboutsQGIS,
@@ -101,6 +100,11 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             ReduceKmeans,
             ReduceLabelgrid,
             ReduceQuadtree,
+
+            #Regularize Buildings
+            BuildingFER,
+            BuildingRectangle,
+            BuildingRegression,
 
             #Simplify
             SimplifyAngular,
@@ -141,18 +145,17 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(BoundariesWhirlpool())
 
         # Buildings
+        self.addAlgorithm(BoffetArea())
+        self.addAlgorithm(ClosePolygon())
+        self.addAlgorithm(MorphologicalAmalgamation())
         self.addAlgorithm(SquaringPolygonLS())
         self.addAlgorithm(SquaringPolygonNaive())
         self.addAlgorithm(SquarePolygonOrthogonal())
         self.addAlgorithm(BuildingSimplificationRuasQGIS())
         self.addAlgorithm(BuildingDisplacementRandomQGIS())
-        self.addAlgorithm(MorphologicalAmalgamation())
-        self.addAlgorithm(BoffetArea())
-        self.addAlgorithm(ClosePolygon())
-        self.addAlgorithm(BuildingFER())
-        self.addAlgorithm(BuildingRectangle())
-        self.addAlgorithm(BuildingRegression())
-        
+        self.addAlgorithm(TypifyMatching())
+        self.addAlgorithm(TypifyBurghardtCecconi())
+
         # Network
         self.addAlgorithm(DetectRoundaboutsQGIS())
         self.addAlgorithm(DetectDeadEnds())
@@ -181,6 +184,11 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         # Processes
         # self.addAlgorithm(ConstraintMethodQGIS())
 
+        #Regularize        
+        self.addAlgorithm(BuildingFER())
+        self.addAlgorithm(BuildingRectangle())
+        self.addAlgorithm(BuildingRegression())
+
         # Simplify
         self.addAlgorithm(SimplifyAngular())
         self.addAlgorithm(DouglasPeucker())
@@ -206,7 +214,8 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(SmoothTaubin())
         self.addAlgorithm(SmoothTopographic())
         self.addAlgorithm(SmoothWMA())
-                
+
+        
         self._algorithms_loaded = True
 
     def id(self):
