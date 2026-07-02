@@ -119,6 +119,7 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             VisvalingamWhyattQGIS,
             SimplifyWangMuller,
             Whirlpool,
+            GeneralizeAreaPatches,            
 
             #Skeletonize And Spinalize
             SkelNatural,
@@ -205,6 +206,7 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(VisvalingamWhyattQGIS())
         self.addAlgorithm(SimplifyWangMuller())
         self.addAlgorithm(Whirlpool())
+        self.addAlgorithm(GeneralizeAreaPatches())
 
         #Skeletonize and Spinalize
         self.addAlgorithm(SkelNatural())
