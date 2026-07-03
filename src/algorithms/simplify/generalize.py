@@ -121,7 +121,7 @@ class GeneralizeAreaPatches (QgsProcessingAlgorithm):
         Generalise area patches using enlargement and contraction.
         This algorithm, proposed by Müller and Wang, simplifies area patches by enlarging or contracting them according to their relative size, then eliminating, reselecting, merging, displacing, and simplifying the survivors.
         
-        <b>/!\MultiPolygon rows are supported and are reassembled after generalisation /!\</b>
+        <b>MultiPolygon rows are supported and are reassembled after generalisation</b>
         <h3> Parameters: </h3>
         <ul>
               <li> - <em>Scaling </em> :  User-defined maximum blanket width in mm on the source map (= t* in eq. 2). Internally converted to ground units as scaling × 1e-3 × initial_scale. </li>

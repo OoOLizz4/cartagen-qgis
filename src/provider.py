@@ -78,6 +78,8 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
 
             #Lines
             BeamsDisplacement,
+            PropagationCrowFlies,
+            PropagationNetwork,
 
             #Network
             CollapseRoundaboutsQGIS,
@@ -162,6 +164,8 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
 
         #Lines
         self.addAlgorithm(BeamsDisplacement())
+        self.addAlgorithm(PropagationCrowFlies())
+        self.addAlgorithm(PropagationNetwork())
 
         # Network
         self.addAlgorithm(DetectRoundaboutsQGIS())
