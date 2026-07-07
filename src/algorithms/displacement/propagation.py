@@ -84,7 +84,7 @@ class PropagationCrowFlies (QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Displacement'
+        return 'Lines Displacement'
 
     def icon(self):
         """
@@ -319,7 +319,7 @@ class PropagationNetwork (QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Displacement'
+        return 'Lines Displacement'
 
     def icon(self):
         """

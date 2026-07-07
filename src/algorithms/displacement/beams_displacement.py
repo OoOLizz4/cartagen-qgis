@@ -94,7 +94,7 @@ class BeamsDisplacement (QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Displacement'
+        return 'Lines Displacement'
 
     def icon(self):
         """
@@ -110,7 +110,7 @@ class BeamsDisplacement (QgsProcessingAlgorithm):
         should be at most a single sentence, e.g. “Converts 2D features to 3D by 
         sampling a DEM raster.”
         """
-        first_line = self.shortHelpString().strip().splitlines()[2]
+        first_line = self.shortHelpString().strip().splitlines()[3]
         description = self.tr(first_line)
         
         return(description)
