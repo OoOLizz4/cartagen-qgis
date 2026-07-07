@@ -67,6 +67,7 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             #Buildings
             BoffetArea,
             ClosePolygon,
+            OpenPolygon,
             MorphologicalAmalgamation,
             BuildingSimplificationRuasQGIS,
             BuildingDisplacementRandomQGIS,
@@ -80,6 +81,10 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             BeamsDisplacement,
             PropagationCrowFlies,
             PropagationNetwork,
+
+            #Measures
+            PolygonElongation,
+            PolygonCompactness,
 
             #Network
             CollapseRoundaboutsQGIS,
@@ -153,6 +158,7 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         # Buildings
         self.addAlgorithm(BoffetArea())
         self.addAlgorithm(ClosePolygon())
+        self.addAlgorithm(OpenPolygon())
         self.addAlgorithm(MorphologicalAmalgamation())
         self.addAlgorithm(SquaringPolygonLS())
         self.addAlgorithm(SquaringPolygonNaive())
@@ -166,6 +172,10 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(BeamsDisplacement())
         self.addAlgorithm(PropagationCrowFlies())
         self.addAlgorithm(PropagationNetwork())
+
+        #Measures
+        self.addAlgorithm(PolygonElongation())
+        self.addAlgorithm(PolygonCompactness())
 
         # Network
         self.addAlgorithm(DetectRoundaboutsQGIS())
