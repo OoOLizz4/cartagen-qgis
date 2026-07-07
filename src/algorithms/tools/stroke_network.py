@@ -175,7 +175,7 @@ class StrokesRoads(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Strokes Roads'
+        return 'Build Strokes Roads'
 
     def displayName(self):
         """
@@ -199,7 +199,7 @@ class StrokesRoads(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Partitioning'
+        return 'Tools'
 
     def shortDescription(self):
         """
@@ -313,7 +313,7 @@ class BuildStrokesRivers (QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Partitioning'
+        return 'Tools'
 
     def icon(self):
         """

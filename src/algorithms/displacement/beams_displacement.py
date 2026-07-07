@@ -94,7 +94,7 @@ class BeamsDisplacement (QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Lines'
+        return 'Displacement'
 
     def icon(self):
         """

@@ -82,10 +82,6 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             PropagationCrowFlies,
             PropagationNetwork,
 
-            #Measures
-            PolygonElongation,
-            PolygonCompactness,
-
             #Network
             CollapseRoundaboutsQGIS,
             CollapseBranchingCrossroads,
@@ -97,11 +93,6 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             DetectDualCarriageways,
             RuralTraffic,
             RuralBetweeness,
-
-            #Partitioning
-            StrokesRoads,
-            BuildStrokesRivers,
-            NetworkFacesQGIS,
 
             #Points
             VectorHeatmap,
@@ -141,7 +132,18 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
             SmoothSnake,
             SmoothTaubin,
             SmoothTopographic,
-            SmoothWMA
+            SmoothWMA,
+
+            #Tools
+            InflexionPoints,
+            MakePlanar,
+            NetworkFacesQGIS,
+            StrokesRoads,
+            BuildStrokesRivers,
+            PolygonElongation,
+            PolygonCompactness,
+            PolygonConcavity,
+            PolygonOrientation
         )
 
         #Boundaries
@@ -168,14 +170,10 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(TypifyMatching())
         self.addAlgorithm(TypifyBurghardtCecconi())
 
-        #Lines
+        # Displacement
         self.addAlgorithm(BeamsDisplacement())
         self.addAlgorithm(PropagationCrowFlies())
         self.addAlgorithm(PropagationNetwork())
-
-        #Measures
-        self.addAlgorithm(PolygonElongation())
-        self.addAlgorithm(PolygonCompactness())
 
         # Network
         self.addAlgorithm(DetectRoundaboutsQGIS())
@@ -188,11 +186,6 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(CollapseDualCarriageways())
         self.addAlgorithm(RuralTraffic())
         self.addAlgorithm(RuralBetweeness())
-
-        # Partitioning
-        self.addAlgorithm(StrokesRoads())
-        self.addAlgorithm(BuildStrokesRivers())
-        self.addAlgorithm(NetworkFacesQGIS())
         
         # Points
         self.addAlgorithm(ReduceKmeans())
@@ -237,6 +230,16 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(SmoothTopographic())
         self.addAlgorithm(SmoothWMA())
 
+        #Tools
+        self.addAlgorithm(InflexionPoints())
+        self.addAlgorithm(NetworkFacesQGIS())
+        self.addAlgorithm(MakePlanar())
+        self.addAlgorithm(PolygonElongation())
+        self.addAlgorithm(PolygonCompactness())
+        self.addAlgorithm(PolygonConcavity())
+        self.addAlgorithm(PolygonOrientation())
+        self.addAlgorithm(StrokesRoads())
+        self.addAlgorithm(BuildStrokesRivers())
         
         self._algorithms_loaded = True
 

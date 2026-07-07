@@ -67,7 +67,7 @@ class PolygonElongation (QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Measures'
+        return 'Tools'
 
     def icon(self):
         """
@@ -137,37 +137,39 @@ class PolygonElongation (QgsProcessingAlgorithm):
         """
         Here is where the processing itself takes place.
         """
+        from qgis.core import QgsField
+        from qgis.PyQt.QtCore import QVariant
         import geopandas as gpd
         import pandas
         from cartagen import polygon_elongation
-        from cartagen4qgis.src.tools import list_to_qgis_feature
+        from cartagen4qgis.src.tools import list_to_qgis_feature_2
 
         # Retrieve the feature source and sink. The 'dest_id' variable is used
         # to uniquely identify the feature sink, and must be included in the
         # dictionary returned by the processAlgorithm function.
         source = self.parameterAsSource(parameters, self.INPUT, context)
+        
+        # Define the fields (get the source fields and a add some fields)
+        fields = source.fields()
+        fields.append(QgsField("ELONGATION", QVariant.Double))
+
         gdf = gpd.GeoDataFrame.from_features(source.getFeatures())
         
         # Compute the number of steps to display within the progress bar and
         # get features from source
         total = 100.0 / source.featureCount() if source.featureCount() else 0
-        features = source.getFeatures()
 
         # Actual algorithm
         dp = gdf.copy()
-        print(dp.columns)
         for i in range(len(gdf)):
-            dp.loc[i,'ELONGATION'] = polygon_elongation (list(gdf.geometry)[i])
+            dp.loc[i,'ELONGATION'] = polygon_elongation(list(gdf.geometry)[i])
 
             # Update the progress bar
             feedback.setProgress(int(i * total))
-        print(dp.columns)
-        print(dp['ELONGATION'])
         
         res = dp.to_dict('records')
-        print(res)
-        res = list_to_qgis_feature(res)
-        print(res)
+        res = list_to_qgis_feature_2(res, fields)
+
         # Create the output sink    
         (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
                 context, res[0].fields(), source.wkbType(), source.sourceCrs())
@@ -237,7 +239,7 @@ class PolygonCompactness (QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Measures'
+        return 'Tools'
 
     def icon(self):
         """
@@ -253,7 +255,7 @@ class PolygonCompactness (QgsProcessingAlgorithm):
         should be at most a single sentence, e.g. “Converts 2D features to 3D by 
         sampling a DEM raster.”
         """
-        first_line = self.shortHelpString().strip().splitlines()[0]
+        first_line = self.shortHelpString().strip().splitlines()[2]
         description = self.tr(first_line)
         
         return(description)
@@ -265,6 +267,8 @@ class PolygonCompactness (QgsProcessingAlgorithm):
         parameters and outputs associated with it..
         """
         helpstring = """
+        <b> /!\ Doesn't work with multipart geometry /!\ </b>
+
         Calculate the compactness of a polygon.
         This function calculates the compactness of a polygon using the Miller index. This index gives a maximum value of 1 for circles. The Miller index is calculated using (4 ·pi ·area)/(perimeter^2)
         
@@ -305,6 +309,8 @@ class PolygonCompactness (QgsProcessingAlgorithm):
         """
         Here is where the processing itself takes place.
         """
+        from qgis.core import QgsField
+        from qgis.PyQt.QtCore import QVariant
         import geopandas as gpd
         import pandas
         from cartagen import polygon_compactness
@@ -314,23 +320,27 @@ class PolygonCompactness (QgsProcessingAlgorithm):
         # to uniquely identify the feature sink, and must be included in the
         # dictionary returned by the processAlgorithm function.
         source = self.parameterAsSource(parameters, self.INPUT, context)
+        
+        # Define the fields (get the source fields and a add some fields)
+        fields = source.fields()
+        fields.append(QgsField("COMPACTNESS", QVariant.Double))
+
         gdf = gpd.GeoDataFrame.from_features(source.getFeatures())
         
         # Compute the number of steps to display within the progress bar and
         # get features from source
         total = 100.0 / source.featureCount() if source.featureCount() else 0
-        features = source.getFeatures()
 
         # Actual algorithm
         dp = gdf.copy()
         for i in range(len(gdf)):
-            dp.loc[i,'COMPACTNESS'] = polygon_compactness (list(gdf.geometry)[i], )
+            dp.loc[i,'COMPACTNESS'] = polygon_compactness(list(gdf.geometry)[i])
 
             # Update the progress bar
             feedback.setProgress(int(i * total))
-
+        
         res = dp.to_dict('records')
-        res = list_to_qgis_feature_2(res,source.fields())
+        res = list_to_qgis_feature_2(res, fields)
         
         # Create the output sink    
         (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
@@ -398,7 +408,7 @@ class PolygonConcavity (QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Measures'
+        return 'Tools'
 
     def icon(self):
         """
@@ -466,6 +476,8 @@ class PolygonConcavity (QgsProcessingAlgorithm):
         """
         Here is where the processing itself takes place.
         """
+        from qgis.core import QgsField
+        from qgis.PyQt.QtCore import QVariant
         import geopandas as gpd
         import pandas
         from cartagen import polygon_concavity
@@ -475,25 +487,27 @@ class PolygonConcavity (QgsProcessingAlgorithm):
         # to uniquely identify the feature sink, and must be included in the
         # dictionary returned by the processAlgorithm function.
         source = self.parameterAsSource(parameters, self.INPUT, context)
+
+        # Define the fields (get the source fields and a add some fields)
+        fields = source.fields()
+        fields.append(QgsField("CONCAVITY", QVariant.Double))
+
         gdf = gpd.GeoDataFrame.from_features(source.getFeatures())
         
-        # Retrieve the other parameters values
-
-
         # Compute the number of steps to display within the progress bar and
         # get features from source
         total = 100.0 / source.featureCount() if source.featureCount() else 0
-        features = source.getFeatures()    
+
         # Actual algorithm
         dp = gdf.copy()
         for i in range(len(gdf)):
-            dp.loc[i,'geometry'] = polygon_concavity (list(gdf.geometry)[i], )
+            dp.loc[i,'CONCAVITY'] = polygon_concavity(list(gdf.geometry)[i])
 
             # Update the progress bar
             feedback.setProgress(int(i * total))
-
+        
         res = dp.to_dict('records')
-        res = list_to_qgis_feature_2(res,source.fields())
+        res = list_to_qgis_feature_2(res, fields)
         
         # Create the output sink    
         (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
@@ -575,7 +589,7 @@ class PolygonOrientation (QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Measures'
+        return 'Tools'
 
     def icon(self):
         """
@@ -665,6 +679,8 @@ class PolygonOrientation (QgsProcessingAlgorithm):
         """
         Here is where the processing itself takes place.
         """
+        from qgis.core import QgsField
+        from qgis.PyQt.QtCore import QVariant
         import geopandas as gpd
         import pandas
         from cartagen import polygon_orientation
@@ -676,6 +692,12 @@ class PolygonOrientation (QgsProcessingAlgorithm):
         source = self.parameterAsSource(parameters, self.INPUT, context)
         gdf = gpd.GeoDataFrame.from_features(source.getFeatures())
         
+        # Define the fields (get the source fields and a add some fields)
+        fields = source.fields()
+        fields.append(QgsField("ORIENTATION", QVariant.Double))
+
+        gdf = gpd.GeoDataFrame.from_features(source.getFeatures())
+        
         # Retrieve the other parameters values
 
         methods = ['primary', 'mbr', 'mbtr', 'swo']
@@ -684,7 +706,8 @@ class PolygonOrientation (QgsProcessingAlgorithm):
         # Compute the number of steps to display within the progress bar and
         # get features from source
         total = 100.0 / source.featureCount() if source.featureCount() else 0
-        features = source.getFeatures()    
+        features = source.getFeatures()
+
         # Actual algorithm
         dp = gdf.copy()
         for i in range(len(gdf)):
@@ -694,7 +717,7 @@ class PolygonOrientation (QgsProcessingAlgorithm):
             feedback.setProgress(int(i * total))
 
         res = dp.to_dict('records')
-        res = list_to_qgis_feature_2(res,source.fields())
+        res = list_to_qgis_feature_2(res,fields)
         
         # Create the output sink    
         (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
