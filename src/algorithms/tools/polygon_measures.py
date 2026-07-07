@@ -99,6 +99,8 @@ class PolygonElongation (QgsProcessingAlgorithm):
 
         Calculate the elongation of a polygon.
         This function calculates the elongation of a polygon using the minimum_rotated_rectangle. It is the ratio between the length and the width of this rectangle.
+
+        Results are displayed in the attribute table.
         
         For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.polygon_elongation.html#cartagen.polygon_elongation">help online</a>.
         """
@@ -272,6 +274,8 @@ class PolygonCompactness (QgsProcessingAlgorithm):
         Calculate the compactness of a polygon.
         This function calculates the compactness of a polygon using the Miller index. This index gives a maximum value of 1 for circles. The Miller index is calculated using (4 ·pi ·area)/(perimeter^2)
         
+        Results are displayed in the attribute table.
+
         For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.polygon_compactness.html#cartagen.polygon_compactness">help online</a>.  
         """
         
@@ -424,7 +428,7 @@ class PolygonConcavity (QgsProcessingAlgorithm):
         should be at most a single sentence, e.g. “Converts 2D features to 3D by 
         sampling a DEM raster.”
         """
-        first_line = self.shortHelpString().strip().splitlines()[0]
+        first_line = self.shortHelpString().strip().splitlines()[2]
         description = self.tr(first_line)
         
         return(description)
@@ -436,9 +440,13 @@ class PolygonConcavity (QgsProcessingAlgorithm):
         parameters and outputs associated with it..
         """
         helpstring = """
+        <b> /!\ Doesn't work with multipart geometry /!\ </b>
+
         Calculate the concavity of a polygon.
         This function calculates the concavity of a polygon as its area divided by the area of its convex hull.
         
+        Results are displayed in the attribute table.
+
         For more see <a href="https://cartagen.readthedocs.io/en/latest/reference/cartagen.polygon_concavity.html#cartagen.polygon_concavity">help online</a>.    
         """
         
@@ -605,7 +613,7 @@ class PolygonOrientation (QgsProcessingAlgorithm):
         should be at most a single sentence, e.g. “Converts 2D features to 3D by 
         sampling a DEM raster.”
         """
-        first_line = self.shortHelpString().strip().splitlines()[0]
+        first_line = self.shortHelpString().strip().splitlines()[2]
         description = self.tr(first_line)
         
         return(description)
@@ -617,8 +625,13 @@ class PolygonOrientation (QgsProcessingAlgorithm):
         parameters and outputs associated with it..
         """
         helpstring = """
+        <b> /!\ Doesn't work with multipart geometry /!\ </b>
+
         Calculate the orientation of a polygon.
         This function calculates the orientation of a polygon using different methods. By default, it uses the orientation of the long side of the minimum bounding rectangle. Parameters: The method to calculate the orientation: ’primary’ calculates the orientation of the longest side of the provided polygon. ’mbr’ calculates the orientation of the long side of the minimum rotated bounding rectangle. ’mbtr’ calculates the orientation of the long side of the minimum rotated bounding touching rectangle. It is the same as the mbr but the rectangle and the polygon must have at least one side in common.
+        
+        Results are displayed in the attribute table.
+
         <h3> Parameters: </h3>
         <ul>
                 <li> - <em>Method </em> : The method to calculate the orientation: </li>
