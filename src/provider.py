@@ -79,7 +79,7 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
 
             #Lines
             BeamsDisplacement,
-            PropagationCrowFlies,
+            # PropagationCrowFlies,
             PropagationNetwork,
 
             #Network
@@ -172,7 +172,7 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
 
         # Displacement
         self.addAlgorithm(BeamsDisplacement())
-        self.addAlgorithm(PropagationCrowFlies())
+        # self.addAlgorithm(PropagationCrowFlies())
         self.addAlgorithm(PropagationNetwork())
 
         # Network
@@ -231,7 +231,7 @@ class CartAGen4QGISProvider(QgsProcessingProvider):
         self.addAlgorithm(SmoothWMA())
 
         #Tools
-        self.addAlgorithm(InflexionPoints())
+        # self.addAlgorithm(InflexionPoints())
         self.addAlgorithm(NetworkFacesQGIS())
         self.addAlgorithm(MakePlanar())
         self.addAlgorithm(PolygonElongation())

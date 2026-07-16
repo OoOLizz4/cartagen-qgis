@@ -1,2 +1,2 @@
 from .beams_displacement import BeamsDisplacement
-from .propagation import PropagationCrowFlies, PropagationNetwork
+from .propagation import PropagationNetwork

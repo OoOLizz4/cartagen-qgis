@@ -152,6 +152,9 @@ class MakePlanar (QgsProcessingAlgorithm):
         # Actual algorithm
         gdf_final = make_planar (gdf)
         res = gdf_final.to_dict('records')
+        for i in res:
+            print(f"i.{i}")
+
         res = list_to_qgis_feature_2(res, source.fields())
         
         # Create the output sink    
